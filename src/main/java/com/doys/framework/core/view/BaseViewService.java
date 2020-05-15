@@ -3,7 +3,7 @@
  * @author David.Li
  * @version 1.0
  * @create_date 2020-05-15
- * 通用视图服务基类
+ * 通用视图服务基类, 用于通用视图
  *****************************************************************************/
 package com.doys.framework.core.view;
 import com.doys.framework.config.Const;
