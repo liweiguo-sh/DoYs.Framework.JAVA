@@ -1,0 +1,32 @@
+package com.doys.framework.upgrade.db.annotation;
+
+import java.lang.annotation.*;
+
+/**
+ * 数据库实体类注解<br>
+ * <b>name:</b> 表名称<br>
+ * <b>text:</b> 中文名称<br>
+ * <b>remark:</b> 备注说明<br>
+ *
+ * @author volant
+ * @since 2020-03-08
+ */
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface EntityClassAnnotation {
+    /**
+     * 表名称
+     */
+    String name() default "";
+
+    /**
+     * 表中文名称
+     */
+    String text() default "";
+
+    /**
+     * 表备注
+     */
+    String remark() default "";
+}

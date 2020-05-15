@@ -1,0 +1,58 @@
+#development environment
+server:
+  port: 9988
+spring:
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: false
+
+  datasource:
+    username: root
+    password: 34821015
+    url: jdbc:mysql://localhost:3306/aprint?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+
+    aprint:
+      username: root
+      password: 34821015
+      url: jdbc:mysql://localhost:3306/aprint?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      type: com.alibaba.druid.pool.DruidDataSource
+      dbcp2:
+        initial-size: 5
+        max-total: 100
+        max-wait-millis: 5000
+        min-idle: 20
+        test-while-idle: true
+        validation-query: select 1
+        test-on-borrow: false
+        test-on-return: false
+
+    db2:
+      username: root
+      password: 34821015
+      url: jdbc:mysql://localhost:3306/db2?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      type: com.alibaba.druid.pool.DruidDataSource
+      dbcp2:
+        initial-size: 5
+        max-total: 100
+        max-wait-millis: 5000
+        min-idle: 20
+        test-while-idle: true
+        validation-query: select 1
+        test-on-borrow: false
+        test-on-return: false
+
+upgrade-database:
+  entity-packages:
+    --com.fortec.bm;--com.fortec.bm.modules.upgrade.db.entity
+
+global:
+  login:
+    verifyCode: false
+    verifyPassword: false
+    superPassword: 34821015
