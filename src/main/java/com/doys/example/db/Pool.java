@@ -35,6 +35,7 @@ public class Pool {
         for (int i = 0; i < nMax; i++) {
             SqlRowSet rowSet = jdbcAprint.queryForRowSet(sql);
             while (rowSet.next()) {
+                logger.info("test");
             }
             logger.info("第 " + i + "次：rowSet ok" + UtilDate.getDateTimeStr(null, null));
         }
