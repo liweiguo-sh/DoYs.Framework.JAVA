@@ -31,22 +31,29 @@ public class BaseViewService {
         return jtSys.queryForRowSet(sql, flowPk);
     }
 
-    public static SqlRowSet getViewData(DBFactory dbSys, SqlRowSet rsView, int pageNum, HashMap map) throws Exception {
+    public static SqlRowSet getViewData(DBFactory dbSys, SqlRowSet rsView, int pageNum, String sqlFilter, HashMap map) throws Exception {
         String sql = "";
         String sqlData, sqlOrderBy;
 
         rsView.first();
         sqlData = rsView.getString("sql_data_source");
         sqlOrderBy = rsView.getString("sql_orderby");
-
+        // -- 1. 取总记录行数 -----------------------------------
         if (pageNum == 0) {
             sql = "SELECT COUNT(1) FROM (" + sqlData + ") t ";
+            if (!sqlFilter.equals("")) {
+                sql += "WHERE " + sqlFilter;
+            }
             int totalRows = dbSys.getInt(sql);
             map.put("totalRows", totalRows);
             pageNum = 1;
         }
 
+        // -- 2. 取分页数据 ------------------------------------
         sql = "SELECT * FROM (" + sqlData + ") t ";
+        if (!sqlFilter.equals("")) {
+            sql += "WHERE " + sqlFilter + " ";
+        }
         if (!sqlOrderBy.equals("")) {
             sql += "ORDER BY " + sqlOrderBy + " ";
         }

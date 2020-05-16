@@ -30,7 +30,7 @@ public class Menu extends BaseController {
         SqlRowSet rsSystem;
         // ------------------------------------------------
         try {
-            userkey = (String) ss.getAttribute("userkey");
+            userkey = (String) this.session().getAttribute("userkey");
             rsSystem = MenuService.getSystem(jtMaster, userkey);
 
             ok("dtbSystem", rsSystem);
@@ -50,7 +50,7 @@ public class Menu extends BaseController {
         SqlRowSet rsMenu;
         // ------------------------------------------------
         try {
-            userkey = (String) ss.getAttribute("userkey");
+            userkey = (String) this.session().getAttribute("userkey");
             rsMenu = MenuService.getMenuByUser(jtMaster, systemKey, userkey);
 
             ok("dtbMenu", rsMenu);

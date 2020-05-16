@@ -79,7 +79,7 @@ public class User extends BaseController {
             }
 
             // -- 3. 登录日志 --
-            logger.info("用户 " + userkey + " 登录成功, session_id = " + ss.getId());
+            logger.info("用户 " + userkey + " 登录成功, session_id = " + this.session().getId());
         } catch (Exception e) {
             return ResultErr(e);
         } finally {

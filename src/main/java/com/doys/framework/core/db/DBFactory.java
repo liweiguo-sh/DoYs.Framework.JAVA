@@ -3,7 +3,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import javax.sql.DataSource;
+import java.util.regex.Pattern;
 public class DBFactory extends JdbcTemplate {
+    private static String regInject = "(\\b(delete|update|insert|drop|truncate|alter|exec|execute)\\b)";
+    private static Pattern sqlPattern = Pattern.compile(regInject, Pattern.CASE_INSENSITIVE);
+
     public DBFactory(DataSource dataSource) {
         setDataSource(dataSource);
         afterPropertiesSet();
@@ -46,5 +50,23 @@ public class DBFactory extends JdbcTemplate {
             }
         }
         return returnString;
+    }
+
+    // -- Check SQL injection -------------------------------------------------
+    public static boolean checkSqlInjection(String sqlStatement) {
+        // ------------------------------------------------
+        try {
+            if (sqlPattern.matcher(sqlStatement).find()) {
+                System.out.println("Suspicious SQL injection statement was found.");
+                // -- TODO：有待测试验证 --
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+        }
+        // ------------------------------------------------
+        return true;
     }
 }

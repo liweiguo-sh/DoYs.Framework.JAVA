@@ -1,45 +1,89 @@
 package com.doys.framework.core.base;
 import com.doys.framework.common.UtilDataSet;
+import com.doys.framework.common.UtilEnv;
 import com.doys.framework.config.Const;
+import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestError;
 import com.doys.framework.core.entity.RestResult;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
+import com.google.gson.Gson;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-@RestController
-@Scope("request")
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.HashMap;
 public class BaseController extends BaseTop {
-    private ThreadLocal<RestResult> tRestResult = new ThreadLocal<>();
-    private ThreadLocal<RestError> tRestError = new ThreadLocal<>();
+    @Value("${global.debug}")
+    protected boolean debug;
 
-    @Autowired
-    protected HttpSession ss;
+    private ThreadLocal<HashMap<String, Object>> tlHashMapIn = new ThreadLocal<>();
+    private ThreadLocal<RestResult> tlRestResult = new ThreadLocal<>();
+    private ThreadLocal<RestError> tlRestError = new ThreadLocal<>();
 
-    // -- private common method -----------------------------------------------
-    private void dispose() {
-        tRestResult.remove();
-        tRestError.remove();
+    // -- request\response\session and ThreadLocal object offer and dispose ---
+    protected HttpSession session() {
+        HttpSession ss = request().getSession();
+        return ss;
+    }
+    public HttpServletRequest request() {
+        return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+    }
+    public HttpServletResponse response() {
+        return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
     }
 
+    private HashMap<String, Object> getHashMapIn() {
+        HashMap<String, Object> hashMapIn = tlHashMapIn.get();
+        if (hashMapIn == null) {
+
+            String strLine = "", jsonString = "";
+            StringBuilder builder = new StringBuilder();
+            try {
+                ServletInputStream inputStream = request().getInputStream();
+                BufferedReader bufReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+                while ((strLine = bufReader.readLine()) != null) {
+                    builder.append(strLine);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.error("读取Request数据遇到未知错误，请检查。");
+            }
+            jsonString = builder.toString();
+            if (debug) {
+                logger.info("request => " + jsonString);
+            }
+
+            hashMapIn = (new Gson()).fromJson(jsonString, HashMap.class);
+            tlHashMapIn.set(hashMapIn);
+        }
+        return hashMapIn;
+    }
     private RestResult getRestResult() {
-        RestResult result = tRestResult.get();
+        RestResult result = tlRestResult.get();
         if (result == null) {
             result = new RestResult();
-            tRestResult.set(result);
+            tlRestResult.set(result);
         }
         return result;
     }
     private RestError getRestError() {
-        RestError error = tRestError.get();
+        RestError error = tlRestError.get();
         if (error == null) {
             error = new RestError();
-            tRestError.set(error);
+            tlRestError.set(error);
         }
         return error;
+    }
+    private void dispose() {
+        tlRestResult.remove();
+        tlRestError.remove();
+        tlHashMapIn.remove();
     }
 
     // -- public common method ------------------------------------------------
@@ -47,12 +91,61 @@ public class BaseController extends BaseTop {
         return _getSessionValue(attrName, "").toString();
     }
     private Object _getSessionValue(String attrName, Object defaultValue) {
-        Object object = ss.getAttribute(attrName);
+        Object object = this.session().getAttribute(attrName);
         if (object == null) {
             return defaultValue;
         }
         else {
             return object;
+        }
+    }
+
+    // -- public inXXX --------------------------------------------------------
+    protected int inInt(String parameterName) {
+        return _inInt(parameterName, 0);
+    }
+    protected int in(String parameterName, int defaultValue) {
+        return _inInt(parameterName, defaultValue);
+    }
+    private int _inInt(String parameterName, int defaultValue) {
+        Object parameterValue = getRequestParameter(parameterName);
+        if (parameterValue == null) {
+            return defaultValue;
+        }
+        if (parameterValue instanceof Double) {
+            return ((Double) parameterValue).intValue();
+        }
+        return (int) parameterValue;
+    }
+
+    protected String in(String parameterName) {
+        return _in(parameterName, "");
+    }
+    protected String in(String parameterName, String defaultValue) {
+        return _in(parameterName, defaultValue);
+    }
+    private String _in(String parameterName, String defaultValue) {
+        String parameterValue;
+        Object parameterObject = getRequestParameter(parameterName);
+        if (parameterObject == null) {
+            return defaultValue;
+        }
+        parameterValue = (String) parameterObject;
+
+        // -- check sql inject ----------------------------
+        if (!DBFactory.checkSqlInjection(parameterValue)) {
+            logger.error("Suspicious SQL injection statement is found, value is ignored. " + parameterValue);
+            return "";
+        }
+
+        return parameterValue;
+    }
+    private Object getRequestParameter(String parameterName) {
+        if (this.getHashMapIn().containsKey(parameterName)) {
+            return this.getHashMapIn().get(parameterName);
+        }
+        else {
+            return null;
         }
     }
 
@@ -119,5 +212,15 @@ public class BaseController extends BaseTop {
         // ------------------------------------------------
         dispose();
         return result;
+    }
+
+    // -- public debug method -------------------------------------------------
+    public void printParameter() {
+        UtilEnv.getWebRootPath();
+
+        HashMap<String, Object> map = getHashMapIn();
+        for (String key : map.keySet()) {
+            logger.info(String.format("%-15s", key) + "=>  " + map.get(key).toString());
+        }
     }
 }

@@ -52,6 +52,7 @@ upgrade-database:
     --com.fortec.bm;--com.fortec.bm.modules.upgrade.db.entity
 
 global:
+  debug: true
   login:
     verifyCode: false
     verifyPassword: false

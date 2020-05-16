@@ -41,17 +41,18 @@ public class BaseViewController extends BaseController {
         return ResultOk();
     }
     @PostMapping("/getViewData")
-    public RestResult getViewData(@RequestBody Map<String, String> req) {
-        int pageNum = Integer.parseInt(req.get("pageNum"));
+    public RestResult getViewData() {
+        int pageNum = inInt("pageNum");
 
-        String viewPk = req.get("viewPk");
+        String viewPk = in("viewPk");
+        String sqlFilter = in("filter");
 
         SqlRowSet rsView, rsViewData;
         HashMap mapRef = (pageNum == 0 ? new HashMap() : null);
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(jtMaster, viewPk);
-            rsViewData = BaseViewService.getViewData(jtMaster, rsView, pageNum, mapRef);
+            rsViewData = BaseViewService.getViewData(jtMaster, rsView, pageNum, sqlFilter, mapRef);
             ok("dtbViewData", rsViewData);
 
             if (pageNum == 0) {

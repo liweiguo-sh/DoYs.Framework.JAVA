@@ -43,4 +43,11 @@ public class UtilString {
         }
         return str.substring(n1, n2);
     }
+
+    public static String KillNull(String valueString) {
+        if (valueString == null) {
+            return "";
+        }
+        return valueString;
+    }
 }
