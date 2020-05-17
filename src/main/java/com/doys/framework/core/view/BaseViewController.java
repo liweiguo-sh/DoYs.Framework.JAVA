@@ -63,4 +63,22 @@ public class BaseViewController extends BaseController {
         }
         return ResultOk();
     }
+
+    @PostMapping("/getFormData")
+    public RestResult getFormData() {
+        int id = inInt("id");
+
+        String viewPk = in("viewPk");
+
+        SqlRowSet rsView, rsFormData;
+        // ------------------------------------------------
+        try {
+            rsView = BaseViewService.getView(jtMaster, viewPk);
+            rsFormData = BaseViewService.getFormData(jtMaster, rsView, id);
+            ok("dtbFormData", rsFormData);
+        } catch (Exception e) {
+            return ResultErr(e);
+        }
+        return ResultOk();
+    }
 }

@@ -61,4 +61,16 @@ public class BaseViewService {
 
         return dbSys.queryForRowSet(sql);
     }
+
+    // -- ViewForm ------------------------------------------------------------
+    public static SqlRowSet getFormData(DBFactory dbSys, SqlRowSet rsView, int id) throws Exception {
+        String sql = "";
+        String tableName;
+
+        rsView.first();
+        tableName = rsView.getString("table_name");
+        // ------------------------------------------------
+        sql = "SELECT * FROM " + tableName + " WHERE id = ?";
+        return dbSys.queryForRowSet(sql, id);
+    }
 }
