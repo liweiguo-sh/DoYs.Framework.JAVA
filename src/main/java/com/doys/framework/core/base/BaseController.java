@@ -6,7 +6,7 @@ import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestError;
 import com.doys.framework.core.entity.RestResult;
 import com.google.gson.Gson;
-import org.springframework.beans.factory.annotation.Value;
+import com.google.gson.internal.LinkedTreeMap;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -19,9 +19,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 public class BaseController extends BaseTop {
-    @Value("${global.debug}")
-    protected boolean debug;
-
     private ThreadLocal<HashMap<String, Object>> tlHashMapIn = new ThreadLocal<>();
     private ThreadLocal<RestResult> tlRestResult = new ThreadLocal<>();
     private ThreadLocal<RestError> tlRestError = new ThreadLocal<>();
@@ -101,10 +98,18 @@ public class BaseController extends BaseTop {
     }
 
     // -- public inXXX --------------------------------------------------------
+    protected LinkedTreeMap<String, Object> inForm(String parameterName) {
+        Object obj = _inObject(parameterName, null);
+        if (obj == null) {
+            return null;
+        }
+        return (LinkedTreeMap<String, Object>) obj;
+    }
+
     protected int inInt(String parameterName) {
         return _inInt(parameterName, 0);
     }
-    protected int in(String parameterName, int defaultValue) {
+    protected int inInt(String parameterName, int defaultValue) {
         return _inInt(parameterName, defaultValue);
     }
     private int _inInt(String parameterName, int defaultValue) {
@@ -119,25 +124,32 @@ public class BaseController extends BaseTop {
     }
 
     protected String in(String parameterName) {
-        return _in(parameterName, "");
+        return (String) _inObject(parameterName, "");
     }
     protected String in(String parameterName, String defaultValue) {
-        return _in(parameterName, defaultValue);
+        return (String) _inObject(parameterName, defaultValue);
     }
-    private String _in(String parameterName, String defaultValue) {
-        String parameterValue;
-        Object parameterObject = getRequestParameter(parameterName);
-        if (parameterObject == null) {
-            return defaultValue;
+    private String _inString(String parameter, String defaultValue) {
+        Object obj = _inObject(parameter, defaultValue);
+        if (obj == null) {
+            return null;
         }
-        parameterValue = (String) parameterObject;
-
         // -- check sql inject ----------------------------
+        String parameterValue = (String) obj;
         if (!DBFactory.checkSqlInjection(parameterValue)) {
             logger.error("Suspicious SQL injection statement is found, value is ignored. " + parameterValue);
             return "";
         }
+        return parameterValue;
+    }
 
+    private Object _inObject(String parameterName, String defaultValue) {
+        Object parameterValue;
+        Object parameterObject = getRequestParameter(parameterName);
+        if (parameterObject == null) {
+            return defaultValue;
+        }
+        parameterValue = parameterObject;
         return parameterValue;
     }
     private Object getRequestParameter(String parameterName) {

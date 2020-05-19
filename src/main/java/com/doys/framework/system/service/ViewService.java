@@ -1,5 +1,5 @@
 package com.doys.framework.system.service;
-import com.doys.framework.config.Const;
+import com.doys.framework.common.UtilDataSet;
 import com.doys.framework.core.base.BaseService;
 import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.db.DBSchema;
@@ -42,10 +42,10 @@ public class ViewService extends BaseService {
             }
 
             // -- 2.表ST_FIELD字段信息更新到表ST_VIEW_FIELD --------
-            dtbView_Field = dbSys.getDataTable("SELECT * FROM sys_view_field WHERE view_pk = ?", new Object[]{viewPk});
+            dtbView_Field = dbSys.getDataTable("SELECT * FROM sys_view_field WHERE view_pk = ?", new Object[] { viewPk });
             dtbView_Field.Sort("name");
 
-            dtbField = dbSys.getDataTable("SELECT * FROM sys_field WHERE table_pk = ?", new Object[]{tablePk});
+            dtbField = dbSys.getDataTable("SELECT * FROM sys_field WHERE table_pk = ?", new Object[] { tablePk });
             dtbField.Sort("name");
             for (int i = 0; i < dtbField.getRowCount(); i++) {
                 fieldName = dtbField.DataCell(i, "name");
@@ -128,13 +128,13 @@ public class ViewService extends BaseService {
                     dr.setDataCell("title", fieldName);
                 }
                 dr.setDataCell("datatype", rsmd.getColumnTypeName(i));
-                dr.setDataCell("type", Const.getFieldType(rsmd.getColumnTypeName(i)));
+                dr.setDataCell("type", UtilDataSet.getFieldType(rsmd.getColumnTypeName(i)));
                 dr.setDataCell("length", rsmd.getColumnDisplaySize(i));
                 dr.setDataCell("flag_pkey", "0");
                 dr.setDataCell("flag_identity", "0");
                 ///dr.setDataCell("field_nullable", rsmd.isNullable(i));
                 if (dr.DataCell("width", true).equals("")) {
-                    dr.setDataCell("width", Const.getColumnWidth(dr.DataCell("type"), dr.DataCell("text"), Integer.parseInt(dr.DataCell("length"))));
+                    dr.setDataCell("width", UtilDataSet.getColumnWidth(dr.DataCell("type"), dr.DataCell("text"), Integer.parseInt(dr.DataCell("length"))));
                 }
 
                 if (dr.DataCell("align") == null || dr.DataCell("align").equals("")) {

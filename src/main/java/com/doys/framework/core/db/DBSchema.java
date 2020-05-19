@@ -7,7 +7,7 @@
  * 解析数据库字段信息到表 ST_TALBE/ST_FIELD/ST_INDEX中, 只追加, 不删除
  */
 package com.doys.framework.core.db;
-import com.doys.framework.config.Const;
+import com.doys.framework.common.UtilDataSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 public class DBSchema {
@@ -27,7 +27,7 @@ public class DBSchema {
         try {
             tableName = tableName.toLowerCase();
             sql = "SELECT * FROM sys_database WHERE pk = ?";
-            rs = dbSys.queryForRowSet(sql, new Object[]{databaseKey});
+            rs = dbSys.queryForRowSet(sql, new Object[] { databaseKey });
             if (rs.next()) {
                 databaseName = rs.getString("name").toLowerCase();
                 databaseType = rs.getString("type");
@@ -170,7 +170,7 @@ public class DBSchema {
                 }
                 // -- 1、固定属性信息 --------
                 dataType = rs.getString("data_type").toLowerCase();
-                fieldType = Const.getFieldType(dataType);
+                fieldType = UtilDataSet.getFieldType(dataType);
 
                 drRow.setDataCell("datatype", dataType);
                 drRow.setDataCell("type", fieldType);
@@ -196,7 +196,7 @@ public class DBSchema {
                     drRow.setDataCell("width", 90);
                 }
                 else {
-                    drRow.setDataCell("width", Const.getColumnWidth(fieldType, drRow.DataCell("text"), Integer.parseInt(drRow.DataCell("length"))));
+                    drRow.setDataCell("width", UtilDataSet.getColumnWidth(fieldType, drRow.DataCell("text"), Integer.parseInt(drRow.DataCell("length"))));
                 }
 
                 if (fieldType.equalsIgnoreCase("number")) {

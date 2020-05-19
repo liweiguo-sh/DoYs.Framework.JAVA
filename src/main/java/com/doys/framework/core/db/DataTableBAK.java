@@ -8,6 +8,7 @@
  * 用法参考.net的DataTable, 已提供的方法基本相同, 用完后一定要调用.close()方法回收内存.
  */
 package com.doys.framework.core.db;
+import com.doys.framework.common.UtilDataSet;
 import com.doys.framework.common.UtilString;
 import com.doys.framework.config.Const;
 import org.slf4j.Logger;
@@ -132,7 +133,7 @@ public class DataTableBAK {
         sql = "SELECT " + sql.substring(1) + " WHERE 1 = 0";
 
         // -- 2. 模拟类初始化 -----------------------------------
-        _DataTable(dbFactory, sql, new Object[]{});
+        _DataTable(dbFactory, sql, new Object[] {});
 
         // -- 3. 读入记录集数据 ----------------------------------
         if (dataString.length() > 0) {
@@ -758,7 +759,7 @@ public class DataTableBAK {
                 this.columnName = rsmd.getColumnLabel(iCol);
                 this.DataTypeID = rsmd.getColumnType(iCol);
                 this.dataType = rsmd.getColumnTypeName(iCol);
-                this.columnType = Const.getFieldType(this.dataType);
+                this.columnType = UtilDataSet.getFieldType(this.dataType);
 
                 ///if (rsmd.isAutoIncrement(iCol)) {
                 if (this.columnName.equalsIgnoreCase("id")) {

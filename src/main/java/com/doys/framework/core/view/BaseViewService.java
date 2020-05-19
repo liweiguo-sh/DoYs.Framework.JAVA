@@ -6,12 +6,16 @@
  * 通用视图服务基类, 用于通用视图
  *****************************************************************************/
 package com.doys.framework.core.view;
+import com.doys.framework.common.UtilDataSet;
 import com.doys.framework.config.Const;
+import com.doys.framework.core.base.BaseService;
 import com.doys.framework.core.db.DBFactory;
+import com.google.gson.internal.LinkedTreeMap;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
 import java.util.HashMap;
-public class BaseViewService {
+public class BaseViewService extends BaseService {
     public static SqlRowSet getView(DBFactory jtSys, String viewPk) throws Exception {
         String sql = "SELECT * FROM sys_view WHERE pk = ?";
         return jtSys.queryForRowSet(sql, viewPk);
@@ -61,9 +65,22 @@ public class BaseViewService {
 
         return dbSys.queryForRowSet(sql);
     }
+    public static SqlRowSet getViewDataOne(DBFactory dbBus, SqlRowSet rsView, long id) {
+        // -- 获取一条视图数据 --
+        String sql = "";
+
+        try {
+            rsView.first();
+            sql = "SELECT * FROM (" + rsView.getString("sql_data_source") + ") t WHERE id = " + id;
+            return dbBus.queryForRowSet(sql);
+        } catch (Exception e) {
+            logger.error(sql);
+            throw e;
+        }
+    }
 
     // -- ViewForm ------------------------------------------------------------
-    public static SqlRowSet getFormData(DBFactory dbSys, SqlRowSet rsView, int id) throws Exception {
+    public static SqlRowSet getFormData(DBFactory dbSys, SqlRowSet rsView, long id) throws Exception {
         String sql = "";
         String tableName;
 
@@ -72,5 +89,132 @@ public class BaseViewService {
         // ------------------------------------------------
         sql = "SELECT * FROM " + tableName + " WHERE id = ?";
         return dbSys.queryForRowSet(sql, id);
+    }
+
+    public static int insert(DBFactory dbBus, String tableName, LinkedTreeMap form) throws Exception {
+        int nIdx = 0;
+
+        String sql = "SELECT * FROM " + tableName + " LIMIT 0";
+        String columnType, columnName, columnValue, quotes;
+        StringBuilder buildField = new StringBuilder();
+        StringBuilder buildValue = new StringBuilder();
+        SqlRowSetMetaData rsmd;
+        // ------------------------------------------------
+        try {
+            buildField.append("INSERT INTO " + tableName + " (");
+            buildValue.append("VALUES (");
+
+            sql = "SELECT * FROM " + tableName + " LIMIT 0";
+            rsmd = dbBus.queryForRowSet(sql).getMetaData();
+            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                columnType = UtilDataSet.getFieldType(rsmd.getColumnTypeName(i));
+                columnName = rsmd.getColumnName(i);
+
+                if (!form.containsKey(columnName)) {
+                    continue;
+                }
+                if (!columnName.equalsIgnoreCase("id")) {
+                    quotes = "'";
+                    buildField.append(nIdx == 0 ? "" : ", ");
+                    buildValue.append(nIdx++ == 0 ? "" : ", ");
+                    if (columnType.equalsIgnoreCase("number")) {
+                        quotes = "";
+                        columnValue = form.get(columnName).toString();
+                        if (columnValue.equals("")) {
+                            columnValue = null;
+                        }
+                    }
+                    else if (columnType.equalsIgnoreCase("datetime")) {
+                        columnValue = (String) form.get(columnName);
+                        if (columnValue.equals("")) {
+                            columnValue = null;
+                        }
+                    }
+                    else {
+                        columnValue = (String) form.get(columnName);
+                    }
+
+                    buildField.append(columnName);
+                    if (columnValue == null) {
+                        buildValue.append("NULL");
+                    }
+                    else {
+                        buildValue.append(quotes + columnValue + quotes);
+                    }
+                }
+            }
+
+            buildField.append(") ");
+            buildValue.append(")");
+            sql = buildField.toString() + buildValue.toString();
+
+            dbBus.update(sql);
+            return dbBus.getInt("SELECT @@identity");
+        } catch (Exception e) {
+            logger.info(sql);
+            throw e;
+        }
+    }
+    public static int update(DBFactory dbBus, String tableName, LinkedTreeMap form) throws Exception {
+        int nIdx = 0;
+
+        String sql = "SELECT * FROM " + tableName + " LIMIT 0";
+        String columnType, columnName, columnValue, quotes;
+        StringBuilder builder = new StringBuilder();
+        SqlRowSetMetaData rsmd;
+        // ------------------------------------------------
+        try {
+            builder.append("UPDATE " + tableName + " SET ");
+
+            sql = "SELECT * FROM " + tableName + " LIMIT 0";
+            rsmd = dbBus.queryForRowSet(sql).getMetaData();
+            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                columnType = UtilDataSet.getFieldType(rsmd.getColumnTypeName(i));
+                columnName = rsmd.getColumnName(i);
+
+                if (!form.containsKey(columnName)) {
+                    continue;
+                }
+                if (!columnName.equalsIgnoreCase("id")) {
+                    quotes = "'";
+                    builder.append(nIdx++ == 0 ? "" : ", ");
+                    if (columnType.equalsIgnoreCase("number")) {
+                        quotes = "";
+                        columnValue = form.get(columnName).toString();
+                        if (columnValue.equals("")) {
+                            columnValue = null;
+                        }
+                    }
+                    else if (columnType.equalsIgnoreCase("datetime")) {
+                        columnValue = (String) form.get(columnName);
+                        if (columnValue.equals("")) {
+                            columnValue = null;
+                        }
+                    }
+                    else {
+                        columnValue = (String) form.get(columnName);
+                    }
+
+                    if (columnValue == null) {
+                        builder.append(columnName + " = NULL");
+                    }
+                    else {
+                        builder.append(columnName + " = " + quotes + columnValue + quotes);
+                    }
+                }
+            }
+
+            builder.append(" WHERE id = " + ((Double) form.get("id")).longValue());
+            sql = builder.toString();
+
+            return dbBus.update(sql);
+        } catch (Exception e) {
+            logger.info(sql);
+            throw e;
+        }
+    }
+    public static void delete(DBFactory dbBus, String tableName, long id) throws Exception {
+        String sql = "DELETE FROM " + tableName + " WHERE id = " + id;
+        dbBus.execute(sql);
     }
 }
