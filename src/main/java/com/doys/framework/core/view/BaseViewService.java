@@ -156,7 +156,7 @@ public class BaseViewService extends BaseService {
         }
     }
     public static int update(DBFactory dbBus, String tableName, LinkedTreeMap form) throws Exception {
-        int nIdx = 0;
+        int result = 0, nIdx = 0;
 
         String sql = "SELECT * FROM " + tableName + " LIMIT 0";
         String columnType, columnName, columnValue, quotes;
@@ -207,14 +207,22 @@ public class BaseViewService extends BaseService {
             builder.append(" WHERE id = " + ((Double) form.get("id")).longValue());
             sql = builder.toString();
 
-            return dbBus.update(sql);
+            result = dbBus.update(sql);
+            if (result != 1) {
+                throw new Exception("记录不存在，请刷新视图页面。");
+            }
+            return result;
         } catch (Exception e) {
             logger.info(sql);
             throw e;
         }
     }
-    public static void delete(DBFactory dbBus, String tableName, long id) throws Exception {
+    public static int delete(DBFactory dbBus, String tableName, long id) throws Exception {
         String sql = "DELETE FROM " + tableName + " WHERE id = " + id;
-        dbBus.execute(sql);
+        int result = dbBus.update(sql);
+        if (result == 0) {
+            throw new Exception("记录不存在，请刷新视图页面。");
+        }
+        return result;
     }
 }
