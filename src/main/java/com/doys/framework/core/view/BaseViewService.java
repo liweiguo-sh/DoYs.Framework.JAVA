@@ -7,6 +7,7 @@
  *****************************************************************************/
 package com.doys.framework.core.view;
 import com.doys.framework.common.UtilDataSet;
+import com.doys.framework.common.UtilString;
 import com.doys.framework.config.Const;
 import com.doys.framework.core.base.BaseService;
 import com.doys.framework.core.db.DBFactory;
@@ -21,18 +22,30 @@ public class BaseViewService extends BaseService {
         return jtSys.queryForRowSet(sql, viewPk);
     }
     public static SqlRowSet getViewField(DBFactory dbSys, String viewPk) {
-        String sql = "SELECT  name, text, fixed, align, width "
+        String sql = "SELECT  name, text, fixed, align, width, data_source_type, data_source "
                 + "FROM sys_view_field "
-                + "WHERE view_pk = ? AND sequence > 0 "
+                + "WHERE view_pk = ? AND sequence <> 0 "
                 + "ORDER BY sequence";
         return dbSys.queryForRowSet(sql, viewPk);
     }
 
-    public static SqlRowSet getFlowNode(DBFactory jtSys, String flowPk) throws Exception {
-        String sql = "SELECT  f.name flow_name, n.node_pk, n.name node_name, n.filter, n.groups, n.users " +
-                "FROM sys_flow f LEFT JOIN sys_flow_node n ON f.pk = n.flow_pk " +
-                "WHERE f.pk = ? ORDER BY n.sequence";
-        return jtSys.queryForRowSet(sql, flowPk);
+    public static SqlRowSet getFlowNode(DBFactory jtSys, String flowPks) throws Exception {
+        String sql = "SELECT  f.name flow_name, n.node_pk, n.name node_name, n.filter, n.group_pks, n.user_pks, allow_addnew " +
+                "FROM sys_flow f INNER JOIN sys_flow_node n ON f.pk = n.flow_pk " +
+                "WHERE f.pk IN (" + flowPks + ") " +
+                "ORDER BY f.level, f.sequence, n.sequence";
+        return jtSys.queryForRowSet(sql);
+    }
+    public static SqlRowSet getFlowButton(DBFactory jtSys, String flowPks) throws Exception {
+        String sql = "SELECT flow_pk, button_pk, b.name, b.icon, assert_js, action_type, action_do, action_remove, group_pks, user_pks " +
+                "FROM sys_flow f INNER JOIN sys_flow_button b ON f.pk = b.flow_pk " +
+                "WHERE f.pk IN (" + flowPks + ") AND flag_disabled = 0 " +
+                "ORDER BY f.level, f.sequence, b.sequence";
+        return jtSys.queryForRowSet(sql);
+    }
+    public static SqlRowSet getFlowButton(DBFactory jtSys, String flowPk, String buttonPk) throws Exception {
+        String sql = "SELECT * FROM sys_flow_button WHERE flow_pk = ? AND button_pk = ?";
+        return jtSys.queryForRowSet(sql, flowPk, buttonPk);
     }
 
     public static SqlRowSet getViewData(DBFactory dbSys, SqlRowSet rsView, int pageNum, String sqlFilter, HashMap map) throws Exception {
@@ -48,7 +61,7 @@ public class BaseViewService extends BaseService {
             if (!sqlFilter.equals("")) {
                 sql += "WHERE " + sqlFilter;
             }
-            int totalRows = dbSys.getInt(sql);
+            long totalRows = dbSys.getLong(sql);
             map.put("totalRows", totalRows);
             pageNum = 1;
         }
@@ -65,7 +78,7 @@ public class BaseViewService extends BaseService {
 
         return dbSys.queryForRowSet(sql);
     }
-    public static SqlRowSet getViewDataOne(DBFactory dbBus, SqlRowSet rsView, long id) {
+    public static SqlRowSet getViewDataOne(DBFactory dbBus, SqlRowSet rsView, long id) throws Exception {
         // -- 获取一条视图数据 --
         String sql = "";
 
@@ -80,6 +93,22 @@ public class BaseViewService extends BaseService {
     }
 
     // -- ViewForm ------------------------------------------------------------
+    public static HashMap<String, SqlRowSet> getViewDS(DBFactory dbBus, SqlRowSet rsViewField) throws Exception {
+        HashMap<String, SqlRowSet> mapDS = new HashMap<>();
+
+        String columnName, dataSourceType, dataSource;
+        // ------------------------------------------------
+        rsViewField.first();
+        while (rsViewField.next()) {
+            columnName = rsViewField.getString("name");
+            dataSourceType = UtilString.KillNull(rsViewField.getString("data_source_type"));
+            if (UtilString.equals(dataSourceType, "sql")) {
+                dataSource = UtilString.KillNull(rsViewField.getString("data_source"));
+                mapDS.put(columnName, dbBus.queryForRowSet(dataSource));
+            }
+        }
+        return mapDS;
+    }
     public static SqlRowSet getFormData(DBFactory dbSys, SqlRowSet rsView, long id) throws Exception {
         String sql = "";
         String tableName;
@@ -91,7 +120,7 @@ public class BaseViewService extends BaseService {
         return dbSys.queryForRowSet(sql, id);
     }
 
-    public static int insert(DBFactory dbBus, String tableName, LinkedTreeMap form) throws Exception {
+    public static long insert(DBFactory dbBus, String tableName, LinkedTreeMap form) throws Exception {
         int nIdx = 0;
 
         String sql = "SELECT * FROM " + tableName + " LIMIT 0";
@@ -149,13 +178,13 @@ public class BaseViewService extends BaseService {
             sql = buildField.toString() + buildValue.toString();
 
             dbBus.update(sql);
-            return dbBus.getInt("SELECT @@identity");
+            return dbBus.getLong("SELECT @@identity");
         } catch (Exception e) {
             logger.info(sql);
             throw e;
         }
     }
-    public static int update(DBFactory dbBus, String tableName, LinkedTreeMap form) throws Exception {
+    public static boolean update(DBFactory dbBus, String tableName, LinkedTreeMap form) throws Exception {
         int result = 0, nIdx = 0;
 
         String sql = "SELECT * FROM " + tableName + " LIMIT 0";
@@ -204,25 +233,45 @@ public class BaseViewService extends BaseService {
                 }
             }
 
-            builder.append(" WHERE id = " + ((Double) form.get("id")).longValue());
+            builder.append(" WHERE id = " + form.get("id"));
             sql = builder.toString();
 
             result = dbBus.update(sql);
             if (result != 1) {
-                throw new Exception("记录不存在，请刷新视图页面。");
+                throw new Exception("当前记录已不存在，请刷新视图页面。");
             }
-            return result;
+            return true;
         } catch (Exception e) {
             logger.info(sql);
             throw e;
         }
     }
-    public static int delete(DBFactory dbBus, String tableName, long id) throws Exception {
+    public static boolean delete(DBFactory dbBus, String tableName, long id) throws Exception {
         String sql = "DELETE FROM " + tableName + " WHERE id = " + id;
         int result = dbBus.update(sql);
         if (result == 0) {
-            throw new Exception("记录不存在，请刷新视图页面。");
+            throw new Exception("当前记录已不存在，请刷新视图页面。");
         }
-        return result;
+        return true;
+    }
+
+    public static boolean doFlow(DBFactory dbBus, String tableName, long id, SqlRowSet rsFlowButton) throws Exception {
+        String sql = "";
+        String sqlAssert, sqlAction;
+        //-------------------------------------------------
+        rsFlowButton.first();
+        sqlAssert = UtilString.KillNull(rsFlowButton.getString("assert_sql"));
+        sqlAction = rsFlowButton.getString("action_do");
+
+        sql = "UPDATE " + tableName + " SET " + sqlAction + " WHERE id = " + id;
+        if (!sqlAssert.equals("")) {
+            sql += " AND " + sqlAssert;
+        }
+
+        int result = dbBus.update(sql);
+        if (result == 0) {
+            throw new Exception("数据状态已变更，不符合操作条件，请刷新视图页面。");
+        }
+        return true;
     }
 }

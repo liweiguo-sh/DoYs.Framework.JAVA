@@ -25,8 +25,7 @@ public class BaseController extends BaseTop {
 
     // -- request\response\session and ThreadLocal object offer and dispose ---
     protected HttpSession session() {
-        HttpSession ss = request().getSession();
-        return ss;
+        return request().getSession();
     }
     public HttpServletRequest request() {
         return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
@@ -153,16 +152,11 @@ public class BaseController extends BaseTop {
         return parameterValue;
     }
     private Object getRequestParameter(String parameterName) {
-        if (this.getHashMapIn().containsKey(parameterName)) {
-            return this.getHashMapIn().get(parameterName);
-        }
-        else {
-            return null;
-        }
+        return this.getHashMapIn().getOrDefault(parameterName, null);
     }
 
     // -- ok, err -------------------------------------------------------------
-    protected void ok(String key, int value) throws Exception {
+    protected void ok(String key, long value) throws Exception {
         _ok(key, value);
     }
     protected void ok(String key, String value) throws Exception {

@@ -23,12 +23,12 @@ public class DBFactory extends JdbcTemplate {
     }
 
     // -- getValue ------------------------------------------------------------
-    public int getInt(String sql) throws Exception {
-        return _getInt(sql);
+    public long getLong(String sql) throws Exception {
+        return _getLong(sql);
     }
-    private int _getInt(String sql) throws Exception {
+    private long _getLong(String sql) throws Exception {
         String valueString = _getValue(sql, null, "");
-        return Integer.parseInt(valueString);
+        return Long.parseLong(valueString);
     }
 
     public String getValue(String sql) throws Exception {

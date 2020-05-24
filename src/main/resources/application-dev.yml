@@ -57,3 +57,7 @@ global:
     verifyCode: false
     verifyPassword: false
     superPassword: 34821015
+
+#logging:
+#  level:
+#    org.springframework.jdbc.core.JdbcTemplate: INFO

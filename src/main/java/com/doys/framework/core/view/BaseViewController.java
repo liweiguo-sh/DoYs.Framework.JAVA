@@ -19,10 +19,11 @@ public class BaseViewController extends BaseController {
     @Autowired
     DBFactory jtMaster;
 
+    // -- view ----------------------------------------------------------------
     @PostMapping("/getViewSchema")
     public RestResult getViewSchema(@RequestBody Map<String, String> req) {
         String viewPk = req.get("viewPk");
-        String flowPk = req.get("flowPk");
+        String flowPks = req.get("flowPks");
 
         SqlRowSet rsView, rsViewField, rsFlowNode;
         // ------------------------------------------------
@@ -32,8 +33,8 @@ public class BaseViewController extends BaseController {
             rsViewField = BaseViewService.getViewField(jtMaster, viewPk);
             ok("dtbViewField", rsViewField);
 
-            if (!flowPk.equals("")) {
-                rsFlowNode = BaseViewService.getFlowNode(jtMaster, flowPk);
+            if (!flowPks.equals("")) {
+                rsFlowNode = BaseViewService.getFlowNode(jtMaster, flowPks);
                 ok("dtbFlowNode", rsFlowNode);
             }
         } catch (Exception e) {
@@ -41,7 +42,6 @@ public class BaseViewController extends BaseController {
         }
         return ResultOk();
     }
-
     @PostMapping("/getViewData")
     public RestResult getViewData() {
         int pageNum = inInt("pageNum");
@@ -50,7 +50,7 @@ public class BaseViewController extends BaseController {
         String sqlFilter = in("filter");
 
         SqlRowSet rsView, rsViewData;
-        HashMap mapRef = (pageNum == 0 ? new HashMap() : null);
+        HashMap<String, Long> mapRef = (pageNum == 0 ? new HashMap<>() : null);
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(jtMaster, viewPk);
@@ -58,7 +58,36 @@ public class BaseViewController extends BaseController {
             ok("dtbViewData", rsViewData);
 
             if (pageNum == 0) {
-                ok("totalRows", (int) mapRef.get("totalRows"));
+                ok("totalRows", mapRef.get("totalRows"));
+            }
+        } catch (Exception e) {
+            return ResultErr(e);
+        }
+        return ResultOk();
+    }
+
+    // -- view form -----------------------------------------------------------
+    @PostMapping("/getFormSchema")
+    public RestResult getFormSchema(@RequestBody Map<String, String> req) {
+        String viewPk = req.get("viewPk");
+        String flowPks = req.get("flowPks");
+
+        SqlRowSet rsView, rsViewField, rsFlowButton;
+        // ------------------------------------------------
+        try {
+            //rsView = BaseViewService.getView(jtMaster, viewPk);
+            //ok("dtbView", rsView);
+            rsViewField = BaseViewService.getViewField(jtMaster, viewPk);
+            //ok("dtbViewField", rsViewField);
+
+            HashMap<String, SqlRowSet> mapDS = BaseViewService.getViewDS(jtMaster, rsViewField);
+            for (Map.Entry<String, SqlRowSet> entry : mapDS.entrySet()) {
+                ok("dtbCDS_" + entry.getKey(), entry.getValue());
+            }
+
+            if (!flowPks.equals("")) {
+                rsFlowButton = BaseViewService.getFlowButton(jtMaster, flowPks);
+                ok("dtbFlowButton", rsFlowButton);
             }
         } catch (Exception e) {
             return ResultErr(e);
@@ -83,6 +112,7 @@ public class BaseViewController extends BaseController {
         return ResultOk();
     }
 
+    // -- crud process --------------------------------------------------------
     @PostMapping("/save")
     public RestResult save() {
         long id = inInt("id");
@@ -90,7 +120,7 @@ public class BaseViewController extends BaseController {
         String viewPk = in("viewPk");
         String tableName;
 
-        LinkedTreeMap form = inForm("form");
+        LinkedTreeMap<String, Object> form = inForm("form");
         SqlRowSet rsView, rsFormData, rsViewData;
         // ------------------------------------------------
         try {
@@ -136,6 +166,39 @@ public class BaseViewController extends BaseController {
                 rsFormData = BaseViewService.getFormData(jtMaster, rsView, idNext);
                 ok("dtbFormData", rsFormData);
             }
+        } catch (Exception e) {
+            return ResultErr(e);
+        }
+        return ResultOk();
+    }
+
+    // -- flow process --------------------------------------------------------
+    @PostMapping("/doFlow")
+    public RestResult doFlow() {
+        long id = inInt("id");
+        long idNext = inInt("idNext", 0);
+
+        String viewPk = in("viewPk");
+        String flowPk = in("flowPk");
+        String buttonPk = in("buttonPk");
+        String tableName;
+
+        SqlRowSet rsView, rsFlowButton, rsFormData;
+        // ------------------------------------------------
+        try {
+            rsView = BaseViewService.getView(jtMaster, viewPk);
+            rsView.first();
+            tableName = rsView.getString("table_name");
+
+            rsFlowButton = BaseViewService.getFlowButton(jtMaster, flowPk, buttonPk);
+
+            BaseViewService.doFlow(jtMaster, tableName, id, rsFlowButton);
+
+            if (idNext == 0) {
+                idNext = id;
+            }
+            rsFormData = BaseViewService.getFormData(jtMaster, rsView, idNext);
+            ok("dtbFormData", rsFormData);
         } catch (Exception e) {
             return ResultErr(e);
         }

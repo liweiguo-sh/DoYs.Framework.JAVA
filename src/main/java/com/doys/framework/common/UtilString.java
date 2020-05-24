@@ -50,4 +50,10 @@ public class UtilString {
         }
         return valueString;
     }
+    public static boolean equals(String string1, String string2) {
+        string1 = trimSpace(string1);
+        string2 = trimSpace(string2);
+
+        return string1.equalsIgnoreCase(string2);
+    }
 }

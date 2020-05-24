@@ -25,12 +25,12 @@ public class ViewService extends BaseService {
         // ------------------------------------------------
         try {
             // -- 1.刷新基础表 ---------------------------------
-            sql = "SELECT database_pk, table_pk, sql_data FROM sys_view WHERE pk = ?";
+            sql = "SELECT database_pk, table_pk, sql_data_source FROM sys_view WHERE pk = ?";
             rs = dbSys.queryForRowSet(sql, viewPk);
             if (rs.next()) {
                 databasePk = rs.getString("database_pk");
                 tablePk = rs.getString("table_pk");
-                sqlViewDS = rs.getString("sql_data");
+                sqlViewDS = rs.getString("sql_data_source");
             }
             else {
                 throw new Exception("视图 " + viewPk + " 不存在。");
@@ -89,6 +89,9 @@ public class ViewService extends BaseService {
                 if (dr.DataCell("remark", true).equals("")) {
                     dr.setDataCell("remark", dtbField.DataCell(i, "remark"));
                 }
+                if (dr.DataCell("sequence", true).equals("")) {
+                    dr.setDataCell("sequence", 0);
+                }
 
                 if (nFind < 0) {
                     dtbView_Field.AddRow(dr);
@@ -107,8 +110,9 @@ public class ViewService extends BaseService {
                     dr = dtbView_Field.NewRow();
                 }
                 else {
-                    if (!dtbView_Field.getRowTag(nFind).equals(""))
+                    if (!dtbView_Field.getRowTag(nFind).equals("")) {
                         continue; // -- 是基础表字段, 第2部分代码已处理 --
+                    }
                     dr = dtbView_Field.Row(nFind);
                 }
                 dr.setRowTag("1");

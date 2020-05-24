@@ -41,4 +41,13 @@
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FileRolling"/>
     </root>
+
+    <!-- 输出jdbc.sql TODO: 无效？-->
+    <!--
+        <include resource="org/springframework/boot/logging/logback/base.xml"/>
+        <logger name="org.springframework.jdbc.core" additivity="true" level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FileRolling"/>
+        </logger>
+    -->
 </configuration>
