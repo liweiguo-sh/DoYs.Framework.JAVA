@@ -49,7 +49,7 @@ public class JustDo extends BaseController {
         int nMax = 1;
         try {
             nMax = Integer.parseInt(req.get("nMaxCount"));
-            dbMaster.execute("DELETE FROM customer");
+            dbMaster.exec("DELETE FROM customer");
 
             int[] result;
             String sql = "INSERT INTO customer (id, name, age) VALUES (?, ?, ?)";
@@ -70,7 +70,7 @@ public class JustDo extends BaseController {
 
 
             for (int i = 0; i < nMax; i++) {
-                dbMaster.execute("DELETE FROM customer");
+                dbMaster.exec("DELETE FROM customer");
 
                 ArrayList<Customer> customers = new ArrayList<Customer>();
                 nMax = Integer.parseInt(req.get("nMaxCount"));

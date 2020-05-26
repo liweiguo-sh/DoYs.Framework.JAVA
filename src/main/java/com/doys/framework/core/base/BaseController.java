@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 public class BaseController extends BaseTop {
     private ThreadLocal<HashMap<String, Object>> tlHashMapIn = new ThreadLocal<>();
@@ -42,7 +43,7 @@ public class BaseController extends BaseTop {
             StringBuilder builder = new StringBuilder();
             try {
                 ServletInputStream inputStream = request().getInputStream();
-                BufferedReader bufReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+                BufferedReader bufReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
                 while ((strLine = bufReader.readLine()) != null) {
                     builder.append(strLine);
                 }
@@ -175,8 +176,8 @@ public class BaseController extends BaseTop {
         _err(strErr);
     }
     protected void err(Exception e) {
-        e.printStackTrace();
         logger.error(e.getMessage());
+        e.printStackTrace();
         _err(e.getMessage());
     }
     private void _err(String strErr) {

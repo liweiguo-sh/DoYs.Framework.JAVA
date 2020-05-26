@@ -4,6 +4,6 @@ public class Unexpected extends Exception {
         super("系统遇到非预期的意外错误，请检查。");
     }
     public Unexpected(String strException) {
-        super(strException);
+        super("系统在 " + strException + " 时遇到非预期的意外错误，请检查。");
     }
 }

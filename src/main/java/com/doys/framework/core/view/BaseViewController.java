@@ -1,10 +1,20 @@
+/******************************************************************************
+ * Copyright (C), 2020, doys-next.com
+ * @author David.Li
+ * @version 1.0
+ * @create_date 2020-05-15
+ * 通用视图控制类, 用于通用视图
+ *****************************************************************************/
 package com.doys.framework.core.view;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
 import com.google.gson.internal.LinkedTreeMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,11 +27,15 @@ import java.util.Map;
 @RequestMapping("/core/base_view")
 public class BaseViewController extends BaseController {
     @Autowired
-    DBFactory jtMaster;
+    protected DBFactory jtMaster;
+    @Autowired
+    DataSourceTransactionManager dstm;
+    @Autowired
+    TransactionDefinition tDef;
 
     // -- view ----------------------------------------------------------------
     @PostMapping("/getViewSchema")
-    public RestResult getViewSchema(@RequestBody Map<String, String> req) {
+    private RestResult getViewSchema(@RequestBody Map<String, String> req) {
         String viewPk = req.get("viewPk");
         String flowPks = req.get("flowPks");
 
@@ -43,7 +57,7 @@ public class BaseViewController extends BaseController {
         return ResultOk();
     }
     @PostMapping("/getViewData")
-    public RestResult getViewData() {
+    private RestResult getViewData() {
         int pageNum = inInt("pageNum");
 
         String viewPk = in("viewPk");
@@ -68,7 +82,7 @@ public class BaseViewController extends BaseController {
 
     // -- view form -----------------------------------------------------------
     @PostMapping("/getFormSchema")
-    public RestResult getFormSchema(@RequestBody Map<String, String> req) {
+    private RestResult getFormSchema(@RequestBody Map<String, String> req) {
         String viewPk = req.get("viewPk");
         String flowPks = req.get("flowPks");
 
@@ -95,7 +109,7 @@ public class BaseViewController extends BaseController {
         return ResultOk();
     }
     @PostMapping("/getFormData")
-    public RestResult getFormData() {
+    private RestResult getFormData() {
         int id = inInt("id");
 
         String viewPk = in("viewPk");
@@ -112,41 +126,58 @@ public class BaseViewController extends BaseController {
         return ResultOk();
     }
 
-    // -- crud process --------------------------------------------------------
+    // -- crud process and flow -----------------------------------------------
     @PostMapping("/save")
-    public RestResult save() {
+    private RestResult save() {
         long id = inInt("id");
+        boolean blAddnew = (id == 0);
 
         String viewPk = in("viewPk");
         String tableName;
 
         LinkedTreeMap<String, Object> form = inForm("form");
         SqlRowSet rsView, rsFormData, rsViewData;
+
+        TransactionStatus tStatus = null;
         // ------------------------------------------------
         try {
+            // -- 1. pretreatment --
             rsView = BaseViewService.getView(jtMaster, viewPk);
             rsView.first();
             tableName = rsView.getString("table_name");
 
-            if (id == 0) {
+            // -- 2.1 beforeSave --
+            tStatus = dstm.getTransaction(tDef);
+            if (!BeforeSave(blAddnew, id)) {
+                return ResultErr();
+            }
+            // -- 3.2. save --
+            if (blAddnew) {
                 id = BaseViewService.insert(jtMaster, tableName, form);
             }
             else {
                 BaseViewService.update(jtMaster, tableName, form);
             }
+            // -- 2.3 afterSave --
+            if (!AfterSave(blAddnew, id)) {
+                return ResultErr();
+            }
+            dstm.commit(tStatus);
 
-            // -- 返回当前行更新后的基础表数据和视图数据 --
+            // -- 9. 返回当前行更新后的基础表数据和视图数据 --
             rsFormData = BaseViewService.getFormData(jtMaster, rsView, id);
             ok("dtbFormData", rsFormData);
             rsViewData = BaseViewService.getViewDataOne(jtMaster, rsView, id);
             ok("dtbViewData", rsViewData);
         } catch (Exception e) {
             return ResultErr(e);
+        } finally {
+            rollback(tStatus);
         }
         return ResultOk();
     }
     @PostMapping("/delete")
-    public RestResult delete() {
+    private RestResult delete() {
         long id = inInt("id");
         long idNext = inInt("idNext", 0);
 
@@ -154,13 +185,25 @@ public class BaseViewController extends BaseController {
         String tableName;
 
         SqlRowSet rsView, rsFormData;
+        TransactionStatus tStatus = null;
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(jtMaster, viewPk);
             rsView.first();
             tableName = rsView.getString("table_name");
 
+            // -- 2.1 beforeDelete --
+            tStatus = dstm.getTransaction(tDef);
+            if (!BeforeDelete(id)) {
+                return ResultErr();
+            }
+            // -- 2.2 delete --
             BaseViewService.delete(jtMaster, tableName, id);
+            // -- 2.3 afterDelete --
+            if (!AfterDelete(id)) {
+                return ResultErr();
+            }
+            dstm.commit(tStatus);
 
             if (idNext > 0) {
                 rsFormData = BaseViewService.getFormData(jtMaster, rsView, idNext);
@@ -168,13 +211,14 @@ public class BaseViewController extends BaseController {
             }
         } catch (Exception e) {
             return ResultErr(e);
+        } finally {
+            rollback(tStatus);
         }
         return ResultOk();
     }
 
-    // -- flow process --------------------------------------------------------
     @PostMapping("/doFlow")
-    public RestResult doFlow() {
+    private RestResult doFlow() {
         long id = inInt("id");
         long idNext = inInt("idNext", 0);
 
@@ -184,6 +228,7 @@ public class BaseViewController extends BaseController {
         String tableName;
 
         SqlRowSet rsView, rsFlowButton, rsFormData;
+        TransactionStatus tStatus = null;
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(jtMaster, viewPk);
@@ -192,8 +237,20 @@ public class BaseViewController extends BaseController {
 
             rsFlowButton = BaseViewService.getFlowButton(jtMaster, flowPk, buttonPk);
 
+            // -- 2.1 beforeSave --
+            tStatus = dstm.getTransaction(tDef);
+            if (!BeforeFlowClick(id, rsFlowButton)) {
+                return ResultErr();
+            }
+            // -- 2.2 doFlow --
             BaseViewService.doFlow(jtMaster, tableName, id, rsFlowButton);
+            // -- 2.3 afterDoFlow --
+            if (!AfterFlowClick(id, rsFlowButton)) {
+                return ResultErr();
+            }
+            dstm.commit(tStatus);
 
+            // -- 9. 返回结果 --
             if (idNext == 0) {
                 idNext = id;
             }
@@ -201,7 +258,52 @@ public class BaseViewController extends BaseController {
             ok("dtbFormData", rsFormData);
         } catch (Exception e) {
             return ResultErr(e);
+        } finally {
+            rollback(tStatus);
         }
         return ResultOk();
+    }
+
+    // -- common --------------------------------------------------------------
+    private void rollback(TransactionStatus tStatus) {
+        try {
+            if (tStatus != null) {
+                if (!tStatus.isCompleted()) {
+                    dstm.rollback(tStatus);
+                }
+            }
+        } catch (Exception e) {
+            err(e);
+        }
+    }
+
+    // -- sub class override --------------------------------------------------
+    protected boolean BeforeSave(boolean addnew, long id) {
+        return true;
+    }
+    protected boolean AfterSave(boolean addnew, long id) {
+        return true;
+    }
+    protected boolean BeforeDelete(long id) {
+        return true;
+    }
+    protected boolean AfterDelete(long id) {
+        return true;
+    }
+    protected boolean BeforeFlowClick(long id, SqlRowSet rsFlowButton) {
+        return true;
+    }
+    protected boolean AfterFlowClick(long id, SqlRowSet rsFlowButton) {
+        return true;
+    }
+
+    protected String BeforeReplace(String sql) {
+        return sql;
+    }
+    private String ReplaceSql(String sql) {
+        return sql;
+    }
+    protected String AfterReplace(String sql) {
+        return sql;
     }
 }

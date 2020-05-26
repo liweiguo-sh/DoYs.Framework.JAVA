@@ -26,7 +26,7 @@ public class ViewService extends BaseService {
         try {
             // -- 1.刷新基础表 ---------------------------------
             sql = "SELECT database_pk, table_pk, sql_data_source FROM sys_view WHERE pk = ?";
-            rs = dbSys.queryForRowSet(sql, viewPk);
+            rs = dbSys.getRowSet(sql, viewPk);
             if (rs.next()) {
                 databasePk = rs.getString("database_pk");
                 tablePk = rs.getString("table_pk");
@@ -100,7 +100,7 @@ public class ViewService extends BaseService {
             // -- 3.根据视图SQL执行结果，将非基础表字段添加到ST_VIEW_FIELD ---
 
             sql = "SELECT * FROM (" + sqlViewDS + ") t WHERE 1 = 0";
-            rs = dbBus.queryForRowSet(sql);
+            rs = dbBus.getRowSet(sql);
             rsmd = rs.getMetaData();
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                 fieldName = rsmd.getColumnLabel(i).toLowerCase();

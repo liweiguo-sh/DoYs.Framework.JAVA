@@ -7,10 +7,10 @@
  *****************************************************************************/
 package com.doys.framework.system.controller;
 import com.doys.framework.core.base.BaseController;
+import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.system.service.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +20,7 @@ import java.util.Map;
 @RequestMapping("/sys_menu")
 public class Menu extends BaseController {
     @Autowired
-    JdbcTemplate jtMaster;
+    DBFactory jtMaster;
 
     // ------------------------------------------------------------------------
     @GetMapping("/getSystem")

@@ -1,6 +1,9 @@
 package com.doys.framework.core.db;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.sql.DataSource;
 import java.util.regex.Pattern;
@@ -42,7 +45,7 @@ public class DBFactory extends JdbcTemplate {
     }
     private String _getValue(String sql, Object[] parameters, String defaultValue) throws Exception {
         String returnString = null;
-        SqlRowSet rs = this.queryForRowSet(sql, parameters);
+        SqlRowSet rs = this.queryForRowSet(replaceSQL(sql), parameters);
         if (rs.next()) {
             returnString = rs.getString(1);
             if (returnString == null) {
@@ -50,6 +53,28 @@ public class DBFactory extends JdbcTemplate {
             }
         }
         return returnString;
+    }
+
+    // -- Override(rename) base method ----------------------------------------
+    public SqlRowSet getRowSet(String sql, Object... args) throws DataAccessException {
+        return super.queryForRowSet(replaceSQL(sql), args);
+    }
+    public int exec(String sql, Object... args) throws DataAccessException {
+        return super.update(replaceSQL(sql), args);
+    }
+    @Deprecated
+    @Override
+    // 未知的枚举常量javax.annotation.meta.When.MAYBE
+    public void execute(final String sql) throws DataAccessException {
+        super.execute(sql);
+    }
+
+    // -- public static method ------------------------------------------------
+    public static String getTenantDatabaseName() {
+        return (String) ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession().getAttribute("dbName");
+    }
+    public static String replaceSQL(String sql) {
+        return sql.replaceAll("\\.\\.", getTenantDatabaseName() + ".");
     }
 
     // -- Check SQL injection -------------------------------------------------

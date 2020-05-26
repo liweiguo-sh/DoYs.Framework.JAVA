@@ -9,24 +9,28 @@ package com.doys.framework.system.controller;
 import com.doys.framework.common.UtilEnv;
 import com.doys.framework.common.image.ImageVerifyCode;
 import com.doys.framework.core.base.BaseController;
+import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 import java.io.File;
-import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/user")
 public class User extends BaseController {
     @Autowired
-    JdbcTemplate jtMaster;
+    DBFactory jtMaster;
 
     @Value("${global.login.verifyPassword}")
     private boolean blVerifyPassword;
@@ -37,19 +41,33 @@ public class User extends BaseController {
 
     // ------------------------------------------------------------------------
     @PostMapping("/login")
-    private RestResult Login(@RequestBody Map<String, String> req) {
-        boolean blPassword = false;
+    private RestResult login() {
+        int tenantId = 0;
 
-        String sql = "";
-        String userkey = req.get("userkey");
-        String password = req.get("password");
-        String loginTime = req.get("loginTime");
-        String verifyCode = req.get("verifyCode");
+        String dbName = "";
+        String userkey = in("userkey");
+        String password = in("password");
+        String loginTime = in("loginTime");
+        String verifyCode = in("verifyCode");
         String verifyCodeSession = "";
 
-        SqlRowSet rowSet;
+        SqlRowSet rsUser, rsTenant;
         // ------------------------------------------------
         try {
+            // -- 0. read tenant infomation --
+            tenantId = parseTenantId(in("tenantId"));
+            rsTenant = UserService.getTenant(jtMaster, tenantId);
+            if (rsTenant.next()) {
+                dbName = rsTenant.getString("database_name");
+
+                session().setAttribute("dbName", dbName);
+                session().setAttribute("tenantName", rsTenant.getString("name"));
+                session().setAttribute("tenantShortName", rsTenant.getString("short_name"));
+            }
+            else {
+                return ResultErr("企业代码不正确，请检查。");
+            }
+
             // -- 1.1 验证验证码 --
             if (blVerifyCode) {
                 verifyCodeSession = getSessionValue("verifyCode");
@@ -64,15 +82,13 @@ public class User extends BaseController {
             }
             // -- 1.2. 验证登录密码 --
             if (blVerifyPassword) {
-                blPassword = UserService.verifyUser(jtMaster, userkey, password, loginTime, superPassword);
+                UserService.verifyUser(jtMaster, dbName, userkey, password, loginTime, superPassword);
             }
 
             // -- 2. 返回用户信息 --
-            sql = "SELECT user_key, user_name FROM sys_user WHERE user_key = ?";
-            rowSet = jtMaster.queryForRowSet(sql, userkey);
-            if (rowSet.next()) {
-                ok("userkey", rowSet.getString("user_key"));
-                ok("username", rowSet.getString("user_name"));
+            rsUser = UserService.getUser(jtMaster, dbName, userkey);
+            if (rsUser.next()) {
+                setSession(rsUser);
             }
             else {
                 return ResultErr("用户不存在，请检查。");
@@ -113,5 +129,28 @@ public class User extends BaseController {
             return ResultErr(e);
         }
         return ResultOk();
+    }
+
+    // ------------------------------------------------------------------------
+    private int parseTenantId(String tenantIdString) {
+        int tenantId;
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(tenantIdString);
+
+        while (matcher.find()) {
+            tenantIdString = matcher.group();
+        }
+        tenantId = Integer.parseInt(tenantIdString);
+        return tenantId;
+    }
+    private void setSession(SqlRowSet rsUser) throws Exception {
+        HttpSession ss = session();
+
+        rsUser.first();
+        ok("userkey", rsUser.getString("user_key"));
+        ok("username", rsUser.getString("user_name"));
+
+        ss.setAttribute("userkey", rsUser.getString("user_key"));
+        ss.setAttribute("username", rsUser.getString("user_name"));
     }
 }

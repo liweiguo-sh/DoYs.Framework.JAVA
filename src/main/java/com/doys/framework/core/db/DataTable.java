@@ -61,7 +61,7 @@ public class DataTable {
 
             long t1 = new Date().getTime();
             ///rs = dbFactory.openResultset(sql, parameters, SqlRowSet.TYPE_SCROLL_INSENSITIVE);
-            rs = dbFactory.queryForRowSet(sql, parameters);
+            rs = dbFactory.getRowSet(sql, parameters);
 
             long t2 = new Date().getTime();
             if (rs != null) {

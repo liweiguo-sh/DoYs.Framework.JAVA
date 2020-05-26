@@ -27,7 +27,7 @@ public class DBSchema {
         try {
             tableName = tableName.toLowerCase();
             sql = "SELECT * FROM sys_database WHERE pk = ?";
-            rs = dbSys.queryForRowSet(sql, new Object[] { databaseKey });
+            rs = dbSys.getRowSet(sql, new Object[] { databaseKey });
             if (rs.next()) {
                 databaseName = rs.getString("name").toLowerCase();
                 databaseType = rs.getString("type");
@@ -69,7 +69,7 @@ public class DBSchema {
         sql += "ORDER BY table_name";
 
         try {
-            SqlRowSet rs = dbBus.queryForRowSet(sql);
+            SqlRowSet rs = dbBus.getRowSet(sql);
             sql = "SELECT * FROM sys_table WHERE database_pk = '" + databasePk + "' ";
             if (!tableName.equals("")) {
                 sql += "AND name IN ('" + tableName.replaceAll(",", "','") + "') ";
@@ -152,7 +152,7 @@ public class DBSchema {
         sql += "ORDER BY table_name, column_name, flag_pkey";
         // ------------------------------------------------
         try {
-            SqlRowSet rs = dbBus.queryForRowSet(sql);
+            SqlRowSet rs = dbBus.getRowSet(sql);
             while (rs.next()) {
                 oFind[0] = rs.getString("pk");
                 nFind = dtb.Find(oFind);
@@ -235,14 +235,14 @@ public class DBSchema {
         else {
             sql += "table_pk = '" + databaseKey + "." + tableName + "'";
         }
-        dbSys.execute(sql);
+        dbSys.exec(sql);
         // ------------------------------------------------
         sql = "INSERT INTO sys..ST_INDEX_FIELD SELECT CONCAT('" + databaseKey
                 + ".', UPPER(s.table_name)) AS table_pk, index_name, column_name AS field_name, CASE non_unique WHEN 1 THEN 0 ELSE 1 END AS is_unique, CASE constraint_type WHEN 'PRIMARY KEY' THEN 1 ELSE 2 END AS index_type "
                 + "FROM INFORMATION_SCHEMA.STATISTICS s LEFT JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc ON s.table_schema = tc.table_schema  AND s.table_name = tc.table_name AND s.index_name = tc.constraint_name "
                 + "WHERE s.table_schema = '" + databaseName + "' " + (tableName.equals("") ? "" : "AND s.table_name = '" + tableName + "' ")
                 + "ORDER BY table_pk, index_type, index_name";
-        dbBus.execute(sql);
+        dbBus.exec(sql);
         // ------------------------------------------------
         return true;
     }

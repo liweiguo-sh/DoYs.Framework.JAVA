@@ -48,16 +48,16 @@ public class MockController extends BaseController {
             tableName = dbSys.getValue(sql, new Object[] { tablePk });
 
             sql = "TRUNCATE TABLE " + tableName;
-            dbSys.execute(sql);
+            dbSys.exec(sql);
 
             sql = "SELECT * FROM " + tableName;
-            rs = dbSys.queryForRowSet(sql);
+            rs = dbSys.getRowSet(sql);
             if (rs.next()) {
                 throw new Exception("表中已存在数据，不允许生成模拟数据。");
             }
 
             sql = "SELECT name, text, type, length FROM sys_field WHERE table_pk = ? AND flag_identity = 0";
-            rsField = dbSys.queryForRowSet(sql, tablePk);
+            rsField = dbSys.getRowSet(sql, tablePk);
             while (rsField.next()) {
                 if (sqlFields == null) {
                     sqlFields = "";
