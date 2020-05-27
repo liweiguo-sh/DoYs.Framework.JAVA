@@ -56,25 +56,34 @@ public class DBFactory extends JdbcTemplate {
     }
 
     // -- Override(rename) base method ----------------------------------------
-    public SqlRowSet getRowSet(String sql, Object... args) throws DataAccessException {
+    public SqlRowSet getRowSet(String sql, Object... args) throws Exception {
         return super.queryForRowSet(replaceSQL(sql), args);
     }
-    public int exec(String sql, Object... args) throws DataAccessException {
+    public int exec(String sql, Object... args) throws Exception {
         return super.update(replaceSQL(sql), args);
     }
     @Deprecated
     @Override
-    // 未知的枚举常量javax.annotation.meta.When.MAYBE
     public void execute(final String sql) throws DataAccessException {
         super.execute(sql);
     }
 
     // -- public static method ------------------------------------------------
-    public static String getTenantDatabaseName() {
-        return (String) ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession().getAttribute("dbName");
+    public static int getTenantId() throws Exception {
+        try {
+            return (int) ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession().getAttribute("tenantId");
+        } catch (NullPointerException e) {
+            throw new Exception("会话已超时，请重新登录。");
+        } catch (Exception e) {
+            throw e;
+        }
     }
-    public static String replaceSQL(String sql) {
-        return sql.replaceAll("\\.\\.", getTenantDatabaseName() + ".");
+    public static String getMasterDbName() throws Exception {
+        // -- 默认主数据库前缀为 db_，如将来确有需求，再改为从sys_database表中取 --
+        return "db_" + getTenantId();
+    }
+    public static String replaceSQL(String sql) throws Exception {
+        return sql.replaceAll("\\.\\.", getMasterDbName() + ".");
     }
 
     // -- Check SQL injection -------------------------------------------------

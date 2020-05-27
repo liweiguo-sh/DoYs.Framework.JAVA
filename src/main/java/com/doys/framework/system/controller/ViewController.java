@@ -29,7 +29,7 @@ public class ViewController extends BaseController {
         String viewPk = req.get("viewPk");
         // ------------------------------------------------
         try {
-            ViewService.refreshViewField(dbMaster, dbMaster, viewPk);
+            ViewService.refreshViewField(dbMaster, viewPk);
         } catch (Exception e) {
             return ResultErr(e);
         }

@@ -8,7 +8,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
 public class ViewService extends BaseService {
-    public static void refreshViewField(DBFactory dbSys, DBFactory dbBus, String viewPk) throws Exception {
+    public static void refreshViewField(DBFactory dbMaster, String viewPk) throws Exception {
         int nResult = 0, nFind = 0;
 
         String sql = "", sqlViewDS = "";
@@ -26,7 +26,7 @@ public class ViewService extends BaseService {
         try {
             // -- 1.刷新基础表 ---------------------------------
             sql = "SELECT database_pk, table_pk, sql_data_source FROM sys_view WHERE pk = ?";
-            rs = dbSys.getRowSet(sql, viewPk);
+            rs = dbMaster.getRowSet(sql, viewPk);
             if (rs.next()) {
                 databasePk = rs.getString("database_pk");
                 tablePk = rs.getString("table_pk");
@@ -36,16 +36,16 @@ public class ViewService extends BaseService {
                 throw new Exception("视图 " + viewPk + " 不存在。");
             }
 
-            DBSchema dbs = new DBSchema(dbSys, dbBus);
+            DBSchema dbs = new DBSchema(dbMaster);
             if (dbs.refreshDBStruct(databasePk, tablePk) == false) {
                 throw new Exception("刷新基础表失败，请检查。");
             }
 
             // -- 2.表ST_FIELD字段信息更新到表ST_VIEW_FIELD --------
-            dtbView_Field = dbSys.getDataTable("SELECT * FROM sys_view_field WHERE view_pk = ?", new Object[] { viewPk });
+            dtbView_Field = dbMaster.getDataTable("SELECT * FROM sys_view_field WHERE view_pk = ?", new Object[] { viewPk });
             dtbView_Field.Sort("name");
 
-            dtbField = dbSys.getDataTable("SELECT * FROM sys_field WHERE table_pk = ?", new Object[] { tablePk });
+            dtbField = dbMaster.getDataTable("SELECT * FROM sys_field WHERE table_pk = ?", new Object[] { tablePk });
             dtbField.Sort("name");
             for (int i = 0; i < dtbField.getRowCount(); i++) {
                 fieldName = dtbField.DataCell(i, "name");
@@ -100,7 +100,7 @@ public class ViewService extends BaseService {
             // -- 3.根据视图SQL执行结果，将非基础表字段添加到ST_VIEW_FIELD ---
 
             sql = "SELECT * FROM (" + sqlViewDS + ") t WHERE 1 = 0";
-            rs = dbBus.getRowSet(sql);
+            rs = dbMaster.getRowSet(sql);
             rsmd = rs.getMetaData();
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                 fieldName = rsmd.getColumnLabel(i).toLowerCase();
@@ -166,7 +166,7 @@ public class ViewService extends BaseService {
                 }
             }
             // -- 5.提交保存 ----------------------------------
-            nResult = dtbView_Field.Update(dbBus, "sys_view_field", "view_pk,name");
+            nResult = dtbView_Field.Update(dbMaster, "sys_view_field", "view_pk,name");
             if (nResult < 0) {
                 throw new Exception("意外错误。");
             }

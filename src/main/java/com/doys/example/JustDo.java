@@ -33,7 +33,7 @@ public class JustDo extends BaseController {
             for (int i = 1; i <= nMax; i++) {
                 logger.info("第 " + i + " 次执行开始 ...");
 
-                ViewService.refreshViewField(dbMaster, dbMaster, "label");
+                ViewService.refreshViewField(dbMaster, "label");
 
                 logger.info("第 " + i + " 次执行完毕.");
             }

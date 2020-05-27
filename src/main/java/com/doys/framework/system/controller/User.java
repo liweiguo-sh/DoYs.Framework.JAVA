@@ -56,10 +56,11 @@ public class User extends BaseController {
         try {
             // -- 0. read tenant infomation --
             tenantId = parseTenantId(in("tenantId"));
+            session().setAttribute("tenantId", tenantId);
+
             rsTenant = UserService.getTenant(jtMaster, tenantId);
             if (rsTenant.next()) {
                 dbName = rsTenant.getString("database_name");
-
                 session().setAttribute("dbName", dbName);
                 session().setAttribute("tenantName", rsTenant.getString("name"));
                 session().setAttribute("tenantShortName", rsTenant.getString("short_name"));

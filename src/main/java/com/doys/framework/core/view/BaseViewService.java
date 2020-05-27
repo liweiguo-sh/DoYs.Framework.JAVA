@@ -21,7 +21,7 @@ public class BaseViewService extends BaseService {
         String sql = "SELECT * FROM sys_view WHERE pk = ?";
         return jtSys.getRowSet(sql, viewPk);
     }
-    public static SqlRowSet getViewField(DBFactory dbSys, String viewPk) {
+    public static SqlRowSet getViewField(DBFactory dbSys, String viewPk) throws Exception {
         String sql = "SELECT  name, text, fixed, align, width, data_source_type, data_source, sequence "
                 + "FROM sys_view_field "
                 + "WHERE view_pk = ? AND sequence <> 0 "

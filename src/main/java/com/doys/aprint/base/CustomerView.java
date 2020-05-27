@@ -1,12 +1,12 @@
-package com.doys.aprint.maso.controller;
+package com.doys.aprint.base;
 import com.doys.framework.common.UtilDate;
 import com.doys.framework.core.view.BaseViewController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/aprint/maso/label/view")
-public class Label extends BaseViewController {
+@RequestMapping("/aprint/maso/base/customer_view")
+public class CustomerView extends BaseViewController {
     @Override
     protected boolean BeforeSave(boolean addnew, long id) {
         String sql = "", strValue = "";
