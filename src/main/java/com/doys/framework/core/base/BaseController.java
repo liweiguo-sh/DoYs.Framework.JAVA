@@ -38,7 +38,6 @@ public class BaseController extends BaseTop {
     private HashMap<String, Object> getHashMapIn() {
         HashMap<String, Object> hashMapIn = tlHashMapIn.get();
         if (hashMapIn == null) {
-
             String strLine = "", jsonString = "";
             StringBuilder builder = new StringBuilder();
             try {
@@ -113,14 +112,11 @@ public class BaseController extends BaseTop {
         return _inInt(parameterName, defaultValue);
     }
     private int _inInt(String parameterName, int defaultValue) {
-        Object parameterValue = getRequestParameter(parameterName);
-        if (parameterValue == null) {
-            return defaultValue;
-        }
+        Object parameterValue = _inObject(parameterName, defaultValue);
         if (parameterValue instanceof Double) {
             return ((Double) parameterValue).intValue();
         }
-        return (int) parameterValue;
+        return Integer.parseInt((String) parameterValue);
     }
 
     protected String in(String parameterName) {
@@ -142,18 +138,26 @@ public class BaseController extends BaseTop {
         }
         return parameterValue;
     }
+    private Object _inObject(String parameterName, Object defaultValue) {
+        HashMap<String, Object> map = this.getHashMapIn();
+        Object parameterValue = null;
 
-    private Object _inObject(String parameterName, String defaultValue) {
-        Object parameterValue;
-        Object parameterObject = getRequestParameter(parameterName);
-        if (parameterObject == null) {
-            return defaultValue;
+        if (map.containsKey(parameterName)) {
+            parameterValue = map.get(parameterName);
         }
-        parameterValue = parameterObject;
+        else {
+            if (map.containsKey("form")) {
+                LinkedTreeMap<String, Object> mapForm = (LinkedTreeMap<String, Object>) map.get("form");
+                if (mapForm.containsKey(parameterName)) {
+                    parameterValue = mapForm.get(parameterName);
+                }
+            }
+        }
+
+        if (parameterValue == null) {
+            parameterValue = defaultValue;
+        }
         return parameterValue;
-    }
-    private Object getRequestParameter(String parameterName) {
-        return this.getHashMapIn().getOrDefault(parameterName, null);
     }
 
     // -- ok, err -------------------------------------------------------------

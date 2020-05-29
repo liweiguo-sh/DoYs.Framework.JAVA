@@ -1,9 +1,9 @@
 package com.doys.framework.core.ex;
-public class Unexpected extends Exception {
-    public Unexpected() {
+public class UnexpectedException extends Exception {
+    public UnexpectedException() {
         super("系统遇到非预期的意外错误，请检查。");
     }
-    public Unexpected(String strException) {
+    public UnexpectedException(String strException) {
         super("系统在 " + strException + " 时遇到非预期的意外错误，请检查。");
     }
 }

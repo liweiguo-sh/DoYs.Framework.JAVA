@@ -1,6 +1,9 @@
 #development environment
 server:
   port: 9988
+  servlet:
+    session:
+      timeout: PT360M
 spring:
   devtools:
     restart:

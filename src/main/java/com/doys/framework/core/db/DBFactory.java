@@ -1,4 +1,5 @@
 package com.doys.framework.core.db;
+import com.doys.framework.core.ex.SessionTimeoutException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -60,8 +61,18 @@ public class DBFactory extends JdbcTemplate {
         return super.queryForRowSet(replaceSQL(sql), args);
     }
     public int exec(String sql, Object... args) throws Exception {
-        return super.update(replaceSQL(sql), args);
+        sql = replaceSQL(sql);
+        writeSqlLog(sql, args);
+
+        return super.update(sql, args);
     }
+    private void writeSqlLog(String sql, Object... args) {
+        for (int i = 0; i < args.length; i++) {
+            sql = sql.replaceFirst("\\?", args[i].toString());
+        }
+        logger.info(sql);
+    }
+
     @Deprecated
     @Override
     public void execute(final String sql) throws DataAccessException {
@@ -73,7 +84,7 @@ public class DBFactory extends JdbcTemplate {
         try {
             return (int) ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession().getAttribute("tenantId");
         } catch (NullPointerException e) {
-            throw new Exception("会话已超时，请重新登录。");
+            throw new SessionTimeoutException();
         } catch (Exception e) {
             throw e;
         }

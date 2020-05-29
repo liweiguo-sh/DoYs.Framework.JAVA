@@ -35,7 +35,6 @@ public class Menu extends BaseController {
 
             ok("dtbSystem", rsSystem);
         } catch (Exception e) {
-            e.printStackTrace();
             return ResultErr(e);
         } finally {
         }

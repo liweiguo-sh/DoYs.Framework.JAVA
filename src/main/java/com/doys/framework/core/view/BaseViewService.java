@@ -17,30 +17,30 @@ import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
 import java.util.HashMap;
 public class BaseViewService extends BaseService {
-    public static SqlRowSet getView(DBFactory jtSys, String viewPk) throws Exception {
+    public static SqlRowSet getView(DBFactory dbMaster, String viewPk) throws Exception {
         String sql = "SELECT * FROM sys_view WHERE pk = ?";
-        return jtSys.getRowSet(sql, viewPk);
+        return dbMaster.getRowSet(sql, viewPk);
     }
     public static SqlRowSet getViewField(DBFactory dbSys, String viewPk) throws Exception {
         String sql = "SELECT  name, text, fixed, align, width, data_source_type, data_source, sequence "
-                + "FROM sys_view_field "
-                + "WHERE view_pk = ? AND sequence <> 0 "
-                + "ORDER BY sequence";
+            + "FROM sys_view_field "
+            + "WHERE view_pk = ? AND sequence <> 0 "
+            + "ORDER BY sequence";
         return dbSys.getRowSet(sql, viewPk);
     }
 
     public static SqlRowSet getFlowNode(DBFactory jtSys, String flowPks) throws Exception {
         String sql = "SELECT f.pk flow_pk, f.name flow_name, n.node_pk, n.name node_name, n.filter, n.group_pks, n.user_pks, allow_addnew " +
-                "FROM sys_flow f INNER JOIN sys_flow_node n ON f.pk = n.flow_pk " +
-                "WHERE f.pk IN (" + flowPks + ") " +
-                "ORDER BY f.level, f.sequence, n.sequence";
+            "FROM sys_flow f INNER JOIN sys_flow_node n ON f.pk = n.flow_pk " +
+            "WHERE f.pk IN (" + flowPks + ") " +
+            "ORDER BY f.level, f.sequence, n.sequence";
         return jtSys.getRowSet(sql);
     }
     public static SqlRowSet getFlowButton(DBFactory jtSys, String flowPks) throws Exception {
         String sql = "SELECT flow_pk, button_pk, b.name, b.icon, assert_js, action_type, action_do, action_remove, group_pks, user_pks " +
-                "FROM sys_flow f INNER JOIN sys_flow_button b ON f.pk = b.flow_pk " +
-                "WHERE f.pk IN (" + flowPks + ") AND flag_disabled = 0 " +
-                "ORDER BY f.level, f.sequence, b.sequence";
+            "FROM sys_flow f INNER JOIN sys_flow_button b ON f.pk = b.flow_pk " +
+            "WHERE f.pk IN (" + flowPks + ") AND flag_disabled = 0 " +
+            "ORDER BY f.level, f.sequence, b.sequence";
         return jtSys.getRowSet(sql);
     }
     public static SqlRowSet getFlowButton(DBFactory jtSys, String flowPk, String buttonPk) throws Exception {
@@ -98,7 +98,7 @@ public class BaseViewService extends BaseService {
 
         String columnName, dataSourceType, dataSource;
         // ------------------------------------------------
-        rsViewField.first();
+        rsViewField.beforeFirst();
         while (rsViewField.next()) {
             columnName = rsViewField.getString("name");
             dataSourceType = UtilString.KillNull(rsViewField.getString("data_source_type"));

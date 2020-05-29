@@ -37,7 +37,7 @@ public class ViewService extends BaseService {
             }
 
             DBSchema dbs = new DBSchema(dbMaster);
-            if (dbs.refreshDBStruct(databasePk, tablePk) == false) {
+            if (!dbs.refreshDBStruct(databasePk, tablePk)) {
                 throw new Exception("刷新基础表失败，请检查。");
             }
 
@@ -97,8 +97,8 @@ public class ViewService extends BaseService {
                     dtbView_Field.AddRow(dr);
                 }
             }
-            // -- 3.根据视图SQL执行结果，将非基础表字段添加到ST_VIEW_FIELD ---
 
+            // -- 3.根据视图SQL执行结果，将非基础表字段添加到ST_VIEW_FIELD ---
             sql = "SELECT * FROM (" + sqlViewDS + ") t WHERE 1 = 0";
             rs = dbMaster.getRowSet(sql);
             rsmd = rs.getMetaData();
@@ -153,6 +153,9 @@ public class ViewService extends BaseService {
                             dr.setDataCell("align", "left");
                         }
                     }
+                }
+                if (dr.DataCell("sequence", true).equals("")) {
+                    dr.setDataCell("sequence", 1);
                 }
 
                 if (nFind < 0) {

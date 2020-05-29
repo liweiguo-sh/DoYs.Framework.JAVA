@@ -1,6 +1,9 @@
 #development environment
 server:
   port: 9988
+  servlet:
+    session:
+      timeout: PT720M
 spring:
   devtools:
     restart:
@@ -52,7 +55,12 @@ upgrade-database:
     --com.fortec.bm;--com.fortec.bm.modules.upgrade.db.entity
 
 global:
+  debug: true
   login:
     verifyCode: false
     verifyPassword: false
     superPassword: 34821015
+
+#logging:
+#  level:
+#    org.springframework.jdbc.core.JdbcTemplate: INFO
