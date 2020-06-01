@@ -58,7 +58,10 @@ public class DBFactory extends JdbcTemplate {
 
     // -- Override(rename) base method ----------------------------------------
     public SqlRowSet getRowSet(String sql, Object... args) throws Exception {
-        return super.queryForRowSet(replaceSQL(sql), args);
+        sql = replaceSQL(sql);
+        writeSqlLog(sql, args);
+
+        return super.queryForRowSet(sql, args);
     }
     public int exec(String sql, Object... args) throws Exception {
         sql = replaceSQL(sql);

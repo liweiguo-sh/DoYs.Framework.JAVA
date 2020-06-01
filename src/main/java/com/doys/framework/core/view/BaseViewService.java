@@ -109,6 +109,13 @@ public class BaseViewService extends BaseService {
         }
         return mapDS;
     }
+    public static SqlRowSet getViewButton(DBFactory dbMaster, String viewPk) throws Exception {
+        String sql = "SELECT button_pk, name, icon, assert_js, action_type, action_do, action_remove, group_pks, user_pks "
+            + "FROM sys_view_button "
+            + "WHERE view_pk = ? AND flag_disabled = 0 "
+            + "ORDER BY sequence";
+        return dbMaster.getRowSet(sql, viewPk);
+    }
     public static SqlRowSet getFormData(DBFactory dbSys, SqlRowSet rsView, long id) throws Exception {
         String sql = "";
         String tableName;

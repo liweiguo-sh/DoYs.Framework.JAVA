@@ -86,7 +86,7 @@ public class BaseViewController extends BaseController {
         String viewPk = req.get("viewPk");
         String flowPks = req.get("flowPks");
 
-        SqlRowSet rsView, rsViewField, rsFlowButton;
+        SqlRowSet rsView, rsViewField, rsFlowButton, rsViewButton;
         // ------------------------------------------------
         try {
             //rsView = BaseViewService.getView(jtMaster, viewPk);
@@ -103,6 +103,9 @@ public class BaseViewController extends BaseController {
                 rsFlowButton = BaseViewService.getFlowButton(dbMaster, flowPks);
                 ok("dtbFlowButton", rsFlowButton);
             }
+
+            rsViewButton = BaseViewService.getViewButton(dbMaster, viewPk);
+            ok("dtbViewButton", rsViewButton);
         } catch (Exception e) {
             return ResultErr(e);
         }
