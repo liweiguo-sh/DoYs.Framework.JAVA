@@ -19,11 +19,11 @@ public class ProductParaView extends BaseViewController {
             sql = "INSERT INTO ..base_product_pn_para (product_id, product_para_id, product_pn_id, para_code, para_name, para_value) "
                 + "SELECT product_id, ? product_para_id, id product_pn_id, ? para_code, ? para_name, ? para_value "
                 + "FROM ..base_product_pn WHERE product_id = ?";
-            dbMaster.exec(sql, id, code, name, defaultValue, productId);
+            dbSys.exec(sql, id, code, name, defaultValue, productId);
         }
         else {
             sql = "UPDATE ..base_product_pn_para SET para_code = ?, para_name = ? WHERE product_para_id = ?";
-            dbMaster.exec(sql, code, name, id);
+            dbSys.exec(sql, code, name, id);
         }
 
         return true;
@@ -32,7 +32,7 @@ public class ProductParaView extends BaseViewController {
     @Override
     protected boolean AfterDelete(long id) throws Exception {
         String sql = "DELETE FROM ..base_product_pn_para WHERE product_para_id = ?";
-        dbMaster.exec(sql, id);
+        dbSys.exec(sql, id);
 
         return true;
     }

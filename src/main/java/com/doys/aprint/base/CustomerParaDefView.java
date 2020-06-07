@@ -16,7 +16,7 @@ public class CustomerParaDefView extends BaseViewController {
         sql = "INSERT INTO ..base_customer_para (customer_id, para_code, para_name, para_value) "
             + "SELECT id customer_id, ? para_code, ? para_name, ? para_value FROM ..base_customer "
             + "WHERE id NOT IN (SELECT customer_id FROM ..base_customer_para WHERE para_code = ?)";
-        dbMaster.exec(sql, code, name, defaultValue, code);
+        dbSys.exec(sql, code, name, defaultValue, code);
 
         return true;
     }
@@ -26,7 +26,7 @@ public class CustomerParaDefView extends BaseViewController {
         String code = in("code");
 
         sql = "DELETE FROM ..base_customer_para WHERE para_code = ?";
-        dbMaster.exec(sql, code);
+        dbSys.exec(sql, code);
 
         return true;
     }

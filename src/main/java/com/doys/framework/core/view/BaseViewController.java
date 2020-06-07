@@ -6,6 +6,7 @@
  * 通用视图控制类, 用于通用视图
  *****************************************************************************/
 package com.doys.framework.core.view;
+import com.doys.framework.common.UtilString;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
@@ -27,7 +28,7 @@ import java.util.Map;
 @RequestMapping("/core/base_view")
 public class BaseViewController extends BaseController {
     @Autowired
-    protected DBFactory dbMaster;
+    protected DBFactory dbSys;
     @Autowired
     DataSourceTransactionManager dstm;
     @Autowired
@@ -38,24 +39,53 @@ public class BaseViewController extends BaseController {
     private RestResult getViewSchema() {
         String viewPk = in("viewPk");
         String flowPks = in("flowPks");
+        String treePk;
 
-        SqlRowSet rsView, rsViewField, rsFlowNode;
+        SqlRowSet rsView, rsViewField, rsFlowNode, rsTree, rsTreeLevel;
         // ------------------------------------------------
         try {
-            rsView = BaseViewService.getView(dbMaster, viewPk);
+            rsView = BaseViewService.getView(dbSys, viewPk);
             ok("dtbView", rsView);
-            rsViewField = BaseViewService.getViewField(dbMaster, viewPk);
+            rsViewField = BaseViewService.getViewField(dbSys, viewPk);
             ok("dtbViewField", rsViewField);
 
             if (!flowPks.equals("")) {
-                rsFlowNode = BaseViewService.getFlowNode(dbMaster, flowPks);
+                rsFlowNode = BaseViewService.getFlowNode(dbSys, flowPks);
                 ok("dtbFlowNode", rsFlowNode);
+            }
+
+            // -- 导航树 --
+            rsView.first();
+            treePk = UtilString.KillNull(rsView.getString("tree_pk"));
+            if (!treePk.equals("")) {
+                rsTree = BaseViewService.getTree(dbSys, treePk);
+                ok("dtbTree", rsTree);
+                rsTreeLevel = BaseViewService.getTreeLevel(dbSys, treePk);
+                ok("dtbTreeLevel", rsTreeLevel);
             }
         } catch (Exception e) {
             return ResultErr(e);
         }
         return ResultOk();
     }
+    @PostMapping("/getTreeNode")
+    private RestResult getTreeNode() {
+        int nodeLevel = inInt("nodeLevel");
+
+        String treePk = in("treePk");
+        String nodeValue = in("nodeValue");
+
+        SqlRowSet rsTreeNode;
+        // ------------------------------------------------
+        try {
+            rsTreeNode = BaseViewService.getTreeNode(dbSys, treePk, nodeLevel, nodeValue);
+            ok("dtbTreeNode", rsTreeNode);
+        } catch (Exception e) {
+            return ResultErr(e);
+        }
+        return ResultOk();
+    }
+
     @PostMapping("/getViewData")
     private RestResult getViewData() {
         int pageNum = inInt("pageNum");
@@ -67,8 +97,8 @@ public class BaseViewController extends BaseController {
         HashMap<String, Long> mapRef = (pageNum == 0 ? new HashMap<>() : null);
         // ------------------------------------------------
         try {
-            rsView = BaseViewService.getView(dbMaster, viewPk);
-            rsViewData = BaseViewService.getViewData(dbMaster, rsView, pageNum, sqlFilter, mapRef);
+            rsView = BaseViewService.getView(dbSys, viewPk);
+            rsViewData = BaseViewService.getViewData(dbSys, rsView, pageNum, sqlFilter, mapRef);
             ok("dtbViewData", rsViewData);
 
             if (pageNum == 0) {
@@ -91,20 +121,20 @@ public class BaseViewController extends BaseController {
         try {
             //rsView = BaseViewService.getView(jtMaster, viewPk);
             //ok("dtbView", rsView);
-            rsViewField = BaseViewService.getViewField(dbMaster, viewPk);
+            rsViewField = BaseViewService.getViewField(dbSys, viewPk);
             //ok("dtbViewField", rsViewField);
 
-            HashMap<String, SqlRowSet> mapDS = BaseViewService.getViewDS(dbMaster, rsViewField);
+            HashMap<String, SqlRowSet> mapDS = BaseViewService.getViewDS(dbSys, rsViewField);
             for (Map.Entry<String, SqlRowSet> entry : mapDS.entrySet()) {
                 ok("dtbCDS_" + entry.getKey(), entry.getValue());
             }
 
             if (!flowPks.equals("")) {
-                rsFlowButton = BaseViewService.getFlowButton(dbMaster, flowPks);
+                rsFlowButton = BaseViewService.getFlowButton(dbSys, flowPks);
                 ok("dtbFlowButton", rsFlowButton);
             }
 
-            rsViewButton = BaseViewService.getViewButton(dbMaster, viewPk);
+            rsViewButton = BaseViewService.getViewButton(dbSys, viewPk);
             ok("dtbViewButton", rsViewButton);
         } catch (Exception e) {
             return ResultErr(e);
@@ -120,8 +150,8 @@ public class BaseViewController extends BaseController {
         SqlRowSet rsView, rsFormData;
         // ------------------------------------------------
         try {
-            rsView = BaseViewService.getView(dbMaster, viewPk);
-            rsFormData = BaseViewService.getFormData(dbMaster, rsView, id);
+            rsView = BaseViewService.getView(dbSys, viewPk);
+            rsFormData = BaseViewService.getFormData(dbSys, rsView, id);
             ok("dtbFormData", rsFormData);
         } catch (Exception e) {
             return ResultErr(e);
@@ -145,7 +175,7 @@ public class BaseViewController extends BaseController {
         // ------------------------------------------------
         try {
             // -- 1. pretreatment --
-            rsView = BaseViewService.getView(dbMaster, viewPk);
+            rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
             tableName = rsView.getString("table_name");
 
@@ -156,10 +186,10 @@ public class BaseViewController extends BaseController {
             }
             // -- 3.2. save --
             if (blAddnew) {
-                id = BaseViewService.insert(dbMaster, tableName, form);
+                id = BaseViewService.insert(dbSys, tableName, form);
             }
             else {
-                BaseViewService.update(dbMaster, tableName, form);
+                BaseViewService.update(dbSys, tableName, form);
             }
             // -- 2.3 afterSave --
             if (!AfterSave(blAddnew, id)) {
@@ -168,9 +198,9 @@ public class BaseViewController extends BaseController {
             dstm.commit(tStatus);
 
             // -- 9. 返回当前行更新后的基础表数据和视图数据 --
-            rsFormData = BaseViewService.getFormData(dbMaster, rsView, id);
+            rsFormData = BaseViewService.getFormData(dbSys, rsView, id);
             ok("dtbFormData", rsFormData);
-            rsViewData = BaseViewService.getViewDataOne(dbMaster, rsView, id);
+            rsViewData = BaseViewService.getViewDataOne(dbSys, rsView, id);
             ok("dtbViewData", rsViewData);
         } catch (Exception e) {
             return ResultErr(e);
@@ -191,7 +221,7 @@ public class BaseViewController extends BaseController {
         TransactionStatus tStatus = null;
         // ------------------------------------------------
         try {
-            rsView = BaseViewService.getView(dbMaster, viewPk);
+            rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
             tableName = rsView.getString("table_name");
 
@@ -201,7 +231,7 @@ public class BaseViewController extends BaseController {
                 return ResultErr();
             }
             // -- 2.2 delete --
-            BaseViewService.delete(dbMaster, tableName, id);
+            BaseViewService.delete(dbSys, tableName, id);
             // -- 2.3 afterDelete --
             if (!AfterDelete(id)) {
                 return ResultErr();
@@ -209,7 +239,7 @@ public class BaseViewController extends BaseController {
             dstm.commit(tStatus);
 
             if (idNext > 0) {
-                rsFormData = BaseViewService.getFormData(dbMaster, rsView, idNext);
+                rsFormData = BaseViewService.getFormData(dbSys, rsView, idNext);
                 ok("dtbFormData", rsFormData);
             }
         } catch (Exception e) {
@@ -234,11 +264,11 @@ public class BaseViewController extends BaseController {
         TransactionStatus tStatus = null;
         // ------------------------------------------------
         try {
-            rsView = BaseViewService.getView(dbMaster, viewPk);
+            rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
             tableName = rsView.getString("table_name");
 
-            rsFlowButton = BaseViewService.getFlowButton(dbMaster, flowPk, buttonPk);
+            rsFlowButton = BaseViewService.getFlowButton(dbSys, flowPk, buttonPk);
 
             // -- 2.1 beforeSave --
             tStatus = dstm.getTransaction(tDef);
@@ -246,7 +276,7 @@ public class BaseViewController extends BaseController {
                 return ResultErr();
             }
             // -- 2.2 doFlow --
-            BaseViewService.doFlow(dbMaster, tableName, id, rsFlowButton);
+            BaseViewService.doFlow(dbSys, tableName, id, rsFlowButton);
             // -- 2.3 afterDoFlow --
             if (!AfterFlowClick(id, rsFlowButton)) {
                 return ResultErr();
@@ -257,7 +287,7 @@ public class BaseViewController extends BaseController {
             if (idNext == 0) {
                 idNext = id;
             }
-            rsFormData = BaseViewService.getFormData(dbMaster, rsView, idNext);
+            rsFormData = BaseViewService.getFormData(dbSys, rsView, idNext);
             ok("dtbFormData", rsFormData);
         } catch (Exception e) {
             return ResultErr(e);

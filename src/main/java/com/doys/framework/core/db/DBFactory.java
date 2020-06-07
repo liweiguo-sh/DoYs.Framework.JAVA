@@ -7,8 +7,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.sql.DataSource;
+import java.util.Map;
 import java.util.regex.Pattern;
 public class DBFactory extends JdbcTemplate {
+    private static String prefix;
     private static String regInject = "(\\b(delete|update|insert|drop|truncate|alter|exec|execute)\\b)";
     private static Pattern sqlPattern = Pattern.compile(regInject, Pattern.CASE_INSENSITIVE);
 
@@ -31,49 +33,79 @@ public class DBFactory extends JdbcTemplate {
         return _getLong(sql);
     }
     private long _getLong(String sql) throws Exception {
-        String valueString = _getValue(sql, null, "");
+        String valueString = _getValue(sql, "");
         return Long.parseLong(valueString);
     }
 
     public String getValue(String sql) throws Exception {
         return _getValue(sql, null, "");
     }
-    public String getValue(String sql, Object[] parameters) throws Exception {
-        return _getValue(sql, parameters, "");
+    public String getValue(String sql, Object... args) throws Exception {
+        return _getValue(sql, "", args);
     }
-    public String getValue(String sql, Object[] parameters, String defaultValue) throws Exception {
-        return _getValue(sql, parameters, defaultValue);
+    public String getValue(String sql, String defaultValue, Object... args) throws Exception {
+        return _getValue(sql, defaultValue, args);
     }
-    private String _getValue(String sql, Object[] parameters, String defaultValue) throws Exception {
-        String returnString = null;
-        SqlRowSet rs = this.queryForRowSet(replaceSQL(sql), parameters);
-        if (rs.next()) {
-            returnString = rs.getString(1);
-            if (returnString == null) {
-                returnString = defaultValue;
+    private String _getValue(String sql, String defaultValue, Object... args) throws Exception {
+        Object objValue = _getObject(sql, args);
+        if (objValue == null) {
+            return defaultValue;
+        }
+        else {
+            return objValue.toString();
+        }
+    }
+
+    private Object _getObject(String sql, Object... args) throws Exception {
+        Map<String, Object> map;
+
+        sql = replaceSQL(sql);
+        if (args.length > 0) {
+            map = this.queryForMap(sql, args);
+        }
+        else {
+            map = this.queryForMap(sql);
+        }
+
+        if (map.size() == 1) {
+            for (Object value : map.values()) {
+                return value;
             }
         }
-        return returnString;
+        return null;
     }
 
     // -- Override(rename) base method ----------------------------------------
     public SqlRowSet getRowSet(String sql, Object... args) throws Exception {
         sql = replaceSQL(sql);
-        writeSqlLog(sql, args);
+        writeSqlLog(-9, sql, args);
 
         return super.queryForRowSet(sql, args);
     }
     public int exec(String sql, Object... args) throws Exception {
-        sql = replaceSQL(sql);
-        writeSqlLog(sql, args);
+        try {
+            sql = replaceSQL(sql);
+            int result = super.update(sql, args);
+            writeSqlLog(result, sql, args);
+
+        } catch (Exception e) {
+            writeSqlLog(-1, sql, args);
+            throw e;
+        }
 
         return super.update(sql, args);
     }
-    private void writeSqlLog(String sql, Object... args) {
+    private void writeSqlLog(int result, String sql, Object... args) {
         for (int i = 0; i < args.length; i++) {
-            sql = sql.replaceFirst("\\?", args[i].toString());
+            sql = sql.replaceFirst("\\?", "'" + args[i].toString() + "'");
         }
-        logger.info(sql);
+        if (result >= -1) {
+            // -- 不输出记录数 --
+            logger.info(result + " => " + sql);
+        }
+        else {
+            logger.info(sql);
+        }
     }
 
     @Deprecated
@@ -92,12 +124,15 @@ public class DBFactory extends JdbcTemplate {
             throw e;
         }
     }
-    public static String getMasterDbName() throws Exception {
-        // -- 默认主数据库前缀为 db_，如将来确有需求，再改为从sys_database表中取 --
-        return "db_" + getTenantId();
+    public String getTenantDbName() throws Exception {
+        if (prefix == null) {
+            Map<String, Object> map = this.queryForMap("SELECT name FROM sys_database WHERE pk = 'prefix'");
+            prefix = (String) map.get("name");
+        }
+        return prefix + getTenantId();
     }
-    public static String replaceSQL(String sql) throws Exception {
-        return sql.replaceAll("\\.\\.", getMasterDbName() + ".");
+    public String replaceSQL(String sql) throws Exception {
+        return sql.replaceAll("\\.\\.", this.getTenantDbName() + ".");
     }
 
     // -- Check SQL injection -------------------------------------------------

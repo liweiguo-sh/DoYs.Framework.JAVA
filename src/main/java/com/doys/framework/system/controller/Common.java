@@ -8,29 +8,27 @@
 package com.doys.framework.system.controller;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.db.DBFactory;
-import com.doys.framework.core.db.DBSchema;
 import com.doys.framework.core.entity.RestResult;
+import com.doys.framework.system.service.CommonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import java.util.ArrayList;
 
 @RestController
-@RequestMapping("/system/database")
-public class Database extends BaseController {
+@RequestMapping("/system/common")
+public class Common extends BaseController {
     @Autowired
     DBFactory dbSys;
 
-    @PostMapping("/refresh")
-    public RestResult refreshDBStruct(@RequestBody Map<String, String> req) {
-        String para1 = req.get("para1");
+    @PostMapping("/clearGarbageData")
+    public RestResult clearGarbageData() {
+        ArrayList<String> list = new ArrayList<>();
         // ------------------------------------------------
         try {
-            DBSchema schema = new DBSchema(dbSys);
-            schema.refreshDBStruct("prefix", "");
+            CommonService.clearGarbageData(dbSys);
         } catch (Exception e) {
             return ResultErr(e);
         }

@@ -6,24 +6,29 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 
 @Configuration
 public class DataSourceConfig {
-    //region -- 默认数据源：aprint --
+    //region -- 默认数据源：sys --
     @Primary
-    @Bean(name = "aprintDataSourceProperties")
+    @Bean(name = "sysDataSourceProperties")
     @ConfigurationProperties(prefix = "spring.datasource")
-    public DataSourceProperties aprintDataSourceProperties() {
+    public DataSourceProperties sysDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Primary
-    @Bean(name = "aprintDataSource")
-    public DataSource aprintDataSource() {
-        return aprintDataSourceProperties().initializeDataSourceBuilder().build();
+    @Bean(name = "sysDataSource")
+    public DataSource sysDataSource() {
+        return sysDataSourceProperties().initializeDataSourceBuilder().build();
+    }
+
+    @Primary
+    @Bean(name = "sysDBFactory")
+    public DBFactory sysDBFactory(@Qualifier("sysDataSource") DataSource dataSource) {
+        return new DBFactory(dataSource);
     }
 
     /*
@@ -33,30 +38,30 @@ public class DataSourceConfig {
         return new JdbcTemplate(dataSource);
     }
     */
-
-    @Primary
-    @Bean(name = "aprintDBFactory")
-    public DBFactory aprintDBFactory(@Qualifier("aprintDataSource") DataSource dataSource) {
-        return new DBFactory(dataSource);
-    }
-
     //endregion
 
-    //region -- 数据源：db2 --
-    @Bean(name = "db2DataSourceProperties")
-    @ConfigurationProperties(prefix = "spring.datasource.db2")
-    public DataSourceProperties db2DataSourceProperties() {
+    //region -- 数据源：bus --
+    @Bean(name = "busDataSourceProperties")
+    @ConfigurationProperties(prefix = "spring.datasource.bus")
+    public DataSourceProperties busDataSourceProperties() {
         return new DataSourceProperties();
     }
 
-    @Bean(name = "db2DataSource")
+    @Bean(name = "busDataSource")
     public DataSource db2DataSource() {
-        return db2DataSourceProperties().initializeDataSourceBuilder().build();
+        return busDataSourceProperties().initializeDataSourceBuilder().build();
     }
 
-    @Bean(name = "db2JdbcTemplate")
-    public JdbcTemplate db2JdbcTemplate(@Qualifier("db2DataSource") DataSource dataSource) {
+    @Bean(name = "busDBFactory")
+    public DBFactory busDBFactory(@Qualifier("busDataSource") DataSource dataSource) {
+        return new DBFactory(dataSource);
+    }
+
+    /*
+    @Bean(name = "busJdbcTemplate")
+    public JdbcTemplate db2JdbcTemplate(@Qualifier("busDataSource") DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
+    */
     //endregion
 }

@@ -3,6 +3,7 @@
  */
 package com.doys.example.db;
 import com.doys.framework.common.UtilDate;
+import com.doys.framework.core.db.DBFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +23,11 @@ public class MultiDataSource {
     private JdbcTemplate jdbcAprint;
     @Autowired
     // TODO: 研究一下
-    //@Qualifier("aprintJdbcTemplet")
-    @Qualifier("aprintDBFactory")
-    private JdbcTemplate jdbcDb1;
+    @Qualifier("sysDBFactory")
+    private DBFactory jdbcDb1;
     @Autowired
-    @Qualifier("db2JdbcTemplate")
-    private JdbcTemplate jdbcDb2;
+    @Qualifier("busDBFactory")
+    private DBFactory jdbcDb2;
     //endregion
     @RequestMapping("/")
     public String HelloWorld() {

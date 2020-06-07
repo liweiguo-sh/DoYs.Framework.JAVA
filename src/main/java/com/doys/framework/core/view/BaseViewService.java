@@ -29,23 +29,41 @@ public class BaseViewService extends BaseService {
         return dbSys.getRowSet(sql, viewPk);
     }
 
-    public static SqlRowSet getFlowNode(DBFactory jtSys, String flowPks) throws Exception {
+    public static SqlRowSet getFlowNode(DBFactory dbSys, String flowPks) throws Exception {
         String sql = "SELECT f.pk flow_pk, f.name flow_name, n.node_pk, n.name node_name, n.filter, n.group_pks, n.user_pks, allow_addnew " +
             "FROM sys_flow f INNER JOIN sys_flow_node n ON f.pk = n.flow_pk " +
             "WHERE f.pk IN (" + flowPks + ") " +
             "ORDER BY f.level, f.sequence, n.sequence";
-        return jtSys.getRowSet(sql);
+        return dbSys.getRowSet(sql);
     }
-    public static SqlRowSet getFlowButton(DBFactory jtSys, String flowPks) throws Exception {
+    public static SqlRowSet getFlowButton(DBFactory dbSys, String flowPks) throws Exception {
         String sql = "SELECT flow_pk, button_pk, b.name, b.icon, assert_js, action_type, action_do, action_remove, group_pks, user_pks " +
             "FROM sys_flow f INNER JOIN sys_flow_button b ON f.pk = b.flow_pk " +
             "WHERE f.pk IN (" + flowPks + ") AND flag_disabled = 0 " +
             "ORDER BY f.level, f.sequence, b.sequence";
-        return jtSys.getRowSet(sql);
+        return dbSys.getRowSet(sql);
     }
-    public static SqlRowSet getFlowButton(DBFactory jtSys, String flowPk, String buttonPk) throws Exception {
+    public static SqlRowSet getFlowButton(DBFactory dbSys, String flowPk, String buttonPk) throws Exception {
         String sql = "SELECT * FROM sys_flow_button WHERE flow_pk = ? AND button_pk = ?";
-        return jtSys.getRowSet(sql, flowPk, buttonPk);
+        return dbSys.getRowSet(sql, flowPk, buttonPk);
+    }
+
+    public static SqlRowSet getTree(DBFactory dbSys, String treePk) throws Exception {
+        String sql = "SELECT * FROM sys_tree WHERE pk = ?";
+        return dbSys.getRowSet(sql, treePk);
+    }
+    public static SqlRowSet getTreeLevel(DBFactory dbSys, String treePk) throws Exception {
+        String sql = "SELECT * FROM sys_tree_level WHERE tree_pk = ?";
+        return dbSys.getRowSet(sql, treePk);
+    }
+    public static SqlRowSet getTreeNode(DBFactory dbSys, String treePk, int nodeLevel, String nodeValue) throws Exception {
+        String sql, sqlData;
+
+        sql = "SELECT sql_data FROM sys_tree_level WHERE tree_pk = ? AND level = ?";
+        sqlData = dbSys.getValue(sql, "", treePk, nodeLevel);
+
+        sql = sqlData.replaceAll("\\{node_value}", nodeValue);
+        return dbSys.getRowSet(sql);
     }
 
     public static SqlRowSet getViewData(DBFactory dbSys, SqlRowSet rsView, int pageNum, String sqlFilter, HashMap map) throws Exception {

@@ -27,8 +27,11 @@ public class DBSchema {
             sql = "SELECT * FROM sys_database WHERE pk = ?";
             rs = dbMaster.getRowSet(sql, new Object[] { databasePk });
             if (rs.next()) {
-                databaseName = rs.getString("pk") + dbMaster.getTenantId();
                 databaseType = rs.getString("type");
+                databaseName = rs.getString("name");
+                if (databasePk.equalsIgnoreCase("prefix")) {
+                    databaseName += dbMaster.getTenantId();
+                }
             }
             else {
                 throw new Exception("没有找到逻辑数据库名称为 " + databasePk + " 的记录, 请检查.");
@@ -60,7 +63,7 @@ public class DBSchema {
         DataTable.DataRow drNew = null;
         // ------------------------------------------------
         sql = "SELECT CONCAT('" + databasePk + "', '.', table_name) AS pk, table_name name, CASE table_type WHEN 'BASE TABLE' THEN 'U' ELSE 'V' END AS type "
-                + "FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '" + databaseName + "' AND (table_type = 'BASE TABLE' OR table_type = 'VIEW')";
+            + "FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '" + databaseName + "' AND (table_type = 'BASE TABLE' OR table_type = 'VIEW')";
         if (!tableName.equals("")) {
             sql += "AND table_name IN ('" + tableName.replaceAll(",", "','") + "') ";
         }
@@ -236,10 +239,10 @@ public class DBSchema {
         dbMaster.exec(sql);
         // ------------------------------------------------
         sql = "INSERT INTO sys..ST_INDEX_FIELD SELECT CONCAT('" + databaseKey
-                + ".', UPPER(s.table_name)) AS table_pk, index_name, column_name AS field_name, CASE non_unique WHEN 1 THEN 0 ELSE 1 END AS is_unique, CASE constraint_type WHEN 'PRIMARY KEY' THEN 1 ELSE 2 END AS index_type "
-                + "FROM INFORMATION_SCHEMA.STATISTICS s LEFT JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc ON s.table_schema = tc.table_schema  AND s.table_name = tc.table_name AND s.index_name = tc.constraint_name "
-                + "WHERE s.table_schema = '" + databaseName + "' " + (tableName.equals("") ? "" : "AND s.table_name = '" + tableName + "' ")
-                + "ORDER BY table_pk, index_type, index_name";
+            + ".', UPPER(s.table_name)) AS table_pk, index_name, column_name AS field_name, CASE non_unique WHEN 1 THEN 0 ELSE 1 END AS is_unique, CASE constraint_type WHEN 'PRIMARY KEY' THEN 1 ELSE 2 END AS index_type "
+            + "FROM INFORMATION_SCHEMA.STATISTICS s LEFT JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc ON s.table_schema = tc.table_schema  AND s.table_name = tc.table_name AND s.index_name = tc.constraint_name "
+            + "WHERE s.table_schema = '" + databaseName + "' " + (tableName.equals("") ? "" : "AND s.table_name = '" + tableName + "' ")
+            + "ORDER BY table_pk, index_type, index_name";
         dbMaster.exec(sql);
         // ------------------------------------------------
         return true;

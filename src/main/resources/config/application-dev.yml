@@ -2,8 +2,10 @@
 server:
   port: 9988
   servlet:
+    context-path: /DoYsSV
     session:
-      timeout: PT720M
+      timeout: PT360M
+
 spring:
   devtools:
     restart:

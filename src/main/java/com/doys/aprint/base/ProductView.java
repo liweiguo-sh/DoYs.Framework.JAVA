@@ -11,13 +11,13 @@ public class ProductView extends BaseViewController {
         String sql;
 
         sql = "DELETE FROM ..base_product_pn WHERE product_id = ?";
-        dbMaster.exec(sql, id);
+        dbSys.exec(sql, id);
 
         sql = "DELETE FROM ..base_product_para WHERE product_id = ?";
-        dbMaster.exec(sql, id);
+        dbSys.exec(sql, id);
 
         sql = "DELETE FROM ..base_product_pn_para WHERE product_id = ?";
-        dbMaster.exec(sql, id);
+        dbSys.exec(sql, id);
 
         return true;
     }

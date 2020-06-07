@@ -13,13 +13,13 @@ public class ProductPnView extends BaseViewController {
         String sql;
         // ------------------------------------------------
         sql = "DELETE FROM ..base_product_pn_para WHERE product_id <> ?";
-        dbMaster.exec(sql, productId);
+        dbSys.exec(sql, productId);
 
         sql = "INSERT INTO ..base_product_pn_para (product_id, product_para_id, product_pn_id, para_code, para_name, para_value) "
             + "SELECT product_id, id product_para_id, ? product_pn_id, code para_code, name para_name, default_value para_value "
             + "FROM ..base_product_para "
             + "WHERE product_id = ? AND code NOT IN (SELECT para_code FROM ..base_product_pn_para WHERE product_pn_id = ?)";
-        dbMaster.exec(sql, id, productId, id);
+        dbSys.exec(sql, id, productId, id);
 
         return true;
     }
@@ -27,7 +27,7 @@ public class ProductPnView extends BaseViewController {
     @Override
     protected boolean AfterDelete(long id) throws Exception {
         String sql = "DELETE FROM ..base_product_pn_para WHERE product_pn_id = ?";
-        dbMaster.exec(sql, id);
+        dbSys.exec(sql, id);
 
         return true;
     }
