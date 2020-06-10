@@ -2,7 +2,7 @@
  * 数据库连接池测试
  */
 package com.doys.example.db;
-import com.doys.framework.common.UtilDate;
+import com.doys.framework.util.UtilDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -6,10 +6,10 @@
  * 通用视图控制类, 用于通用视图
  *****************************************************************************/
 package com.doys.framework.core.view;
-import com.doys.framework.common.UtilString;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
+import com.doys.framework.util.UtilString;
 import com.google.gson.internal.LinkedTreeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -46,7 +46,7 @@ public class BaseViewController extends BaseController {
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
             ok("dtbView", rsView);
-            rsViewField = BaseViewService.getViewField(dbSys, viewPk);
+            rsViewField = getViewField(viewPk);
             ok("dtbViewField", rsViewField);
 
             if (!flowPks.equals("")) {
@@ -92,13 +92,16 @@ public class BaseViewController extends BaseController {
 
         String viewPk = in("viewPk");
         String sqlFilter = in("filter");
+        String sqlUserDefDS;
 
         SqlRowSet rsView, rsViewData;
         HashMap<String, Long> mapRef = (pageNum == 0 ? new HashMap<>() : null);
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
-            rsViewData = BaseViewService.getViewData(dbSys, rsView, pageNum, sqlFilter, mapRef);
+
+            sqlUserDefDS = getUseDefDataSource();
+            rsViewData = BaseViewService.getViewData(dbSys, rsView, pageNum, sqlFilter, mapRef, sqlUserDefDS);
             ok("dtbViewData", rsViewData);
 
             if (pageNum == 0) {
@@ -121,7 +124,7 @@ public class BaseViewController extends BaseController {
         try {
             //rsView = BaseViewService.getView(jtMaster, viewPk);
             //ok("dtbView", rsView);
-            rsViewField = BaseViewService.getViewField(dbSys, viewPk);
+            rsViewField = this.getViewField(viewPk);
             //ok("dtbViewField", rsViewField);
 
             HashMap<String, SqlRowSet> mapDS = BaseViewService.getViewDS(dbSys, rsViewField);
@@ -317,7 +320,7 @@ public class BaseViewController extends BaseController {
     protected boolean AfterSave(boolean addnew, long id) throws Exception {
         return true;
     }
-    protected boolean BeforeDelete(long id) {
+    protected boolean BeforeDelete(long id) throws Exception {
         return true;
     }
     protected boolean AfterDelete(long id) throws Exception {
@@ -338,5 +341,13 @@ public class BaseViewController extends BaseController {
     }
     protected String AfterReplace(String sql) {
         return sql;
+    }
+
+    // -- sub class override 2 ------------------------------------------------
+    protected SqlRowSet getViewField(String viewPk) throws Exception {
+        return BaseViewService.getViewField(dbSys, viewPk);
+    }
+    protected String getUseDefDataSource() {
+        return null;
     }
 }

@@ -1,5 +1,5 @@
 package com.doys.example.controller;
-import com.doys.framework.common.UtilDate;
+import com.doys.framework.util.UtilDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +22,7 @@ public class Ping {
     @RequestMapping("/doLongWork")
     private String doLongWork() throws Exception {
         long seconds = 1500;
-            String strReturn = "";
+        String strReturn = "";
         // ------------------------------------------------
         try {
             logger.info("Do long work bgin " + UtilDate.getDateTimeString());

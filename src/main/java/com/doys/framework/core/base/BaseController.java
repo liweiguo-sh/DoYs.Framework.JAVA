@@ -1,10 +1,10 @@
 package com.doys.framework.core.base;
-import com.doys.framework.common.UtilDataSet;
-import com.doys.framework.common.UtilEnv;
 import com.doys.framework.config.Const;
 import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestError;
 import com.doys.framework.core.entity.RestResult;
+import com.doys.framework.util.UtilDataSet;
+import com.doys.framework.util.UtilEnv;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -18,6 +18,7 @@ import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 public class BaseController extends BaseTop {
     private ThreadLocal<HashMap<String, Object>> tlHashMapIn = new ThreadLocal<>();
@@ -83,7 +84,7 @@ public class BaseController extends BaseTop {
     }
 
     // -- public common method ------------------------------------------------
-    protected String getSessionValue(String attrName) {
+    protected String ssValue(String attrName) {
         return _getSessionValue(attrName, "").toString();
     }
     private Object _getSessionValue(String attrName, Object defaultValue) {
@@ -103,6 +104,13 @@ public class BaseController extends BaseTop {
             return null;
         }
         return (LinkedTreeMap<String, Object>) obj;
+    }
+    protected ArrayList<LinkedTreeMap<String, Object>> inArrayList(String parameterName) {
+        Object obj = _inObject(parameterName, null);
+        if (obj == null) {
+            return null;
+        }
+        return (ArrayList<LinkedTreeMap<String, Object>>) obj;
     }
 
     protected int inInt(String parameterName) {

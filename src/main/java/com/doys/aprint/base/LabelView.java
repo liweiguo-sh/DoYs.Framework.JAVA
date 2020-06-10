@@ -1,6 +1,6 @@
 package com.doys.aprint.base;
-import com.doys.framework.common.UtilDate;
 import com.doys.framework.core.view.BaseViewController;
+import com.doys.framework.util.UtilDate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

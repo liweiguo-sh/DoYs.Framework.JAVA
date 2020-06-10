@@ -1,8 +1,8 @@
 package com.doys.aprint.label;
-import com.doys.framework.common.UtilString;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
+import com.doys.framework.util.UtilString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.RequestMapping;

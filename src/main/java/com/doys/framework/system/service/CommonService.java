@@ -21,6 +21,8 @@ public class CommonService extends BaseService {
 
         listSql.add("DELETE FROM sys_flow_node WHERE flow_pk NOT IN (SELECT pk FROM sys_flow)");
         listSql.add("DELETE FROM sys_flow_button WHERE flow_pk NOT IN (SELECT pk FROM sys_flow)");
+
+        listSql.add("DELETE FROM sys_tree_level WHERE tree_pk NOT IN (SELECT pk FROM sys_tree)");
         // ------------------------------------------------
         for (int i = 0; i < listSql.size(); i++) {
             sql = listSql.get(i);

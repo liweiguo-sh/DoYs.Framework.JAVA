@@ -1,5 +1,5 @@
 package com.doys.framework.interceptor;
-import com.doys.framework.common.UtilDate;
+import com.doys.framework.util.UtilDate;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;

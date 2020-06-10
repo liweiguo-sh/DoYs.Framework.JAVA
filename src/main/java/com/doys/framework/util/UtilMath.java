@@ -1,4 +1,4 @@
-package com.doys.framework.common;
+package com.doys.framework.util;
 import java.math.BigDecimal;
 public class UtilMath {
     // -- math 四则运算 -----------------------------------------------------------

@@ -8,9 +8,9 @@
  * 用法参考.net的DataTable, 已提供的方法基本相同, 用完后一定要调用.close()方法回收内存.
  */
 package com.doys.framework.core.db;
-import com.doys.framework.common.UtilDataSet;
-import com.doys.framework.common.UtilString;
 import com.doys.framework.config.Const;
+import com.doys.framework.util.UtilDataSet;
+import com.doys.framework.util.UtilString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -173,18 +173,18 @@ public class DataTableBAK {
                 _arrCols[iCol][1] = Integer.toString(rsmd.getColumnType(iCol));
                 _arrCols[iCol][2] = rsmd.getColumnTypeName(iCol);
                 if (_arrCols[iCol][2].equalsIgnoreCase("int") || _arrCols[iCol][2].equalsIgnoreCase("INTEGER") || _arrCols[iCol][2].equalsIgnoreCase("tinyint")
-                        || _arrCols[iCol][2].equalsIgnoreCase("smallint") || _arrCols[iCol][2].equalsIgnoreCase("numeric")
-                        || _arrCols[iCol][2].equalsIgnoreCase("decimal") || _arrCols[iCol][2].equalsIgnoreCase("NUMBER")) {
+                    || _arrCols[iCol][2].equalsIgnoreCase("smallint") || _arrCols[iCol][2].equalsIgnoreCase("numeric")
+                    || _arrCols[iCol][2].equalsIgnoreCase("decimal") || _arrCols[iCol][2].equalsIgnoreCase("NUMBER")) {
                     _arrCols[iCol][0] = "number";
                 }
                 else if (_arrCols[iCol][2].equalsIgnoreCase("varchar") || _arrCols[iCol][2].equalsIgnoreCase("nvarchar")
-                        || _arrCols[iCol][2].equalsIgnoreCase("char") || _arrCols[iCol][2].equalsIgnoreCase("nchar") || _arrCols[iCol][2].equalsIgnoreCase("VARCHAR2")
-                        || _arrCols[iCol][2].equalsIgnoreCase("NVARCHAR2") || _arrCols[iCol][2].equalsIgnoreCase("text")
-                        || _arrCols[iCol][2].equalsIgnoreCase("ntext")) {
+                    || _arrCols[iCol][2].equalsIgnoreCase("char") || _arrCols[iCol][2].equalsIgnoreCase("nchar") || _arrCols[iCol][2].equalsIgnoreCase("VARCHAR2")
+                    || _arrCols[iCol][2].equalsIgnoreCase("NVARCHAR2") || _arrCols[iCol][2].equalsIgnoreCase("text")
+                    || _arrCols[iCol][2].equalsIgnoreCase("ntext")) {
                     _arrCols[iCol][0] = "string";
                 }
                 else if (_arrCols[iCol][2].equalsIgnoreCase("datetime") || _arrCols[iCol][2].equalsIgnoreCase("TIMESTAMP")
-                        || _arrCols[iCol][2].equalsIgnoreCase("DATE") || _arrCols[iCol][2].equalsIgnoreCase("TIME")) {
+                    || _arrCols[iCol][2].equalsIgnoreCase("DATE") || _arrCols[iCol][2].equalsIgnoreCase("TIME")) {
                     _arrCols[iCol][0] = "datetime";
                 }
                 else if (_arrCols[iCol][2].equalsIgnoreCase("bit")) {
@@ -358,11 +358,11 @@ public class DataTableBAK {
                     _arrSortCols[i][1] = "Int";
                 }
                 else if (colTypeName.equalsIgnoreCase("numeric") || colTypeName.equalsIgnoreCase("decimal") || colTypeName.equalsIgnoreCase("NUMBER")
-                        || colTypeName.equalsIgnoreCase("FLOAT") || colTypeName.equalsIgnoreCase("money") || colTypeName.equalsIgnoreCase("real")) {
+                    || colTypeName.equalsIgnoreCase("FLOAT") || colTypeName.equalsIgnoreCase("money") || colTypeName.equalsIgnoreCase("real")) {
                     _arrSortCols[i][1] = "Numeric";
                 }
                 else if (colTypeName.equalsIgnoreCase("VARCHAR") || colTypeName.equalsIgnoreCase("VARCHAR2") || colTypeName.equalsIgnoreCase("NVARCHAR")
-                        || colTypeName.equalsIgnoreCase("NVARCHAR2") || colTypeName.equalsIgnoreCase("CHAR") || colTypeName.equalsIgnoreCase("NCHAR")) {
+                    || colTypeName.equalsIgnoreCase("NVARCHAR2") || colTypeName.equalsIgnoreCase("CHAR") || colTypeName.equalsIgnoreCase("NCHAR")) {
                     _arrSortCols[i][1] = "String";
                 }
                 else if (colTypeName.equalsIgnoreCase("datetime")) {

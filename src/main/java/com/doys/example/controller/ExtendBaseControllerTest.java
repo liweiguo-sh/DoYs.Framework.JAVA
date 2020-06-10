@@ -1,7 +1,7 @@
 package com.doys.example.controller;
-import com.doys.framework.common.UtilDate;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.entity.RestResult;
+import com.doys.framework.util.UtilDate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

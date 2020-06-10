@@ -6,11 +6,11 @@
  * 通用视图服务基类, 用于通用视图
  *****************************************************************************/
 package com.doys.framework.core.view;
-import com.doys.framework.common.UtilDataSet;
-import com.doys.framework.common.UtilString;
 import com.doys.framework.config.Const;
 import com.doys.framework.core.base.BaseService;
 import com.doys.framework.core.db.DBFactory;
+import com.doys.framework.util.UtilDataSet;
+import com.doys.framework.util.UtilString;
 import com.google.gson.internal.LinkedTreeMap;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
@@ -67,11 +67,19 @@ public class BaseViewService extends BaseService {
     }
 
     public static SqlRowSet getViewData(DBFactory dbSys, SqlRowSet rsView, int pageNum, String sqlFilter, HashMap map) throws Exception {
+        return getViewData(dbSys, rsView, pageNum, sqlFilter, map, null);
+    }
+    public static SqlRowSet getViewData(DBFactory dbSys, SqlRowSet rsView, int pageNum, String sqlFilter, HashMap map, String sqlUserDefDS) throws Exception {
         String sql = "";
         String sqlData, sqlOrderBy;
 
         rsView.first();
-        sqlData = rsView.getString("sql_data_source");
+        if (sqlUserDefDS == null || sqlUserDefDS.equals("")) {
+            sqlData = rsView.getString("sql_data_source");
+        }
+        else {
+            sqlData = sqlUserDefDS;
+        }
         sqlOrderBy = rsView.getString("sql_orderby");
         // -- 1. 取总记录行数 -----------------------------------
         if (pageNum == 0) {
@@ -205,7 +213,6 @@ public class BaseViewService extends BaseService {
             dbBus.exec(sql);
             return dbBus.getLong("SELECT @@identity");
         } catch (Exception e) {
-            logger.info(sql);
             throw e;
         }
     }

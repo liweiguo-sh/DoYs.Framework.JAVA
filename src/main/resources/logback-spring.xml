@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
-    <springProfile name="ems">
+    <springProfile name="aprint">
         <property name="charset" value="UTF-8"/>
         <property name="LOG_HOME" value="D:\\DoYsSV\\work\\logs"/>
     </springProfile>

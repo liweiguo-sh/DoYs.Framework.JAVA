@@ -23,13 +23,10 @@ public class MenuService extends BaseService {
 
         SqlRowSet rowSet = null;
         // ------------------------------------------------
-        try {
-            sql = "SELECT * FROM sys_menu WHERE LEFT(pk, 3) = ? ORDER BY sequence";
-            rowSet = dbSys.getRowSet(sql, systemKey);
-            return rowSet;
-        } catch (Exception e) {
-            throw e;
-        } finally {
-        }
+        sql = "SELECT v.controller, m.* "
+            + "FROM sys_menu m LEFT JOIN sys_view v ON m.type_pk = v.pk "
+            + "WHERE LEFT(m.pk, 3) = ? ORDER BY m.sequence";
+        rowSet = dbSys.getRowSet(sql, systemKey);
+        return rowSet;
     }
 }

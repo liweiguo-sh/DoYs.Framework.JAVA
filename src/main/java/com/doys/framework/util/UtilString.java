@@ -1,4 +1,4 @@
-package com.doys.framework.common;
+package com.doys.framework.util;
 
 public class UtilString {
     /**

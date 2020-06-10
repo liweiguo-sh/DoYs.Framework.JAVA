@@ -6,10 +6,10 @@
  * 通用视图controller模板类
  *****************************************************************************/
 package com.doys.framework.system.mock;
-import com.doys.framework.common.UtilDate;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
+import com.doys.framework.util.UtilDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.PostMapping;

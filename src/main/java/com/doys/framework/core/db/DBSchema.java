@@ -7,7 +7,7 @@
  * 解析数据库字段信息到表 ST_TALBE/ST_FIELD/ST_INDEX中, 只追加, 不删除
  */
 package com.doys.framework.core.db;
-import com.doys.framework.common.UtilDataSet;
+import com.doys.framework.util.UtilDataSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 public class DBSchema {

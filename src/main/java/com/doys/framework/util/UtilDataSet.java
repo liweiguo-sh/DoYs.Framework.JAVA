@@ -1,4 +1,4 @@
-package com.doys.framework.common;
+package com.doys.framework.util;
 import com.doys.framework.config.Const;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;

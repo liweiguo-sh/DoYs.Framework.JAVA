@@ -1,9 +1,9 @@
 package com.doys.framework.system.service;
-import com.doys.framework.common.UtilDataSet;
 import com.doys.framework.core.base.BaseService;
 import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.db.DBSchema;
 import com.doys.framework.core.db.DataTable;
+import com.doys.framework.util.UtilDataSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 

@@ -1,6 +1,6 @@
 package com.doys.framework.common.io;
-import com.doys.framework.common.UtilEnv;
 import com.doys.framework.common.entity.EntityFile;
+import com.doys.framework.util.UtilEnv;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,9 +39,11 @@ public class ScanFile {
                 }
 
                 entityFiles.add(entityFile);
-            } else if (file.isDirectory()) {
+            }
+            else if (file.isDirectory()) {
                 entityFiles.addAll(scanFolder(new File(file.getPath()), extNames, includeSubDirectory));
-            } else {
+            }
+            else {
                 throw new Exception("debug here ScanFile.scanFolder()");
             }
         }

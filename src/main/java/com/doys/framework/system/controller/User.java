@@ -6,12 +6,12 @@
  * Description: 用户登录
  *****************************************************************************/
 package com.doys.framework.system.controller;
-import com.doys.framework.common.UtilEnv;
 import com.doys.framework.common.image.ImageVerifyCode;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.system.service.UserService;
+import com.doys.framework.util.UtilEnv;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -71,7 +71,7 @@ public class User extends BaseController {
 
             // -- 1.1 验证验证码 --
             if (blVerifyCode) {
-                verifyCodeSession = getSessionValue("verifyCode");
+                verifyCodeSession = ssValue("verifyCode");
                 if (verifyCodeSession.equals("")) {
                     return ResultErr("会话已超时，请刷新登录页面。");
                 }
