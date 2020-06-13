@@ -1,5 +1,4 @@
-package com.doys.aprint.label;
-import com.doys.aprint.base.LabelService;
+package com.doys.aprint.print;
 import com.doys.aprint.task.TaskService;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.db.DBFactory;
@@ -63,8 +62,8 @@ public class QuickPrintController extends BaseController {
         return ResultOk();
     }
 
-    @RequestMapping("/generatePrintData")
-    private RestResult generatePrintData() {
+    @RequestMapping("/createTask")
+    private RestResult createTask() {
         int taskId;
         int labelId = inInt("labelId");
         int qty = inInt("qty");
@@ -75,8 +74,8 @@ public class QuickPrintController extends BaseController {
         ArrayList<LinkedTreeMap<String, Object>> variables = inArrayList("variables");
         // ------------------------------------------------
         try {
-            taskId = TaskService.createQuickPrintTask(dbSys, userkey);
-            LabelService.generatePrintData(dbSys, labelId, qty, taskId, variables);
+            taskId = TaskService.createQuickPrintTask(dbSys, labelId, userkey);
+            PrintService.generatePrintData(dbSys, labelId, qty, taskId, variables);
 
             ok("taskId", taskId);
         } catch (Exception e) {
@@ -84,4 +83,33 @@ public class QuickPrintController extends BaseController {
         }
         return ResultOk();
     }
+    @RequestMapping("/deleteTask")
+    private RestResult deleteTask() {
+        int taskId = inInt("taskId");
+        // ------------------------------------------------
+        try {
+            PrintService.deleteTask(dbSys, taskId);
+        } catch (Exception e) {
+            return ResultErr(e);
+        }
+        return ResultOk();
+    }
+    @RequestMapping("/getTaskData")
+    private RestResult getTaskData() {
+        int labelId = inInt("labelId");
+        int taskId = inInt("taskId");
+        int rowNoFrom = inInt("rowNoFrom");
+        int rowNoTo = inInt("rowNoTo");
+
+        SqlRowSet rsTaskData;
+        // ------------------------------------------------
+        try {
+            rsTaskData = PrintService.getTaskData(dbSys, labelId, taskId, rowNoFrom, rowNoTo);
+            ok("dtbTaskData", rsTaskData);
+        } catch (Exception e) {
+            return ResultErr(e);
+        }
+        return ResultOk();
+    }
+
 }
