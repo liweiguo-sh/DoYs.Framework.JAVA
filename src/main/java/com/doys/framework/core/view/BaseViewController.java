@@ -46,17 +46,25 @@ public class BaseViewController extends BaseController {
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
             ok("dtbView", rsView);
+            rsView.beforeFirst();
+            if (rsView.next()) {
+                treePk = UtilString.KillNull(rsView.getString("tree_pk"));
+            }
+            else {
+                return ResultErr("视图 " + viewPk + " 不存在，请检查。");
+            }
+
+            // -- view field --
             rsViewField = getViewField(viewPk);
             ok("dtbViewField", rsViewField);
 
+            // -- flow tree --
             if (!flowPks.equals("")) {
                 rsFlowNode = BaseViewService.getFlowNode(dbSys, flowPks);
                 ok("dtbFlowNode", rsFlowNode);
             }
 
-            // -- 导航树 --
-            rsView.first();
-            treePk = UtilString.KillNull(rsView.getString("tree_pk"));
+            // -- navigate tree --
             if (!treePk.equals("")) {
                 rsTree = BaseViewService.getTree(dbSys, treePk);
                 ok("dtbTree", rsTree);

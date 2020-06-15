@@ -16,14 +16,23 @@ spring:
   datasource:
     username: root
     password: 34821015
-    url: jdbc:mysql://localhost:3306/aprint?useUnicode=true&characterEncoding=utf-8&rewriteBatchedStatements=true&useSSL=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/sys?useUnicode=true&characterEncoding=utf-8&rewriteBatchedStatements=true&useSSL=true&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
+    dbcp2:
+      initial-size: 5
+      max-total: 100
+      max-wait-millis: 5000
+      min-idle: 20
+      test-while-idle: true
+      validation-query: select 1
+      test-on-borrow: false
+      test-on-return: false
 
     aprint:
       username: root
       password: 34821015
-      url: jdbc:mysql://localhost:3306/aprint?useUnicode=true&characterEncoding=utf-8&rewriteBatchedStatements=true&useSSL=true&serverTimezone=Asia/Shanghai
+      url: jdbc:mysql://localhost:3306/sys_100?useUnicode=true&characterEncoding=utf-8&rewriteBatchedStatements=true&useSSL=true&serverTimezone=Asia/Shanghai
       driver-class-name: com.mysql.cj.jdbc.Driver
       type: com.alibaba.druid.pool.DruidDataSource
       dbcp2:

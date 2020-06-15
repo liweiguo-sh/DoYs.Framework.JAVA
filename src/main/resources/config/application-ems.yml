@@ -1,4 +1,4 @@
-## -- ems: energy management system --
+## -- ems --
 server:
   port: 9988
   servlet:
@@ -32,7 +32,7 @@ spring:
     bus:
       username: root
       password: 34821015
-      url: jdbc:mysql://localhost:3307/db2?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai
+      url: jdbc:mysql://localhost:3307/ems_100?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai
       driver-class-name: com.mysql.cj.jdbc.Driver
       type: com.alibaba.druid.pool.DruidDataSource
       dbcp2:

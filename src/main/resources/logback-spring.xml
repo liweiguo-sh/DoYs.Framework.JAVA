@@ -1,25 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
-    <springProfile name="aprint">
+    <springProfile name="aprint,ems">
         <property name="charset" value="UTF-8"/>
         <property name="LOG_HOME" value="D:\\DoYsSV\\work\\logs"/>
+
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <!--格式化日志输出：%d日期；%thread线程名；%-5level日志级别，且从左显示5个字符宽度；%logger日志输出位置；%msg日志内容；%n换行符-->
+                <!--彩色日志格式-->
+                <!--<Pattern>%date{HH:mm:ss.SSS} %highlight(%-5level) %cyan([%thread]) %boldMagenta(%logger{50}) %red(%msg%n)</Pattern>-->
+                <Pattern>%date{HH:mm:ss.SSS} %green(%-5level) %msg%n</Pattern>
+                <charset>${charset}</charset>
+            </encoder>
+        </appender>
     </springProfile>
     <springProfile name="prod">
-        <!-- TOMCAT控制台需要设置为GBK -->
+        <!-- TOMCAT控制台需要设置为GBK, log.path在setenv.bat中配置 -->
         <property name="charset" value="GBK"/>
-        <property name="LOG_HOME" value="D:\\DoYsEnv\\apache-tomcat-9.0.33\\work\\logs"/>
-    </springProfile>
+        <property name="LOG_HOME" value="${log.path}"/>
 
-    <!--控制台输出-->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <!--格式化日志输出：%d日期；%thread线程名；%-5level日志级别，且从左显示5个字符宽度；%logger日志输出位置；%msg日志内容；%n换行符-->
-            <!--彩色日志格式-->
-            <!--<Pattern>%date{HH:mm:ss.SSS} %highlight(%-5level) %cyan([%thread]) %boldMagenta(%logger{50}) %red(%msg%n)</Pattern>-->
-            <Pattern>%date{HH:mm:ss.SSS} %green(%-5level) %msg%n</Pattern>
-            <charset>${charset}</charset>
-        </encoder>
-    </appender>
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>%date{HH:mm:ss.SSS} %-5level %msg%n</Pattern>
+                <charset>${charset}</charset>
+            </encoder>
+        </appender>
+    </springProfile>
     ​
     <!--日志文件输出-->
     <appender name="FileRolling" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -41,13 +47,4 @@
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FileRolling"/>
     </root>
-
-    <!-- 输出jdbc.sql TODO: 无效？-->
-    <!--
-        <include resource="org/springframework/boot/logging/logback/base.xml"/>
-        <logger name="org.springframework.jdbc.core" additivity="true" level="INFO">
-            <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FileRolling"/>
-        </logger>
-    -->
 </configuration>
