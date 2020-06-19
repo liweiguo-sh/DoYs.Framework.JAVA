@@ -56,4 +56,31 @@ public class UtilString {
 
         return string1.equalsIgnoreCase(string2);
     }
+
+    public static String getNewNodeKey(String currentMaxNodeKey, int nNodeLen) throws Exception {
+        int nLenParent = currentMaxNodeKey.length() - nNodeLen;
+        String pNodeKey = currentMaxNodeKey.substring(0, nLenParent);
+        String subKey = currentMaxNodeKey.substring(nLenParent);
+
+        char[] chArr = subKey.toCharArray();
+        for (int i = chArr.length - 1; i >= 0; i--) {
+            if (chArr[i] == 'Z') {
+                chArr[i] = '0';
+                if (i == 0) {
+                    // -- 累加越界, 超过最大范围 --
+                    throw new Exception("累加越界, 超过最大值.");
+                }
+            }
+            else {
+                if (chArr[i] == '9') {
+                    chArr[i] = 'A';
+                }
+                else {
+                    chArr[i]++;
+                }
+                break;
+            }
+        }
+        return pNodeKey + new String(chArr);
+    }
 }

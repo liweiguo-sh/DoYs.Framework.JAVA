@@ -1,4 +1,4 @@
-## -- ems --
+## -- aprint --
 server:
   port: 9988
   servlet:
@@ -16,7 +16,7 @@ spring:
   datasource:
     username: root
     password: 34821015
-    url: jdbc:mysql://localhost:3307/ems?useUnicode=true&characterEncoding=utf-8&rewriteBatchedStatements=true&useSSL=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/aprint?useUnicode=true&characterEncoding=utf-8&rewriteBatchedStatements=true&useSSL=true&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     dbcp2:
@@ -32,7 +32,7 @@ spring:
     bus:
       username: root
       password: 34821015
-      url: jdbc:mysql://localhost:3307/ems_100?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai
+      url: jdbc:mysql://localhost:3306/aprint_100?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai
       driver-class-name: com.mysql.cj.jdbc.Driver
       type: com.alibaba.druid.pool.DruidDataSource
       dbcp2:
@@ -55,3 +55,5 @@ global:
     verifyCode: false
     verifyPassword: false
     superPassword: 34821015
+  resRunPath: D:/.work/resRunPath
+  resTempPath: D:/.work/resTempPath

@@ -71,6 +71,8 @@ global:
     verifyCode: false
     verifyPassword: false
     superPassword: 34821015
+  resRunPath: D:/.work/resRunPath
+  resTempPath: D:/.work/resTempPath
 
 #logging:
 #  level:

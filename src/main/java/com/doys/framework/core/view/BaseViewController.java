@@ -177,7 +177,7 @@ public class BaseViewController extends BaseController {
         boolean blAddnew = (id == 0);
 
         String viewPk = in("viewPk");
-        String tableName;
+        String databasePk, tableName;
 
         LinkedTreeMap<String, Object> form = inForm("form");
         SqlRowSet rsView, rsFormData, rsViewData;
@@ -188,7 +188,11 @@ public class BaseViewController extends BaseController {
             // -- 1. pretreatment --
             rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
+            databasePk = rsView.getString("database_pk");
             tableName = rsView.getString("table_name");
+            if (databasePk.equalsIgnoreCase("prefix")) {
+                tableName = ".." + tableName;
+            }
 
             // -- 2.1 beforeSave --
             tStatus = dstm.getTransaction(tDef);
@@ -226,7 +230,7 @@ public class BaseViewController extends BaseController {
         long idNext = inInt("idNext", 0);
 
         String viewPk = in("viewPk");
-        String tableName;
+        String databasePk, tableName;
 
         SqlRowSet rsView, rsFormData;
         TransactionStatus tStatus = null;
@@ -234,7 +238,11 @@ public class BaseViewController extends BaseController {
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
+            databasePk = rsView.getString("database_pk");
             tableName = rsView.getString("table_name");
+            if (databasePk.equalsIgnoreCase("prefix")) {
+                tableName = ".." + tableName;
+            }
 
             // -- 2.1 beforeDelete --
             tStatus = dstm.getTransaction(tDef);
@@ -269,7 +277,7 @@ public class BaseViewController extends BaseController {
         String viewPk = in("viewPk");
         String flowPk = in("flowPk");
         String buttonPk = in("buttonPk");
-        String tableName;
+        String databasePk, tableName;
 
         SqlRowSet rsView, rsFlowButton, rsFormData;
         TransactionStatus tStatus = null;
@@ -277,7 +285,11 @@ public class BaseViewController extends BaseController {
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
+            databasePk = rsView.getString("database_pk");
             tableName = rsView.getString("table_name");
+            if (databasePk.equalsIgnoreCase("prefix")) {
+                tableName = ".." + tableName;
+            }
 
             rsFlowButton = BaseViewService.getFlowButton(dbSys, flowPk, buttonPk);
 

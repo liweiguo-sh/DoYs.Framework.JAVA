@@ -144,29 +144,33 @@ public class BaseViewService extends BaseService {
     }
     public static SqlRowSet getFormData(DBFactory dbSys, SqlRowSet rsView, long id) throws Exception {
         String sql = "";
-        String tableName;
+        String databasePk, tableName;
 
         rsView.first();
+        databasePk = rsView.getString("pk");
         tableName = rsView.getString("table_name");
         // ------------------------------------------------
-        sql = "SELECT * FROM .." + tableName + " WHERE id = ?";
+        if (databasePk.equalsIgnoreCase("prefix")) {
+            tableName = ".." + tableName;
+        }
+        sql = "SELECT * FROM " + tableName + " WHERE id = ?";
         return dbSys.getRowSet(sql, id);
     }
 
     public static long insert(DBFactory dbBus, String tableName, LinkedTreeMap form) throws Exception {
         int nIdx = 0;
 
-        String sql = "SELECT * FROM .." + tableName + " LIMIT 0";
+        String sql = "SELECT * FROM " + tableName + " LIMIT 0";
         String columnType, columnName, columnValue, quotes;
         StringBuilder buildField = new StringBuilder();
         StringBuilder buildValue = new StringBuilder();
         SqlRowSetMetaData rsmd;
         // ------------------------------------------------
         try {
-            buildField.append("INSERT INTO .." + tableName + " (");
+            buildField.append("INSERT INTO " + tableName + " (");
             buildValue.append("VALUES (");
 
-            sql = "SELECT * FROM .." + tableName + " LIMIT 0";
+            sql = "SELECT * FROM " + tableName + " LIMIT 0";
             rsmd = dbBus.getRowSet(sql).getMetaData();
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                 columnType = UtilDataSet.getFieldType(rsmd.getColumnTypeName(i));
@@ -219,15 +223,15 @@ public class BaseViewService extends BaseService {
     public static boolean update(DBFactory dbBus, String tableName, LinkedTreeMap form) throws Exception {
         int result = 0, nIdx = 0;
 
-        String sql = "SELECT * FROM .." + tableName + " LIMIT 0";
+        String sql = "SELECT * FROM " + tableName + " LIMIT 0";
         String columnType, columnName, columnValue, quotes;
         StringBuilder builder = new StringBuilder();
         SqlRowSetMetaData rsmd;
         // ------------------------------------------------
         try {
-            builder.append("UPDATE .." + tableName + " SET ");
+            builder.append("UPDATE " + tableName + " SET ");
 
-            sql = "SELECT * FROM .." + tableName + " LIMIT 0";
+            sql = "SELECT * FROM " + tableName + " LIMIT 0";
             rsmd = dbBus.getRowSet(sql).getMetaData();
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                 columnType = UtilDataSet.getFieldType(rsmd.getColumnTypeName(i));
@@ -279,7 +283,7 @@ public class BaseViewService extends BaseService {
         }
     }
     public static boolean delete(DBFactory dbBus, String tableName, long id) throws Exception {
-        String sql = "DELETE FROM .." + tableName + " WHERE id = " + id;
+        String sql = "DELETE FROM " + tableName + " WHERE id = " + id;
         int result = dbBus.exec(sql);
         if (result == 0) {
             throw new Exception("当前记录已不存在，请刷新视图页面。");
@@ -295,7 +299,7 @@ public class BaseViewService extends BaseService {
         sqlAssert = UtilString.KillNull(rsFlowButton.getString("assert_sql"));
         sqlAction = rsFlowButton.getString("action_do");
 
-        sql = "UPDATE .." + tableName + " SET " + sqlAction + " WHERE id = " + id;
+        sql = "UPDATE " + tableName + " SET " + sqlAction + " WHERE id = " + id;
         if (!sqlAssert.equals("")) {
             sql += " AND " + sqlAssert;
         }

@@ -168,6 +168,18 @@ public class BaseController extends BaseTop {
         return parameterValue;
     }
 
+    // -- setValue ------------------------------------------------------------
+    protected void setFormValue(String key, Object value) throws Exception {
+        HashMap<String, Object> map = this.getHashMapIn();
+        LinkedTreeMap<String, Object> mapForm = (LinkedTreeMap<String, Object>) map.get("form");
+        if (mapForm.containsKey(key)) {
+            mapForm.replace(key, value);
+        }
+        else {
+            mapForm.put(key, value);
+        }
+    }
+
     // -- ok, err -------------------------------------------------------------
     protected void ok(String key, long value) throws Exception {
         _ok(key, value);
