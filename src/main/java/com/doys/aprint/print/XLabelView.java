@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class XLabelView extends BaseViewController {
     @Override
     protected SqlRowSet getViewField(String viewPk) throws Exception {
+        int labelId = inInt("labelId", 0);
+
         String sql, sql1, sql2;
         String sqlFixed, sqlDynamic;
         // ------------------------------------------------
         sql1 = "SELECT text, fixed, align, width, data_source_type, data_source, 1 id FROM sys_view_field WHERE view_pk = 'x_label' AND name = 'variable_xxx'";
-        sql2 = "SELECT 1 id, LOWER(name) name, sequence FROM aprint_100.base_label_variable WHERE label_id = 4";
+        sql2 = "SELECT 1 id, LOWER(name) name, sequence FROM aprint_100.base_label_variable WHERE label_id = " + labelId;
         sqlDynamic = "SELECT name, name text, fixed, align, width, data_source_type, data_source, sequence + 100 sequence FROM ("
             + sql1 + ") f INNER JOIN (" + sql2 + ") n ON f.id = n.id";
 
@@ -27,9 +29,15 @@ public class XLabelView extends BaseViewController {
     }
     @Override
     protected String getUseDefDataSource() {
-        String sql;
+        int labelId = inInt("labelId", 0);
 
-        sql = "SELECT * FROM ..x_label_4";
+        String sql;
+        if (labelId == 0) {
+            sql = "SELECT * FROM ..x_label";
+        }
+        else {
+            sql = "SELECT * FROM ..x_label_" + labelId;
+        }
         return sql;
     }
 }

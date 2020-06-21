@@ -40,7 +40,7 @@ public class DBFactory extends JdbcTemplate {
         return _getInt(sql, args);
     }
     private int _getInt(String sql, Object... args) throws Exception {
-        String valueString = _getValue(sql, "", args);
+        String valueString = _getValue(sql, args);
         return Integer.parseInt(valueString);
     }
 
@@ -48,23 +48,20 @@ public class DBFactory extends JdbcTemplate {
         return _getLong(sql);
     }
     private long _getLong(String sql) throws Exception {
-        String valueString = _getValue(sql, "");
+        String valueString = _getValue(sql);
         return Long.parseLong(valueString);
     }
 
     public String getValue(String sql) throws Exception {
-        return _getValue(sql, null, "");
+        return _getValue(sql);
     }
     public String getValue(String sql, Object... args) throws Exception {
-        return _getValue(sql, "", args);
+        return _getValue(sql, args);
     }
-    public String getValue(String sql, String defaultValue, Object... args) throws Exception {
-        return _getValue(sql, defaultValue, args);
-    }
-    private String _getValue(String sql, String defaultValue, Object... args) throws Exception {
+    private String _getValue(String sql, Object... args) throws Exception {
         Object objValue = _getObject(sql, args);
         if (objValue == null) {
-            return defaultValue;
+            return "";
         }
         else {
             return objValue.toString();
@@ -191,7 +188,12 @@ public class DBFactory extends JdbcTemplate {
         return prefix + getTenantId();
     }
     public String replaceSQL(String sql) throws Exception {
-        return sql.replaceAll("\\.\\.", this.getTenantDbName() + ".");
+        if (sql.indexOf("..") >= 0) {
+            return sql.replaceAll("\\.\\.", this.getTenantDbName() + ".");
+        }
+        else {
+            return sql;
+        }
     }
 
     // -- Check SQL injection -------------------------------------------------

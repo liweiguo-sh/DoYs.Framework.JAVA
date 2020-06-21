@@ -60,7 +60,7 @@ public class BaseViewService extends BaseService {
         String sql, sqlData;
 
         sql = "SELECT sql_data FROM sys_tree_level WHERE tree_pk = ? AND level = ?";
-        sqlData = dbSys.getValue(sql, "", treePk, nodeLevel);
+        sqlData = dbSys.getValue(sql, treePk, nodeLevel);
 
         sql = sqlData.replaceAll("\\{node_value}", nodeValue);
         return dbSys.getRowSet(sql);
@@ -147,7 +147,7 @@ public class BaseViewService extends BaseService {
         String databasePk, tableName;
 
         rsView.first();
-        databasePk = rsView.getString("pk");
+        databasePk = rsView.getString("database_pk");
         tableName = rsView.getString("table_name");
         // ------------------------------------------------
         if (databasePk.equalsIgnoreCase("prefix")) {
@@ -205,6 +205,7 @@ public class BaseViewService extends BaseService {
                         buildValue.append("NULL");
                     }
                     else {
+                        columnValue = columnValue.replaceAll("'", "''");
                         buildValue.append(quotes + columnValue + quotes);
                     }
                 }
@@ -264,6 +265,7 @@ public class BaseViewService extends BaseService {
                         builder.append(columnName + " = NULL");
                     }
                     else {
+                        columnValue = columnValue.replaceAll("'", "''");
                         builder.append(columnName + " = " + quotes + columnValue + quotes);
                     }
                 }

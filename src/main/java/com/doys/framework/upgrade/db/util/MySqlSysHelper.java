@@ -1,5 +1,6 @@
 package com.doys.framework.upgrade.db.util;
 
+import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.upgrade.db.enum1.EntityIndexType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,23 +48,24 @@ public class MySqlSysHelper {
         String indexName = "", indexFields = "", columnName = "";
 
         String sql = "SELECT index_name, column_name FROM INFORMATION_SCHEMA.STATISTICS "
-                + "WHERE table_name = '" + tableName + "' AND index_name <> 'PRIMARY' AND non_unique = " + (indexType == EntityIndexType.UNIQUE_INDEX ? 0 : 1) + " "
-                + "ORDER BY index_name, seq_in_index";
+            + "WHERE table_name = '" + tableName + "' AND index_name <> 'PRIMARY' AND non_unique = " + (indexType == EntityIndexType.UNIQUE_INDEX ? 0 : 1) + " "
+            + "ORDER BY index_name, seq_in_index";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql);
         while (rowSet.next()) {
             columnName = rowSet.getString("column_name");
             if (indexName.equals(rowSet.getString("index_name"))) {
                 indexFields += "," + columnName;
-            } else {
+            }
+            else {
                 if (!indexFields.equals("")) {
-                    alIndex.add(new String[]{indexName, indexFields});
+                    alIndex.add(new String[] { indexName, indexFields });
                 }
                 indexName = rowSet.getString("index_name");
                 indexFields = columnName;
             }
         }
         if (!indexFields.equals("")) {
-            alIndex.add(new String[]{indexName, indexFields});
+            alIndex.add(new String[] { indexName, indexFields });
         }
 
         return alIndex;
@@ -73,7 +75,8 @@ public class MySqlSysHelper {
         String sql = "";
         if (indexType == EntityIndexType.PRIMARY) {
             sql = "ALTER TABLE " + tableName + " DROP PRIMARY KEY";
-        } else {
+        }
+        else {
             sql = "ALTER TABLE " + tableName + " DROP INDEX " + indexName;
         }
         System.out.println(sql);
@@ -84,26 +87,26 @@ public class MySqlSysHelper {
         String sql = "";
         if (indexType == EntityIndexType.PRIMARY) {
             sql = "ALTER TABLE " + tableName + " ADD PRIMARY KEY(" + indexFields + ")";
-        } else if (indexType == EntityIndexType.UNIQUE_INDEX) {
+        }
+        else if (indexType == EntityIndexType.UNIQUE_INDEX) {
             sql = "ALTER TABLE " + tableName + " ADD UNIQUE INDEX " + indexName + "(" + indexFields + ")";
-        } else if (indexType == EntityIndexType.INDEX) {
+        }
+        else if (indexType == EntityIndexType.INDEX) {
             sql = "ALTER TABLE " + tableName + " ADD INDEX " + indexName + "(" + indexFields + ")";
-        } else {
+        }
+        else {
             throw new Exception("unknown index type: " + indexType);
         }
 
         jdbcTemplate.execute(sql);
     }
 
-    public static void dropColumn(JdbcTemplate jdbcTemplate, String tableName, String columnName) throws Exception {
-        String sql = "";
-
-        sql = "ALTER TABLE " + tableName + " DROP COLUMN " + columnName;
-        System.out.println(sql);
-        jdbcTemplate.execute(sql);
+    public static void dropColumn(DBFactory dbBus, String tableName, String columnName) throws Exception {
+        String sql = "ALTER TABLE " + tableName + " DROP COLUMN " + columnName;
+        dbBus.exec(sql);
     }
 
-    public static void disableColumn(JdbcTemplate jdbcTemplate, String tableName, String columnName, String columnType, String columnComment) throws Exception {
+    public static void disableColumn(DBFactory dbBus, String databaseName, String tableName, String columnName, String columnType, String columnComment) throws Exception {
         long maxDays = 30;
 
         String sql = "";
@@ -116,8 +119,7 @@ public class MySqlSysHelper {
             columnNameMock = prefixMock + columnName;
             columnComment = LocalDateTime.now().format(formatter) + prefixMock + "升级程序模拟删除注释，请勿改动";
             sql = "ALTER TABLE " + tableName + " CHANGE COLUMN " + columnName + " " + columnNameMock + " " + columnType + " DEFAULT NULL COMMENT '" + columnComment + "'";
-            System.out.println(sql);
-            jdbcTemplate.execute(sql);
+            dbBus.exec(sql);
             return;
         }
 
@@ -130,7 +132,7 @@ public class MySqlSysHelper {
         LocalDate dtUpgrade = LocalDate.parse(dtUpgradeStr, formatter);
         long days = LocalDate.now().toEpochDay() - dtUpgrade.toEpochDay();
         if (days > maxDays) {
-            dropColumn(jdbcTemplate, tableName, columnName);
+            dropColumn(dbBus, tableName, columnName);
         }
     }
 }

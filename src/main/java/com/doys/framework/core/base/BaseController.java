@@ -124,6 +124,9 @@ public class BaseController extends BaseTop {
         if (parameterValue instanceof Double) {
             return ((Double) parameterValue).intValue();
         }
+        else if (parameterValue instanceof Integer) {
+            return (Integer) parameterValue;
+        }
         return Integer.parseInt((String) parameterValue);
     }
 

@@ -319,6 +319,29 @@ public class BaseViewController extends BaseController {
         }
         return ResultOk();
     }
+    @PostMapping("/doClick")
+    private RestResult doClick() {
+        long id = inInt("id");
+
+        String buttonName = in("buttonName");
+
+        TransactionStatus tStatus = null;
+        // ------------------------------------------------
+        try {
+            tStatus = dstm.getTransaction(tDef);
+
+            if (!ButtonClick(id, null, buttonName)) {
+                return ResultErr();
+            }
+
+            dstm.commit(tStatus);
+        } catch (Exception e) {
+            return ResultErr(e);
+        } finally {
+            rollback(tStatus);
+        }
+        return ResultOk();
+    }
 
     // -- common --------------------------------------------------------------
     private void rollback(TransactionStatus tStatus) {
@@ -350,6 +373,10 @@ public class BaseViewController extends BaseController {
         return true;
     }
     protected boolean AfterFlowClick(long id, SqlRowSet rsFlowButton) {
+        return true;
+    }
+
+    protected boolean ButtonClick(long id, SqlRowSet rsViewButton, String buttonName) throws Exception {
         return true;
     }
 

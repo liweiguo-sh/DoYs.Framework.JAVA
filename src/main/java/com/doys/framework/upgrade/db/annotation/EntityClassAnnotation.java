@@ -4,6 +4,7 @@ import java.lang.annotation.*;
 
 /**
  * 数据库实体类注解<br>
+ * <b>databasePk:</b> 库名称<br>
  * <b>name:</b> 表名称<br>
  * <b>text:</b> 中文名称<br>
  * <b>remark:</b> 备注说明<br>
@@ -15,6 +16,10 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface EntityClassAnnotation {
+    /**
+     * 数据库名称
+     */
+    String databasePk() default "prefix";
     /**
      * 表名称
      */

@@ -12,14 +12,10 @@ import org.springframework.stereotype.Component;
 @Component
 @Order(value = 1)
 public class StartService implements ApplicationRunner {
-    //@Autowired
-    //SystemUpgradeService systemUpgradeService;
     @Override
     public void run(ApplicationArguments args) throws Exception {
         String strNow = UtilDate.getDateTimeStr(null, null);
-        System.err.println("WebApplication start at " + strNow + ", Powered by DoYs Framework" + "\n\n");
 
-        //systemUpgradeService.upgradeDatabase("");
-        //systemUpgradeService.upgradeMenu();
+        System.err.println("WebApplication start at " + strNow + ", Powered by DoYs Framework" + "\n\n");
     }
 }

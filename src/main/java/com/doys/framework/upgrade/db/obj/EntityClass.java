@@ -1,10 +1,10 @@
 package com.doys.framework.upgrade.db.obj;
-
 import com.doys.framework.upgrade.db.enum1.EntityFieldType;
 
 import java.util.ArrayList;
 
 public class EntityClass {
+    public String datbasePK = "";
     public String name = "";
     /**
      * 表中文名称
@@ -15,7 +15,6 @@ public class EntityClass {
      */
     public String remark = "";
 
-
     /**
      * 字段数量
      */
@@ -25,7 +24,6 @@ public class EntityClass {
     public void addColumnDefinition(EntityField entityField) {
         this.entityFields.add(entityField);
     }
-
 
     /**
      * 主键
@@ -55,26 +53,34 @@ public class EntityClass {
             for (EntityField cd : entityFields) {
                 if (isFirstField) {
                     isFirstField = false;
-                } else {
+                }
+                else {
                     sb.append(",");
                 }
                 sb.append("\n\t`" + cd.name + "` ");
 
                 if (cd.type == EntityFieldType.INT) {
                     sb.append(cd.type);
-                } else if (cd.type == EntityFieldType.TINYINT) {
+                }
+                else if (cd.type == EntityFieldType.TINYINT) {
                     sb.append("tinyint");
-                } else if (cd.type == EntityFieldType.LONG) {
+                }
+                else if (cd.type == EntityFieldType.LONG) {
                     sb.append("bigint");
-                } else if (cd.type == EntityFieldType.STRING) {
+                }
+                else if (cd.type == EntityFieldType.STRING) {
                     sb.append("varchar(" + cd.length + ")");
-                } else if (cd.type == EntityFieldType.FLOAT || cd.type == EntityFieldType.DOUBLE) {
+                }
+                else if (cd.type == EntityFieldType.FLOAT || cd.type == EntityFieldType.DOUBLE) {
                     sb.append(cd.type + "(" + cd.length + ")");
-                } else if (cd.type == EntityFieldType.DATETIME || cd.type == EntityFieldType.DATE || cd.type == EntityFieldType.TIME) {
+                }
+                else if (cd.type == EntityFieldType.DATETIME || cd.type == EntityFieldType.DATE || cd.type == EntityFieldType.TIME) {
                     sb.append(cd.type);
-                } else if (cd.type == EntityFieldType.TEXT) {
+                }
+                else if (cd.type == EntityFieldType.TEXT) {
                     sb.append("text");
-                } else {
+                }
+                else {
                     throw new Exception("待补充代码");
                 }
                 if (cd.auto) {
@@ -87,12 +93,15 @@ public class EntityClass {
                 if (!cd.default_value.equals("")) {
                     if (cd.type == EntityFieldType.INT || cd.type == EntityFieldType.TINYINT || cd.type == EntityFieldType.LONG) {
                         sb.append(" DEFAULT " + cd.default_value);
-                    } else if (cd.type == EntityFieldType.DATETIME || cd.type == EntityFieldType.DATE || cd.type == EntityFieldType.TIME) {
+                    }
+                    else if (cd.type == EntityFieldType.DATETIME || cd.type == EntityFieldType.DATE || cd.type == EntityFieldType.TIME) {
                         sb.append(" DEFAULT " + cd.default_value);
-                    } else {
+                    }
+                    else {
                         if (cd.default_value.equals("''")) {
                             sb.append(" DEFAULT ''");
-                        } else {
+                        }
+                        else {
                             sb.append(" DEFAULT '" + cd.default_value + "'");
                         }
                     }
@@ -103,7 +112,8 @@ public class EntityClass {
             // -- 2. 索引部分 --
             if (!autoColName.equals("")) {
                 sb.append(",\n\tPRIMARY KEY (" + autoColName + ")");
-            } else if (!pk.equals("")) {
+            }
+            else if (!pk.equals("")) {
                 sb.append(",\n\tPRIMARY KEY (" + pk + ")");
             }
 
@@ -122,7 +132,6 @@ public class EntityClass {
         }
         return sqlReturn;
     }
-
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -151,7 +160,8 @@ public class EntityClass {
             for (int i = 0; i < this.entityFields.size(); i++) {
                 sb.append("\r\n\t" + entityFields.get(i).toString());
             }
-        } else {
+        }
+        else {
             sb.append("\r\n\tcolumn count is zero in physical database");
         }
 
