@@ -1,7 +1,7 @@
 package com.doys.framework.system.service;
 import com.doys.framework.common.security.UtilDigest;
 import com.doys.framework.core.base.BaseService;
-import com.doys.framework.core.db.DBFactory;
+import com.doys.framework.database.DBFactory;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 public class UserService extends BaseService {
@@ -10,7 +10,7 @@ public class UserService extends BaseService {
         return jtSys.getRowSet(sql, tenantId);
     }
 
-    public static boolean verifyUser(DBFactory dbMaster, String dbName, String userkey, String passwordMDx, String loginTime, String supperPassword) throws Exception {
+    public static boolean verifyUser(DBFactory dbBus, String dbName, String userkey, String passwordMDx, String loginTime, String supperPassword) throws Exception {
         String sql = "";
         String password = "", passwordMD5 = "";
 
@@ -18,7 +18,7 @@ public class UserService extends BaseService {
         // ------------------------------------------------
         try {
             sql = "SELECT user_key, password FROM sys_user WHERE user_key = ?";
-            rowSet = dbMaster.getRowSet(dbMaster.replaceSQL(sql), userkey);
+            rowSet = dbBus.getRowSet(sql, userkey);
             if (rowSet.next()) {
                 userkey = rowSet.getString("user_key").toLowerCase();
                 password = rowSet.getString("password");
@@ -47,9 +47,9 @@ public class UserService extends BaseService {
         }
         return true;
     }
-    public static SqlRowSet getUser(DBFactory dbMaster, String dbName, String userkey) throws Exception {
-        String sql = "SELECT user_key, user_name FROM ..sys_user WHERE user_key = ?";
-        SqlRowSet rowSet = dbMaster.getRowSet(dbMaster.replaceSQL(sql), userkey);
+    public static SqlRowSet getUser(DBFactory dbBus, String dbName, String userkey) throws Exception {
+        String sql = "SELECT user_key, user_name FROM sys_user WHERE user_key = ?";
+        SqlRowSet rowSet = dbBus.getRowSet(sql, userkey);
         return rowSet;
     }
 }

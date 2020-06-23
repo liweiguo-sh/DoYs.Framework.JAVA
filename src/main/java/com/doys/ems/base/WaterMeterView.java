@@ -26,8 +26,8 @@ public class WaterMeterView extends BaseViewController {
 
         String sql;
         // ------------------------------------------------
-        sql = "SELECT COUNT(1) FROM ..core_water WHERE water_meter_id = ?";
-        result = dbSys.getInt(sql, id);
+        sql = "SELECT COUNT(1) FROM core_water WHERE water_meter_id = ?";
+        result = dbBus.getInt(sql, id);
         if (result > 0) {
             err("当前水表存在历史数据，不能删除。");
             return false;

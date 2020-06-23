@@ -1,6 +1,6 @@
 package com.doys.framework.system.service;
 import com.doys.framework.core.base.BaseService;
-import com.doys.framework.core.db.DBFactory;
+import com.doys.framework.database.DBFactory;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 public class MenuService extends BaseService {

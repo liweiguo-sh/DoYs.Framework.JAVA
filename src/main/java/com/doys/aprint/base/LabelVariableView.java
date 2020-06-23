@@ -11,7 +11,7 @@ public class LabelVariableView extends BaseViewController {
     protected boolean AfterSave(boolean addnew, long id) throws Exception {
         int labelId = inInt("label_id");
 
-        LabelService.generateLabelXTable(dbSys, labelId);
+        LabelService.generateLabelXTable(dbSys, dbBus, labelId);
         return true;
     }
 }

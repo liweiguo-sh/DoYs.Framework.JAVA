@@ -7,10 +7,8 @@
  *****************************************************************************/
 package com.doys.framework.core.view;
 import com.doys.framework.core.base.BaseController;
-import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.util.UtilString;
-import com.google.gson.internal.LinkedTreeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -27,8 +25,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/core/base_view")
 public class BaseViewController extends BaseController {
-    @Autowired
-    protected DBFactory dbSys;
     @Autowired
     DataSourceTransactionManager dstm;
     @Autowired
@@ -107,9 +103,14 @@ public class BaseViewController extends BaseController {
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
+            rsView.first();
+            if (rsView.getString("database_pk").equalsIgnoreCase("sys")) {
+                dbBus = null;
+                dbBus = dbSys;
+            }
 
             sqlUserDefDS = getUseDefDataSource();
-            rsViewData = BaseViewService.getViewData(dbSys, rsView, pageNum, sqlFilter, mapRef, sqlUserDefDS);
+            rsViewData = BaseViewService.getViewData(dbBus, rsView, pageNum, sqlFilter, mapRef, sqlUserDefDS);
             ok("dtbViewData", rsViewData);
 
             if (pageNum == 0) {
@@ -130,10 +131,7 @@ public class BaseViewController extends BaseController {
         SqlRowSet rsView, rsViewField, rsFlowButton, rsViewButton;
         // ------------------------------------------------
         try {
-            //rsView = BaseViewService.getView(jtMaster, viewPk);
-            //ok("dtbView", rsView);
             rsViewField = this.getViewField(viewPk);
-            //ok("dtbViewField", rsViewField);
 
             HashMap<String, SqlRowSet> mapDS = BaseViewService.getViewDS(dbSys, rsViewField);
             for (Map.Entry<String, SqlRowSet> entry : mapDS.entrySet()) {
@@ -157,12 +155,20 @@ public class BaseViewController extends BaseController {
         int id = inInt("id");
 
         String viewPk = in("viewPk");
+        String tableName;
 
         SqlRowSet rsView, rsFormData;
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
-            rsFormData = BaseViewService.getFormData(dbSys, rsView, id);
+            rsView.first();
+            tableName = rsView.getString("table_name");
+            if (rsView.getString("database_pk").equalsIgnoreCase("sys")) {
+                dbBus = null;
+                dbBus = dbSys;
+            }
+
+            rsFormData = BaseViewService.getFormData(dbBus, tableName, id);
             ok("dtbFormData", rsFormData);
         } catch (Exception e) {
             return ResultErr(e);
@@ -177,9 +183,9 @@ public class BaseViewController extends BaseController {
         boolean blAddnew = (id == 0);
 
         String viewPk = in("viewPk");
-        String databasePk, tableName;
+        String tableName, sqlDataSource;
 
-        LinkedTreeMap<String, Object> form = inForm("form");
+        HashMap<String, Object> form = inForm("form");
         SqlRowSet rsView, rsFormData, rsViewData;
 
         TransactionStatus tStatus = null;
@@ -188,10 +194,11 @@ public class BaseViewController extends BaseController {
             // -- 1. pretreatment --
             rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
-            databasePk = rsView.getString("database_pk");
             tableName = rsView.getString("table_name");
-            if (databasePk.equalsIgnoreCase("prefix")) {
-                tableName = ".." + tableName;
+            sqlDataSource = rsView.getString("sql_data_source");
+            if (rsView.getString("database_pk").equalsIgnoreCase("sys")) {
+                dbBus = null;
+                dbBus = dbSys;
             }
 
             // -- 2.1 beforeSave --
@@ -201,10 +208,10 @@ public class BaseViewController extends BaseController {
             }
             // -- 3.2. save --
             if (blAddnew) {
-                id = BaseViewService.insert(dbSys, tableName, form);
+                id = BaseViewService.insert(dbBus, tableName, form);
             }
             else {
-                BaseViewService.update(dbSys, tableName, form);
+                BaseViewService.update(dbSys, dbBus, tableName, form);
             }
             // -- 2.3 afterSave --
             if (!AfterSave(blAddnew, id)) {
@@ -213,9 +220,9 @@ public class BaseViewController extends BaseController {
             dstm.commit(tStatus);
 
             // -- 9. 返回当前行更新后的基础表数据和视图数据 --
-            rsFormData = BaseViewService.getFormData(dbSys, rsView, id);
+            rsFormData = BaseViewService.getFormData(dbBus, tableName, id);
             ok("dtbFormData", rsFormData);
-            rsViewData = BaseViewService.getViewDataOne(dbSys, rsView, id);
+            rsViewData = BaseViewService.getViewDataOne(dbBus, sqlDataSource, id);
             ok("dtbViewData", rsViewData);
         } catch (Exception e) {
             return ResultErr(e);
@@ -238,10 +245,10 @@ public class BaseViewController extends BaseController {
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
-            databasePk = rsView.getString("database_pk");
             tableName = rsView.getString("table_name");
-            if (databasePk.equalsIgnoreCase("prefix")) {
-                tableName = ".." + tableName;
+            if (rsView.getString("database_pk").equalsIgnoreCase("sys")) {
+                dbBus = null;
+                dbBus = dbSys;
             }
 
             // -- 2.1 beforeDelete --
@@ -250,7 +257,7 @@ public class BaseViewController extends BaseController {
                 return ResultErr();
             }
             // -- 2.2 delete --
-            BaseViewService.delete(dbSys, tableName, id);
+            BaseViewService.delete(dbBus, tableName, id);
             // -- 2.3 afterDelete --
             if (!AfterDelete(id)) {
                 return ResultErr();
@@ -258,7 +265,7 @@ public class BaseViewController extends BaseController {
             dstm.commit(tStatus);
 
             if (idNext > 0) {
-                rsFormData = BaseViewService.getFormData(dbSys, rsView, idNext);
+                rsFormData = BaseViewService.getFormData(dbBus, tableName, idNext);
                 ok("dtbFormData", rsFormData);
             }
         } catch (Exception e) {
@@ -285,10 +292,10 @@ public class BaseViewController extends BaseController {
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
-            databasePk = rsView.getString("database_pk");
             tableName = rsView.getString("table_name");
-            if (databasePk.equalsIgnoreCase("prefix")) {
-                tableName = ".." + tableName;
+            if (rsView.getString("database_pk").equalsIgnoreCase("sys")) {
+                dbBus = null;
+                dbBus = dbSys;
             }
 
             rsFlowButton = BaseViewService.getFlowButton(dbSys, flowPk, buttonPk);
@@ -299,7 +306,7 @@ public class BaseViewController extends BaseController {
                 return ResultErr();
             }
             // -- 2.2 doFlow --
-            BaseViewService.doFlow(dbSys, tableName, id, rsFlowButton);
+            BaseViewService.doFlow(dbBus, tableName, id, rsFlowButton);
             // -- 2.3 afterDoFlow --
             if (!AfterFlowClick(id, rsFlowButton)) {
                 return ResultErr();
@@ -310,7 +317,7 @@ public class BaseViewController extends BaseController {
             if (idNext == 0) {
                 idNext = id;
             }
-            rsFormData = BaseViewService.getFormData(dbSys, rsView, idNext);
+            rsFormData = BaseViewService.getFormData(dbBus, tableName, idNext);
             ok("dtbFormData", rsFormData);
         } catch (Exception e) {
             return ResultErr(e);

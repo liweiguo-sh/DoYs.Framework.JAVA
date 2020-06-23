@@ -8,18 +8,17 @@
 package com.doys.framework.core.view;
 import com.doys.framework.config.Const;
 import com.doys.framework.core.base.BaseService;
-import com.doys.framework.core.db.DBFactory;
+import com.doys.framework.database.DBFactory;
 import com.doys.framework.util.UtilDataSet;
 import com.doys.framework.util.UtilString;
-import com.google.gson.internal.LinkedTreeMap;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
 import java.util.HashMap;
 public class BaseViewService extends BaseService {
-    public static SqlRowSet getView(DBFactory dbMaster, String viewPk) throws Exception {
+    public static SqlRowSet getView(DBFactory dbSys, String viewPk) throws Exception {
         String sql = "SELECT * FROM sys_view WHERE pk = ?";
-        return dbMaster.getRowSet(sql, viewPk);
+        return dbSys.getRowSet(sql, viewPk);
     }
     public static SqlRowSet getViewField(DBFactory dbSys, String viewPk) throws Exception {
         String sql = "SELECT  name, text, fixed, align, width, data_source_type, data_source, sequence "
@@ -104,18 +103,10 @@ public class BaseViewService extends BaseService {
 
         return dbSys.getRowSet(dbSys.replaceSQL(sql));
     }
-    public static SqlRowSet getViewDataOne(DBFactory dbBus, SqlRowSet rsView, long id) throws Exception {
+    public static SqlRowSet getViewDataOne(DBFactory dbBus, String sqlDataSource, long id) throws Exception {
         // -- 获取一条视图数据 --
-        String sql = "";
-
-        try {
-            rsView.first();
-            sql = "SELECT * FROM (" + rsView.getString("sql_data_source") + ") t WHERE id = " + id;
-            return dbBus.getRowSet(sql);
-        } catch (Exception e) {
-            logger.error(sql);
-            throw e;
-        }
+        String sql = "SELECT * FROM (" + sqlDataSource + ") t WHERE id = ?";
+        return dbBus.getRowSet(sql, id);
     }
 
     // -- ViewForm ------------------------------------------------------------
@@ -142,22 +133,12 @@ public class BaseViewService extends BaseService {
             + "ORDER BY sequence";
         return dbMaster.getRowSet(sql, viewPk);
     }
-    public static SqlRowSet getFormData(DBFactory dbSys, SqlRowSet rsView, long id) throws Exception {
-        String sql = "";
-        String databasePk, tableName;
-
-        rsView.first();
-        databasePk = rsView.getString("database_pk");
-        tableName = rsView.getString("table_name");
-        // ------------------------------------------------
-        if (databasePk.equalsIgnoreCase("prefix")) {
-            tableName = ".." + tableName;
-        }
-        sql = "SELECT * FROM " + tableName + " WHERE id = ?";
-        return dbSys.getRowSet(sql, id);
+    public static SqlRowSet getFormData(DBFactory dbBus, String tableName, long id) throws Exception {
+        String sql = "SELECT * FROM " + tableName + " WHERE id = ?";
+        return dbBus.getRowSet(sql, id);
     }
 
-    public static long insert(DBFactory dbBus, String tableName, LinkedTreeMap form) throws Exception {
+    public static long insert(DBFactory dbBus, String tableName, HashMap form) throws Exception {
         int nIdx = 0;
 
         String sql = "SELECT * FROM " + tableName + " LIMIT 0";
@@ -221,7 +202,7 @@ public class BaseViewService extends BaseService {
             throw e;
         }
     }
-    public static boolean update(DBFactory dbBus, String tableName, LinkedTreeMap form) throws Exception {
+    public static boolean update(DBFactory dbSys, DBFactory dbBus, String tableName, HashMap form) throws Exception {
         int result = 0, nIdx = 0;
 
         String sql = "SELECT * FROM " + tableName + " LIMIT 0";
@@ -229,60 +210,55 @@ public class BaseViewService extends BaseService {
         StringBuilder builder = new StringBuilder();
         SqlRowSetMetaData rsmd;
         // ------------------------------------------------
-        try {
-            builder.append("UPDATE " + tableName + " SET ");
+        builder.append("UPDATE " + tableName + " SET ");
 
-            sql = "SELECT * FROM " + tableName + " LIMIT 0";
-            rsmd = dbBus.getRowSet(sql).getMetaData();
-            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                columnType = UtilDataSet.getFieldType(rsmd.getColumnTypeName(i));
-                columnName = rsmd.getColumnName(i);
+        sql = "SELECT * FROM " + tableName + " LIMIT 0";
+        rsmd = dbBus.getRowSet(sql).getMetaData();
+        for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+            columnType = UtilDataSet.getFieldType(rsmd.getColumnTypeName(i));
+            columnName = rsmd.getColumnName(i);
 
-                if (!form.containsKey(columnName)) {
-                    continue;
-                }
-                if (!columnName.equalsIgnoreCase("id")) {
-                    quotes = "'";
-                    builder.append(nIdx++ == 0 ? "" : ", ");
-                    if (columnType.equalsIgnoreCase("number")) {
-                        quotes = "";
-                        columnValue = form.get(columnName).toString();
-                        if (columnValue.equals("")) {
-                            columnValue = null;
-                        }
-                    }
-                    else if (columnType.equalsIgnoreCase("datetime")) {
-                        columnValue = (String) form.get(columnName);
-                        if (columnValue.equals("")) {
-                            columnValue = null;
-                        }
-                    }
-                    else {
-                        columnValue = (String) form.get(columnName);
-                    }
-
-                    if (columnValue == null) {
-                        builder.append(columnName + " = NULL");
-                    }
-                    else {
-                        columnValue = columnValue.replaceAll("'", "''");
-                        builder.append(columnName + " = " + quotes + columnValue + quotes);
+            if (!form.containsKey(columnName)) {
+                continue;
+            }
+            if (!columnName.equalsIgnoreCase("id")) {
+                quotes = "'";
+                builder.append(nIdx++ == 0 ? "" : ", ");
+                if (columnType.equalsIgnoreCase("number")) {
+                    quotes = "";
+                    columnValue = form.get(columnName).toString();
+                    if (columnValue.equals("")) {
+                        columnValue = null;
                     }
                 }
-            }
+                else if (columnType.equalsIgnoreCase("datetime")) {
+                    columnValue = (String) form.get(columnName);
+                    if (columnValue.equals("")) {
+                        columnValue = null;
+                    }
+                }
+                else {
+                    columnValue = (String) form.get(columnName);
+                }
 
-            builder.append(" WHERE id = " + form.get("id"));
-            sql = builder.toString();
-
-            result = dbBus.exec(sql);
-            if (result != 1) {
-                throw new Exception("当前记录已不存在，请刷新视图页面。");
+                if (columnValue == null) {
+                    builder.append(columnName + " = NULL");
+                }
+                else {
+                    columnValue = columnValue.replaceAll("'", "''");
+                    builder.append(columnName + " = " + quotes + columnValue + quotes);
+                }
             }
-            return true;
-        } catch (Exception e) {
-            logger.info(sql);
-            throw e;
         }
+
+        builder.append(" WHERE id = " + form.get("id"));
+        sql = builder.toString();
+
+        result = dbBus.exec(sql);
+        if (result != 1) {
+            throw new Exception("当前记录已不存在，请刷新视图页面。");
+        }
+        return true;
     }
     public static boolean delete(DBFactory dbBus, String tableName, long id) throws Exception {
         String sql = "DELETE FROM " + tableName + " WHERE id = " + id;

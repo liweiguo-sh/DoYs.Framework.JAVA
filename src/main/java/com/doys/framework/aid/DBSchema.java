@@ -6,7 +6,9 @@
  * @modify date 2017-09-12
  * 解析数据库字段信息到表 ST_TALBE/ST_FIELD/ST_INDEX中, 只追加, 不删除
  */
-package com.doys.framework.core.db;
+package com.doys.framework.aid;
+import com.doys.framework.database.DBFactory;
+import com.doys.framework.database.dtb.DataTable;
 import com.doys.framework.util.UtilDataSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 

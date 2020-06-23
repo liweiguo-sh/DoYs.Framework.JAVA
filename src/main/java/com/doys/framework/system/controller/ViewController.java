@@ -7,10 +7,8 @@
  *****************************************************************************/
 package com.doys.framework.system.controller;
 import com.doys.framework.core.base.BaseController;
-import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.system.service.ViewService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,15 +19,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/system/view")
 public class ViewController extends BaseController {
-    @Autowired
-    DBFactory dbMaster;
-
     @PostMapping("/refresh")
     public RestResult refreshDBStruct(@RequestBody Map<String, String> req) {
         String viewPk = req.get("viewPk");
         // ------------------------------------------------
         try {
-            ViewService.refreshViewField(dbMaster, viewPk);
+            ViewService.refreshViewField(dbSys, viewPk);
         } catch (Exception e) {
             return ResultErr(e);
         }

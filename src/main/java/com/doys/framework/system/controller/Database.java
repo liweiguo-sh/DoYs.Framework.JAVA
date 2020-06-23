@@ -6,11 +6,9 @@
  * 数据库管理
  *****************************************************************************/
 package com.doys.framework.system.controller;
+import com.doys.framework.aid.DBSchema;
 import com.doys.framework.core.base.BaseController;
-import com.doys.framework.core.db.DBFactory;
-import com.doys.framework.core.db.DBSchema;
 import com.doys.framework.core.entity.RestResult;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,9 +19,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/system/database")
 public class Database extends BaseController {
-    @Autowired
-    DBFactory dbSys;
-
     @PostMapping("/refresh")
     public RestResult refreshDBStruct(@RequestBody Map<String, String> req) {
         String para1 = req.get("para1");

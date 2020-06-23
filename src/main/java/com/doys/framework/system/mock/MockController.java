@@ -7,10 +7,8 @@
  *****************************************************************************/
 package com.doys.framework.system.mock;
 import com.doys.framework.core.base.BaseController;
-import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.util.UtilDate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,9 +23,6 @@ import java.util.Random;
 @RestController
 @RequestMapping("/system/mock")
 public class MockController extends BaseController {
-    @Autowired
-    DBFactory dbSys;
-
     @PostMapping("/generate_data")
     public RestResult generateMockData(@RequestBody Map<String, String> req) {
         int rowCount = Integer.parseInt(req.get("rowCount"));

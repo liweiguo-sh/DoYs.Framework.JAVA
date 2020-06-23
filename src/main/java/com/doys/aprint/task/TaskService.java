@@ -1,6 +1,6 @@
 package com.doys.aprint.task;
-import com.doys.framework.core.db.DBFactory;
-import com.doys.framework.core.db.EntityTable;
+import com.doys.framework.database.DBFactory;
+import com.doys.framework.dts.EntityTable;
 import com.doys.framework.util.UtilDate;
 public class TaskService {
     public static int createQuickPrintTask(DBFactory dbSys, int labelId, String userkey) throws Exception {

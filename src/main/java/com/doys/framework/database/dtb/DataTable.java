@@ -7,8 +7,9 @@
  * 建议只对Int及String两种数据类型排序，Find同上.
  * 用法参考.net的DataTable, 已提供的方法基本相同, 用完后一定要调用.close()方法回收内存.
  */
-package com.doys.framework.core.db;
+package com.doys.framework.database.dtb;
 import com.doys.framework.config.Const;
+import com.doys.framework.database.DBFactory;
 import com.doys.framework.util.UtilDataSet;
 import com.doys.framework.util.UtilString;
 import org.slf4j.Logger;
@@ -16,13 +17,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
-public class DataTableBAK {
+public class DataTable {
     public SqlRowSet rs = null;
     public String SQL = "";
     public boolean UniqueSort = true;
@@ -48,10 +49,10 @@ public class DataTableBAK {
     private SimpleDateFormat sdfTime = new SimpleDateFormat(Const.datetimeFormat);
     private Logger logger = LoggerFactory.getLogger("DataTable");
     // -------------------------------------------------------------------------
-    public DataTableBAK(DBFactory dbFactory, String sql) throws Exception {
+    public DataTable(DBFactory dbFactory, String sql) throws Exception {
         _DataTable(dbFactory, sql, new Object[0]);
     }
-    public DataTableBAK(DBFactory dbFactory, String sql, Object[] parameters) throws Exception {
+    public DataTable(DBFactory dbFactory, String sql, Object[] parameters) throws Exception {
         _DataTable(dbFactory, sql, parameters);
     }
     private void _DataTable(DBFactory dbFactory, String sql, Object[] parameters) throws Exception {
@@ -84,7 +85,7 @@ public class DataTableBAK {
         } finally {
         }
     }
-    public DataTableBAK(String strDataTable, DBFactory dbFactory) throws Exception {
+    public DataTable(String strDataTable, DBFactory dbFactory) throws Exception {
         /*
          * 反序列化, 将序列化的字符串转换为DataTable类
          */
@@ -544,9 +545,10 @@ public class DataTableBAK {
 
         int[] arrPKeyIndex = null;
         int[] arrResult = null;
-        int nResult = 0;
+        int nResult = 0, nIdx = 0;
 
-        PreparedStatement pstInsert = null, pstUpdate = null, pstDelete = null;
+        ArrayList<Object[]> listInsert = null, listUpdate = null, listDelete = null;
+        Object[] paraInsert, paraUpdate, paraDelete;
         // --1、生成预处理SQL语句------------------------------------------------------
         strPKeyCols = strPKeyCols.replaceAll(" ", "");
         for (int iCol = 1; iCol <= _nColCount; iCol++) {
@@ -577,96 +579,91 @@ public class DataTableBAK {
             arrPKeyIndex[i] = getColIndex(arrPKey[i]);
         }
         // --2、填充预处理SQL参数------------------------------------------------------
-
-        // --A、Create prepareStatement--------------------------------------
+        // --A、Create prepareStatement---------------------
         if (_nInsertCount > 0) {
-            ///pstInsert = dbFactory.dbConnection.prepareStatement(sqlInsertCmd);
-            pstInsert = dbFactory.getDataSource().getConnection().prepareStatement(sqlInsertCmd);
+            listInsert = new ArrayList<>();
         }
         if (_nUpdateCount > 0) {
-            ///pstUpdate = dbFactory.dbConnection.prepareStatement(sqlUpdateCmd);
-            pstUpdate = dbFactory.getDataSource().getConnection().prepareStatement(sqlUpdateCmd);
+            listUpdate = new ArrayList<>();
         }
         if (_nDeleteCount > 0) {
-            ///pstDelete = dbFactory.dbConnection.prepareStatement(sqlDeleteCmd);
-            pstDelete = dbFactory.getDataSource().getConnection().prepareStatement(sqlDeleteCmd);
+            listDelete = new ArrayList<>();
         }
-        // --B、Insert and Update-------------------------------------------
+        // --B、Insert and Update---------------------------
         for (int iRow = 0; iRow < _nRowCount; iRow++) {
             String strNUD = _arrRows[iRow][0];
-            int nParaIndex = 1;
             if (strNUD == null || strNUD == "") {
                 continue;
             }
             if (strNUD.compareTo("N") == 0) {
+                nIdx = 0;
+                paraInsert = new Object[_nColCount];
                 for (int iCol = 1; iCol <= _nColCount; iCol++) {
                     DataColumn dc = Column(iCol);
                     if (!dc.isAutoIncrement) {
                         if (null == _arrRows[iRow][iCol]) {
-                            pstInsert.setString(nParaIndex++, null);
+                            paraInsert[nIdx++] = null;
                         }
                         else {
                             if (dc.columnType.equalsIgnoreCase("datetime")) {
-                                pstInsert.setTimestamp(nParaIndex++, getTimestamp(_arrRows[iRow][iCol]));
+                                paraInsert[nIdx++] = getTimestamp(_arrRows[iRow][iCol]);
                             }
                             else {
-                                pstInsert.setObject(nParaIndex++, _arrRows[iRow][iCol]);
+                                paraInsert[nIdx++] = _arrRows[iRow][iCol];
                             }
                         }
                     }
                 }
-                pstInsert.addBatch();
+                listInsert.add(paraInsert);
             }
             else if (strNUD.compareTo("U") == 0) {
+                nIdx = 0;
+                paraUpdate = new Object[_nColCount + arrPKeyIndex.length];
                 for (int iCol = 1; iCol <= _nColCount; iCol++) {
                     DataColumn dc = Column(iCol);
                     if (!dc.isAutoIncrement) {
                         if (null == _arrRows[iRow][iCol]) {
-                            pstUpdate.setString(nParaIndex++, null);
+                            paraUpdate[nIdx++] = null;
                         }
                         else {
                             if (dc.columnType.equalsIgnoreCase("datetime")) {
-                                pstUpdate.setTimestamp(nParaIndex++, getTimestamp(_arrRows[iRow][iCol]));
+                                paraUpdate[nIdx++] = getTimestamp(_arrRows[iRow][iCol]);
                             }
                             else {
-                                pstUpdate.setObject(nParaIndex++, _arrRows[iRow][iCol]);
+                                paraUpdate[nIdx++] = _arrRows[iRow][iCol];
                             }
                         }
                     }
                 }
                 for (int iCol = 0; iCol < arrPKeyIndex.length; iCol++) {
                     int colIndex = arrPKeyIndex[iCol];
-                    pstUpdate.setString(nParaIndex++, _arrRows[iRow][colIndex]);
+                    paraUpdate[nIdx++] = _arrRows[iRow][colIndex];
                 }
-                pstUpdate.addBatch();
+                listUpdate.add(paraUpdate);
             }
         }
-        // --C、Delete----------------------------------
+        // --C、Delete--------------------------------------
         for (int iRow = 0; iRow < _nDeleteCount; iRow++) {
+            nIdx = 0;
+            paraDelete = new Object[arrPKeyIndex.length];
             for (int iCol = 0; iCol < arrPKeyIndex.length; iCol++) {
                 int colIndex = arrPKeyIndex[iCol];
-                pstDelete.setString(iCol + 1, _arrRowsDeleted[iRow][colIndex]);
+                paraDelete[nIdx++] = _arrRowsDeleted[iRow][colIndex];
             }
-            pstDelete.addBatch();
+            listDelete.add(paraDelete);
         }
         // --D、提交更新------------------------------------
         if (_nDeleteCount > 0) {
-            arrResult = pstDelete.executeBatch();
+            arrResult = dbFactory.batchUpdate(sqlDeleteCmd, listDelete);
             nResult += arrResult.length;
-            pstDelete.close();
-            pstDelete = null;
         }
         if (_nUpdateCount > 0) {
-            arrResult = pstUpdate.executeBatch();
+            arrResult = dbFactory.batchUpdate(sqlUpdateCmd, listUpdate);
             nResult += arrResult.length;
-            pstUpdate.close();
-            pstUpdate = null;
         }
         if (_nInsertCount > 0) {
-            arrResult = pstInsert.executeBatch();
+            arrResult = dbFactory.batchUpdate(sqlInsertCmd, listInsert);
             nResult += arrResult.length;
-            pstInsert.close();
-            pstInsert = null;
         }
 
         nResult = _nInsertCount + _nUpdateCount + _nDeleteCount;
@@ -677,6 +674,7 @@ public class DataTableBAK {
         // --3、catch, finally and return ------------------
         return nResult;
     }
+
     // -- inner class area ----------------------------------------------------
 
 
@@ -695,7 +693,7 @@ public class DataTableBAK {
                 _arrRow[iCol] = (objValue == null ? null : objValue.toString());
             }
             else {// --修改行--
-                DataTableBAK.this.setDataCell(_DataRowIndex, iCol, objValue);
+                DataTable.this.setDataCell(_DataRowIndex, iCol, objValue);
             }
         }
         public void setDataCell(String ColumnName, Object objValue) {
@@ -822,9 +820,9 @@ public class DataTableBAK {
         return sbJSON.toString();
     }
 
-    ///
+    /// -- temp --
     public java.sql.Timestamp getTimestamp(String strDateTime) {
-        Date date = null;
+        java.util.Date date = null;
         java.sql.Timestamp timeStamp = null;
         try {
             if (strDateTime == null || strDateTime == "") {

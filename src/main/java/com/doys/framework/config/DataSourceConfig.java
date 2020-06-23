@@ -1,15 +1,14 @@
 package com.doys.framework.config;
-import com.doys.framework.core.db.DBFactory;
+import com.doys.framework.database.DBFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
 
-@Configuration
+//@Configuration
 public class DataSourceConfig {
     //region -- 默认数据源：sys --
     @Primary

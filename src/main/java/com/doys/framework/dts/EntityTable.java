@@ -1,4 +1,6 @@
-package com.doys.framework.core.db;
+package com.doys.framework.dts;
+import com.doys.framework.database.DBFactory;
+
 import java.util.HashMap;
 public class EntityTable {
     private long id = 0;

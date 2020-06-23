@@ -1,11 +1,7 @@
 package com.doys.example;
 import com.doys.framework.core.base.BaseController;
-import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.system.service.ViewService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,10 +17,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/once")
 public class JustDo extends BaseController {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-    @Autowired
-    DBFactory dbMaster;
-
     @RequestMapping("/a")
     public RestResult JustDoIt(@RequestBody Map<String, String> req) {
         int nMax = 1;
@@ -33,7 +25,7 @@ public class JustDo extends BaseController {
             for (int i = 1; i <= nMax; i++) {
                 logger.info("第 " + i + " 次执行开始 ...");
 
-                ViewService.refreshViewField(dbMaster, "label");
+                ViewService.refreshViewField(dbSys, "label");
 
                 logger.info("第 " + i + " 次执行完毕.");
             }
@@ -49,7 +41,7 @@ public class JustDo extends BaseController {
         int nMax = 1;
         try {
             nMax = Integer.parseInt(req.get("nMaxCount"));
-            dbMaster.exec("DELETE FROM customer");
+            dbSys.exec("DELETE FROM customer");
 
             int[] result;
             String sql = "INSERT INTO customer (id, name, age) VALUES (?, ?, ?)";
@@ -62,7 +54,7 @@ public class JustDo extends BaseController {
                 list.add(obj);
             }
             logger.info("begin");
-            result = dbMaster.batchUpdate(sql, list);
+            result = dbSys.batchUpdate(sql, list);
             logger.info("end");
             if (nMax > 0) {
                 return ResultOk();
@@ -70,7 +62,7 @@ public class JustDo extends BaseController {
 
 
             for (int i = 0; i < nMax; i++) {
-                dbMaster.exec("DELETE FROM customer");
+                dbSys.exec("DELETE FROM customer");
 
                 ArrayList<Customer> customers = new ArrayList<Customer>();
                 nMax = Integer.parseInt(req.get("nMaxCount"));
@@ -82,7 +74,7 @@ public class JustDo extends BaseController {
                     customers.add(c);
                 }
                 logger.info("第 " + (i + 1) + " 开始执行");
-                insertBatch(dbMaster, customers);
+                insertBatch(dbSys, customers);
                 logger.info("第 " + (i + 1) + " 次执行完毕");
             }
         } catch (Exception e) {

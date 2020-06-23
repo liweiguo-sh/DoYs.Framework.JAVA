@@ -20,10 +20,10 @@ public class CustomerView extends BaseViewController {
         String sql;
         // ------------------------------------------------
         if (addnew) {
-            sql = "INSERT INTO ..base_customer_para (customer_id, para_code, para_name, para_value) "
+            sql = "INSERT INTO base_customer_para (customer_id, para_code, para_name, para_value) "
                 + "SELECT ? customer_id, code para_code, name para_name, default_value para_value "
-                + "FROM ..base_para_def WHERE category = 'customer'";
-            dbSys.exec(sql, id);
+                + "FROM base_para_def WHERE category = 'customer'";
+            dbBus.exec(sql, id);
         }
 
         return true;
@@ -31,8 +31,8 @@ public class CustomerView extends BaseViewController {
 
     @Override
     protected boolean AfterDelete(long id) throws Exception {
-        String sql = "DELETE FROM ..base_customer_para WHERE customer_id = ?";
-        dbSys.exec(sql, id);
+        String sql = "DELETE FROM base_customer_para WHERE customer_id = ?";
+        dbBus.exec(sql, id);
 
         return true;
     }

@@ -1,12 +1,13 @@
 package com.doys.framework.core.base;
 import com.doys.framework.config.Const;
-import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestError;
 import com.doys.framework.core.entity.RestResult;
+import com.doys.framework.database.DBFactory;
 import com.doys.framework.util.UtilDataSet;
 import com.doys.framework.util.UtilEnv;
-import com.google.gson.Gson;
-import com.google.gson.internal.LinkedTreeMap;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -21,6 +22,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 public class BaseController extends BaseTop {
+    @Autowired
+    protected DBFactory dbSys;
+    @Autowired
+    @Qualifier("dynamicDBFactory")
+    protected DBFactory dbBus;
+
     private ThreadLocal<HashMap<String, Object>> tlHashMapIn = new ThreadLocal<>();
     private ThreadLocal<RestResult> tlRestResult = new ThreadLocal<>();
     private ThreadLocal<RestError> tlRestError = new ThreadLocal<>();
@@ -47,16 +54,18 @@ public class BaseController extends BaseTop {
                 while ((strLine = bufReader.readLine()) != null) {
                     builder.append(strLine);
                 }
+
+                jsonString = builder.toString();
+                if (debug) {
+                    logger.info("request => " + jsonString);
+                }
+
+                ObjectMapper mapper = new ObjectMapper();
+                hashMapIn = mapper.readValue(jsonString, HashMap.class);
             } catch (Exception e) {
                 e.printStackTrace();
-                logger.error("读取Request数据遇到未知错误，请检查。");
+                logger.error("读取解析Request数据遇到未知错误，请检查。");
             }
-            jsonString = builder.toString();
-            if (debug) {
-                logger.info("request => " + jsonString);
-            }
-
-            hashMapIn = (new Gson()).fromJson(jsonString, HashMap.class);
             tlHashMapIn.set(hashMapIn);
         }
         return hashMapIn;
@@ -98,19 +107,19 @@ public class BaseController extends BaseTop {
     }
 
     // -- public inXXX --------------------------------------------------------
-    protected LinkedTreeMap<String, Object> inForm(String parameterName) {
+    protected HashMap<String, Object> inForm(String parameterName) {
         Object obj = _inObject(parameterName, null);
         if (obj == null) {
             return null;
         }
-        return (LinkedTreeMap<String, Object>) obj;
+        return (HashMap<String, Object>) obj;
     }
-    protected ArrayList<LinkedTreeMap<String, Object>> inArrayList(String parameterName) {
+    protected ArrayList<HashMap<String, Object>> inArrayList(String parameterName) {
         Object obj = _inObject(parameterName, null);
         if (obj == null) {
             return null;
         }
-        return (ArrayList<LinkedTreeMap<String, Object>>) obj;
+        return (ArrayList<HashMap<String, Object>>) obj;
     }
 
     protected int inInt(String parameterName) {
@@ -158,7 +167,7 @@ public class BaseController extends BaseTop {
         }
         else {
             if (map.containsKey("form")) {
-                LinkedTreeMap<String, Object> mapForm = (LinkedTreeMap<String, Object>) map.get("form");
+                HashMap<String, Object> mapForm = (HashMap<String, Object>) map.get("form");
                 if (mapForm.containsKey(parameterName)) {
                     parameterValue = mapForm.get(parameterName);
                 }
@@ -174,7 +183,7 @@ public class BaseController extends BaseTop {
     // -- setValue ------------------------------------------------------------
     protected void setFormValue(String key, Object value) throws Exception {
         HashMap<String, Object> map = this.getHashMapIn();
-        LinkedTreeMap<String, Object> mapForm = (LinkedTreeMap<String, Object>) map.get("form");
+        HashMap<String, Object> mapForm = (HashMap<String, Object>) map.get("form");
         if (mapForm.containsKey(key)) {
             mapForm.replace(key, value);
         }

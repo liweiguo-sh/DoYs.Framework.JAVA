@@ -1,14 +1,14 @@
 package com.doys.aprint.print;
 import com.doys.framework.core.base.BaseService;
-import com.doys.framework.core.db.DBFactory;
-import com.google.gson.internal.LinkedTreeMap;
+import com.doys.framework.database.DBFactory;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 public class PrintService extends BaseService {
-    public static void generatePrintData(DBFactory dbSys, int labelId, int qty, int taskId, ArrayList<LinkedTreeMap<String, Object>> variables) throws Exception {
+    public static void generatePrintData(DBFactory dbSys, int labelId, int qty, int taskId, ArrayList<HashMap<String, Object>> variables) throws Exception {
         int columnCount, colIndex = 0;
 
         String sql, sqlInsert, sqlUpdate;
@@ -44,7 +44,7 @@ public class PrintService extends BaseService {
             builderField.append(name).append(", ");
             builderValue.append("?, ");
             // -- 1. 合并客户端变量值 --
-            for (LinkedTreeMap<String, Object> variable : variables) {
+            for (HashMap<String, Object> variable : variables) {
                 String paraKey = (String) variable.get("name");
                 if (paraKey.equalsIgnoreCase(name)) {
                     value = (String) variable.get("value");

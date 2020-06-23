@@ -1,6 +1,6 @@
 package com.doys.aprint.base;
 import com.doys.framework.core.base.BaseService;
-import com.doys.framework.core.db.DBFactory;
+import com.doys.framework.database.DBFactory;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 public class LabelService extends BaseService {
     /**
@@ -10,7 +10,7 @@ public class LabelService extends BaseService {
      * @param dbSys
      * @param labelId
      */
-    public static void generateLabelXTable(DBFactory dbSys, int labelId) throws Exception {
+    public static void generateLabelXTable(DBFactory dbSys, DBFactory dbBus, int labelId) throws Exception {
         int columnLength;
 
         String sql;
@@ -26,8 +26,8 @@ public class LabelService extends BaseService {
         builder.append("\n\tid int NOT NULL AUTO_INCREMENT,");
         builder.append("\n\trow_no int NOT NULL,");
 
-        sql = "SELECT * FROM ..base_label_variable WHERE label_id = ?";
-        rs = dbSys.getRowSet(sql, labelId);
+        sql = "SELECT * FROM base_label_variable WHERE label_id = ?";
+        rs = dbBus.getRowSet(sql, labelId);
         while (rs.next()) {
             columnName = rs.getString("name");
             columnLength = rs.getInt("value_len");

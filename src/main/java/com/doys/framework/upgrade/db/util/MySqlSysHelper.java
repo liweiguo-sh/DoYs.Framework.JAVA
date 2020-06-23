@@ -1,6 +1,6 @@
 package com.doys.framework.upgrade.db.util;
 
-import com.doys.framework.core.db.DBFactory;
+import com.doys.framework.database.DBFactory;
 import com.doys.framework.upgrade.db.enum1.EntityIndexType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

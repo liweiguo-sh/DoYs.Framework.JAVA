@@ -6,7 +6,6 @@
  * 菜单视图类
  *****************************************************************************/
 package com.doys.framework.aid;
-import com.doys.framework.core.db.DBSchema;
 import com.doys.framework.core.ex.UnImplementException;
 import com.doys.framework.core.view.BaseViewController;
 import org.springframework.jdbc.support.rowset.SqlRowSet;

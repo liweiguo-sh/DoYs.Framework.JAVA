@@ -1,18 +1,13 @@
 package com.doys.aprint.label;
 import com.doys.framework.core.base.BaseController;
-import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.util.UtilString;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/aprint/label")
 public class LabelController extends BaseController {
-    @Autowired
-    protected DBFactory dbMaster;
-
     @RequestMapping("/getLabelContentById")
     private RestResult getLabelContentById() {
         int labelId = inInt("labelId");
@@ -21,7 +16,7 @@ public class LabelController extends BaseController {
         // ------------------------------------------------
         try {
             sql = "SELECT * FROM ..base_label WHERE id = ?";
-            rs = dbMaster.getRowSet(sql, labelId);
+            rs = dbBus.getRowSet(sql, labelId);
             if (rs.next()) {
                 ok("id", rs.getString("id"));
                 ok("type", rs.getString("type"));
@@ -49,7 +44,7 @@ public class LabelController extends BaseController {
         // ------------------------------------------------
         try {
             sql = "UPDATE ..base_label SET content = ?, vars = ? WHERE id = ?";
-            dbMaster.exec(sql, content, vars, id);
+            dbBus.exec(sql, content, vars, id);
         } catch (Exception e) {
             return ResultErr(e);
         } finally {
@@ -66,7 +61,7 @@ public class LabelController extends BaseController {
         // ------------------------------------------------
         try {
             sql = "SELECT para_code, para_value FROM ..base_customer_para WHERE customer_id = ?";
-            rsCustomerPara = dbMaster.getRowSet(sql, customerId);
+            rsCustomerPara = dbBus.getRowSet(sql, customerId);
             ok("dtbCustomerPara", rsCustomerPara);
         } catch (Exception e) {
             return ResultErr(e);
@@ -83,7 +78,7 @@ public class LabelController extends BaseController {
         // ------------------------------------------------
         try {
             sql = "SELECT para_code, para_value FROM ..base_product_pn_para WHERE product_pn_id = ?";
-            rsProductPnPara = dbMaster.getRowSet(sql, customerId);
+            rsProductPnPara = dbBus.getRowSet(sql, customerId);
             ok("dtbProductPnPara", rsProductPnPara);
         } catch (Exception e) {
             return ResultErr(e);

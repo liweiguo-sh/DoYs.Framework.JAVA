@@ -1,6 +1,6 @@
 package com.doys.framework.system.service;
 import com.doys.framework.core.base.BaseService;
-import com.doys.framework.core.db.DBFactory;
+import com.doys.framework.database.DBFactory;
 
 import java.util.ArrayList;
 public class CommonService extends BaseService {

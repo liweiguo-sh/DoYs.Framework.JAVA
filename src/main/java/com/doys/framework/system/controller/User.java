@@ -8,11 +8,9 @@
 package com.doys.framework.system.controller;
 import com.doys.framework.common.image.ImageVerifyCode;
 import com.doys.framework.core.base.BaseController;
-import com.doys.framework.core.db.DBFactory;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.system.service.UserService;
 import com.doys.framework.util.UtilEnv;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,9 +27,6 @@ import java.util.regex.Pattern;
 @RestController
 @RequestMapping("/user")
 public class User extends BaseController {
-    @Autowired
-    DBFactory jtMaster;
-
     @Value("${global.login.verifyPassword}")
     private boolean blVerifyPassword;
     @Value("${global.login.verifyCode}")
@@ -58,7 +53,7 @@ public class User extends BaseController {
             tenantId = parseTenantId(in("tenantId"));
             session().setAttribute("tenantId", tenantId);
 
-            rsTenant = UserService.getTenant(jtMaster, tenantId);
+            rsTenant = UserService.getTenant(dbSys, tenantId);
             if (rsTenant.next()) {
                 dbName = rsTenant.getString("database_name");
                 session().setAttribute("dbName", dbName);
@@ -83,11 +78,11 @@ public class User extends BaseController {
             }
             // -- 1.2. 验证登录密码 --
             if (blVerifyPassword) {
-                UserService.verifyUser(jtMaster, dbName, userkey, password, loginTime, superPassword);
+                UserService.verifyUser(dbBus, dbName, userkey, password, loginTime, superPassword);
             }
 
             // -- 2. 返回用户信息 --
-            rsUser = UserService.getUser(jtMaster, dbName, userkey);
+            rsUser = UserService.getUser(dbBus, dbName, userkey);
             if (rsUser.next()) {
                 setSession(rsUser);
             }

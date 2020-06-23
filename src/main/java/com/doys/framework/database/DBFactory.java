@@ -1,5 +1,6 @@
-package com.doys.framework.core.db;
+package com.doys.framework.database;
 import com.doys.framework.core.ex.SessionTimeoutException;
+import com.doys.framework.database.dtb.DataTable;
 import com.doys.framework.util.UtilDate;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;

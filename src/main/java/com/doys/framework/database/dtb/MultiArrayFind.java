@@ -1,4 +1,4 @@
-package com.doys.framework.core.db;
+package com.doys.framework.database.dtb;
 import java.text.Collator;
 import java.text.RuleBasedCollator;
 import java.util.Comparator;
