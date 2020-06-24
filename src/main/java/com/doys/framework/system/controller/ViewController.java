@@ -24,7 +24,7 @@ public class ViewController extends BaseController {
         String viewPk = req.get("viewPk");
         // ------------------------------------------------
         try {
-            ViewService.refreshViewField(dbSys, viewPk);
+            ViewService.refreshViewField(dbSys, dbBus, viewPk);
         } catch (Exception e) {
             return ResultErr(e);
         }

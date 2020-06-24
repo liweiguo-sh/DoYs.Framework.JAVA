@@ -55,14 +55,14 @@ public class BaseViewService extends BaseService {
         String sql = "SELECT * FROM sys_tree_level WHERE tree_pk = ?";
         return dbSys.getRowSet(sql, treePk);
     }
-    public static SqlRowSet getTreeNode(DBFactory dbSys, String treePk, int nodeLevel, String nodeValue) throws Exception {
+    public static SqlRowSet getTreeNode(DBFactory dbSys, DBFactory dbBus, String treePk, int nodeLevel, String nodeValue) throws Exception {
         String sql, sqlData;
 
         sql = "SELECT sql_data FROM sys_tree_level WHERE tree_pk = ? AND level = ?";
         sqlData = dbSys.getValue(sql, treePk, nodeLevel);
 
         sql = sqlData.replaceAll("\\{node_value}", nodeValue);
-        return dbSys.getRowSet(sql);
+        return dbBus.getRowSet(sql);
     }
 
     public static SqlRowSet getViewData(DBFactory dbSys, SqlRowSet rsView, int pageNum, String sqlFilter, HashMap map) throws Exception {

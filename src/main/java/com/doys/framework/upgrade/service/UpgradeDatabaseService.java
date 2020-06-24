@@ -4,9 +4,9 @@ import com.doys.framework.config.DataSourceDelegating;
 import com.doys.framework.core.base.BaseService;
 import com.doys.framework.core.ex.UnImplementException;
 import com.doys.framework.database.DBFactory;
-import com.doys.framework.upgrade.db.annotation.EntityClassAnnotation;
 import com.doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
 import com.doys.framework.upgrade.db.annotation.EntityIndexAnnotation;
+import com.doys.framework.upgrade.db.annotation.EntityTableAnnotation;
 import com.doys.framework.upgrade.db.enum1.EntityFieldType;
 import com.doys.framework.upgrade.db.enum1.EntityIndexType;
 import com.doys.framework.upgrade.db.obj.EntityClass;
@@ -70,7 +70,7 @@ public class UpgradeDatabaseService extends BaseService {
     }
     private static EntityClass parseTable(Object entity) throws Exception {
         EntityClass table = new EntityClass();
-        EntityClassAnnotation tableProperty = entity.getClass().getAnnotation(EntityClassAnnotation.class);
+        EntityTableAnnotation tableProperty = entity.getClass().getAnnotation(EntityTableAnnotation.class);
         // -- 1. 判断是否实体类 --
         if (tableProperty == null) {
             // -- 不是实体类 --

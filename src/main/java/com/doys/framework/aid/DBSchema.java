@@ -13,10 +13,10 @@ import com.doys.framework.util.UtilDataSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 public class DBSchema {
-    private DBFactory dbMaster = null;
+    private DBFactory dbSys, dbBus;
     // ------------------------------------------------------------------------
-    public DBSchema(DBFactory _dbMaster) {
-        dbMaster = _dbMaster;
+    public DBSchema(DBFactory _dbSys, DBFactory _dbBus) {
+        dbSys = _dbSys;
     }
     public boolean refreshDBStruct(String databasePk, String tableName) throws Exception {
         String sql = "";
@@ -27,12 +27,13 @@ public class DBSchema {
         try {
             tableName = tableName.toLowerCase();
             sql = "SELECT * FROM sys_database WHERE pk = ?";
-            rs = dbMaster.getRowSet(sql, new Object[] { databasePk });
+            rs = dbSys.getRowSet(sql, new Object[] { databasePk });
             if (rs.next()) {
                 databaseType = rs.getString("type");
                 databaseName = rs.getString("name");
-                if (databasePk.equalsIgnoreCase("prefix")) {
-                    databaseName += dbMaster.getTenantId();
+                if (databasePk.equalsIgnoreCase("sys")) {
+                    dbBus = null;
+                    dbBus = dbSys;
                 }
             }
             else {
@@ -72,13 +73,13 @@ public class DBSchema {
         sql += "ORDER BY table_name";
 
         try {
-            SqlRowSet rs = dbMaster.getRowSet(sql);
+            SqlRowSet rs = dbSys.getRowSet(sql);
             sql = "SELECT * FROM sys_table WHERE database_pk = '" + databasePk + "' ";
             if (!tableName.equals("")) {
                 sql += "AND name IN ('" + tableName.replaceAll(",", "','") + "') ";
             }
             sql += "ORDER BY pk";
-            dtb = dbMaster.getDataTable(sql);
+            dtb = dbSys.getDataTable(sql);
             dtb.Sort("pk");
             // -- 1. 添加新表 ---------------------------------
             while (rs.next()) {
@@ -104,7 +105,7 @@ public class DBSchema {
                     // -- dtb.RemoveAt(i); --
                 }
             }
-            nResult = dtb.Update(dbMaster, "sys_table", "pk");
+            nResult = dtb.Update(dbSys, "sys_table", "pk");
             if (nResult < 0) {
                 throw new Exception("refreshDBStruct_MySQL_Table 遇到错误，请检查。");
             }
@@ -139,7 +140,7 @@ public class DBSchema {
             sql += "AND RIGHT(table_pk, LENGTH(table_pk) - " + databasePk.length() + " - 1) IN ('" + tableName.replaceAll(",", "','") + "') ";
         }
         sql += "ORDER BY pk";
-        dtb = dbMaster.getDataTable(sql);
+        dtb = dbSys.getDataTable(sql);
         dtb.Sort("pk");
 
         // -- 动态视图SQL -------------------------------------
@@ -155,7 +156,7 @@ public class DBSchema {
         sql += "ORDER BY table_name, column_name, flag_pkey";
         // ------------------------------------------------
         try {
-            SqlRowSet rs = dbMaster.getRowSet(sql);
+            SqlRowSet rs = dbSys.getRowSet(sql);
             while (rs.next()) {
                 oFind[0] = rs.getString("pk");
                 nFind = dtb.Find(oFind);
@@ -218,7 +219,7 @@ public class DBSchema {
                     // -- dtb.RemoveAt(i); --
                 }
             }
-            nResult = dtb.Update(dbMaster, "sys_field", "pk");
+            nResult = dtb.Update(dbSys, "sys_field", "pk");
             if (nResult < 0) {
                 throw new Exception("刷新数据库字段过程中遇到意外错误.");
             }
@@ -238,14 +239,14 @@ public class DBSchema {
         else {
             sql += "table_pk = '" + databaseKey + "." + tableName + "'";
         }
-        dbMaster.exec(sql);
+        dbSys.exec(sql);
         // ------------------------------------------------
         sql = "INSERT INTO sys..ST_INDEX_FIELD SELECT CONCAT('" + databaseKey
             + ".', UPPER(s.table_name)) AS table_pk, index_name, column_name AS field_name, CASE non_unique WHEN 1 THEN 0 ELSE 1 END AS is_unique, CASE constraint_type WHEN 'PRIMARY KEY' THEN 1 ELSE 2 END AS index_type "
             + "FROM INFORMATION_SCHEMA.STATISTICS s LEFT JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc ON s.table_schema = tc.table_schema  AND s.table_name = tc.table_name AND s.index_name = tc.constraint_name "
             + "WHERE s.table_schema = '" + databaseName + "' " + (tableName.equals("") ? "" : "AND s.table_name = '" + tableName + "' ")
             + "ORDER BY table_pk, index_type, index_name";
-        dbMaster.exec(sql);
+        dbSys.exec(sql);
         // ------------------------------------------------
         return true;
     }

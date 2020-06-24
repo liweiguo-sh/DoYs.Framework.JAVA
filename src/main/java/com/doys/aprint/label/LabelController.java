@@ -15,7 +15,7 @@ public class LabelController extends BaseController {
         SqlRowSet rs;
         // ------------------------------------------------
         try {
-            sql = "SELECT * FROM ..base_label WHERE id = ?";
+            sql = "SELECT * FROM base_label WHERE id = ?";
             rs = dbBus.getRowSet(sql, labelId);
             if (rs.next()) {
                 ok("id", rs.getString("id"));
@@ -43,7 +43,7 @@ public class LabelController extends BaseController {
         String vars = in("vars");
         // ------------------------------------------------
         try {
-            sql = "UPDATE ..base_label SET content = ?, vars = ? WHERE id = ?";
+            sql = "UPDATE base_label SET content = ?, vars = ? WHERE id = ?";
             dbBus.exec(sql, content, vars, id);
         } catch (Exception e) {
             return ResultErr(e);
@@ -60,7 +60,7 @@ public class LabelController extends BaseController {
         SqlRowSet rsCustomerPara;
         // ------------------------------------------------
         try {
-            sql = "SELECT para_code, para_value FROM ..base_customer_para WHERE customer_id = ?";
+            sql = "SELECT para_code, para_value FROM base_customer_para WHERE customer_id = ?";
             rsCustomerPara = dbBus.getRowSet(sql, customerId);
             ok("dtbCustomerPara", rsCustomerPara);
         } catch (Exception e) {
@@ -77,7 +77,7 @@ public class LabelController extends BaseController {
         SqlRowSet rsProductPnPara;
         // ------------------------------------------------
         try {
-            sql = "SELECT para_code, para_value FROM ..base_product_pn_para WHERE product_pn_id = ?";
+            sql = "SELECT para_code, para_value FROM base_product_pn_para WHERE product_pn_id = ?";
             rsProductPnPara = dbBus.getRowSet(sql, customerId);
             ok("dtbProductPnPara", rsProductPnPara);
         } catch (Exception e) {

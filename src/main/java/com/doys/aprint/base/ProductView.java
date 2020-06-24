@@ -10,14 +10,14 @@ public class ProductView extends BaseViewController {
     protected boolean AfterDelete(long id) throws Exception {
         String sql;
 
-        sql = "DELETE FROM ..base_product_pn WHERE product_id = ?";
-        dbSys.exec(sql, id);
+        sql = "DELETE FROM base_product_pn WHERE product_id = ?";
+        dbBus.exec(sql, id);
 
-        sql = "DELETE FROM ..base_product_para WHERE product_id = ?";
-        dbSys.exec(sql, id);
+        sql = "DELETE FROM base_product_para WHERE product_id = ?";
+        dbBus.exec(sql, id);
 
-        sql = "DELETE FROM ..base_product_pn_para WHERE product_id = ?";
-        dbSys.exec(sql, id);
+        sql = "DELETE FROM base_product_pn_para WHERE product_id = ?";
+        dbBus.exec(sql, id);
 
         return true;
     }

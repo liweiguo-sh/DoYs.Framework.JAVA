@@ -16,14 +16,14 @@ public class ProductParaView extends BaseViewController {
         String defaultValue = in("default_value");
         // ------------------------------------------------
         if (addnew) {
-            sql = "INSERT INTO ..base_product_pn_para (product_id, product_para_id, product_pn_id, para_code, para_name, para_value) "
+            sql = "INSERT INTO base_product_pn_para (product_id, product_para_id, product_pn_id, para_code, para_name, para_value) "
                 + "SELECT product_id, ? product_para_id, id product_pn_id, ? para_code, ? para_name, ? para_value "
-                + "FROM ..base_product_pn WHERE product_id = ?";
-            dbSys.exec(sql, id, code, name, defaultValue, productId);
+                + "FROM base_product_pn WHERE product_id = ?";
+            dbBus.exec(sql, id, code, name, defaultValue, productId);
         }
         else {
-            sql = "UPDATE ..base_product_pn_para SET para_code = ?, para_name = ? WHERE product_para_id = ?";
-            dbSys.exec(sql, code, name, id);
+            sql = "UPDATE base_product_pn_para SET para_code = ?, para_name = ? WHERE product_para_id = ?";
+            dbBus.exec(sql, code, name, id);
         }
 
         return true;
@@ -31,8 +31,8 @@ public class ProductParaView extends BaseViewController {
 
     @Override
     protected boolean AfterDelete(long id) throws Exception {
-        String sql = "DELETE FROM ..base_product_pn_para WHERE product_para_id = ?";
-        dbSys.exec(sql, id);
+        String sql = "DELETE FROM base_product_pn_para WHERE product_para_id = ?";
+        dbBus.exec(sql, id);
 
         return true;
     }

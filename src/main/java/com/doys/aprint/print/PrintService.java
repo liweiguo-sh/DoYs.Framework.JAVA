@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 public class PrintService extends BaseService {
-    public static void generatePrintData(DBFactory dbSys, int labelId, int qty, int taskId, ArrayList<HashMap<String, Object>> variables) throws Exception {
+    public static void generatePrintData(DBFactory dbBus, int labelId, int qty, int taskId, ArrayList<HashMap<String, Object>> variables) throws Exception {
         int columnCount, colIndex = 0;
 
         String sql, sqlInsert, sqlUpdate;
@@ -20,8 +20,8 @@ public class PrintService extends BaseService {
         SqlRowSet rsVariable;
 
         // -- 1. 预处理 --
-        sql = "SELECT COUNT(1) FROM ..base_label_variable WHERE label_id = ?";
-        columnCount = dbSys.getInt(sql, labelId);
+        sql = "SELECT COUNT(1) FROM base_label_variable WHERE label_id = ?";
+        columnCount = dbBus.getInt(sql, labelId);
         for (int i = 0; i < qty; i++) {
             paraInsert = new Object[columnCount + 2];
             paraInsert[columnCount] = taskId;
@@ -32,8 +32,8 @@ public class PrintService extends BaseService {
         builderValue = new StringBuilder(columnCount + 1);
 
         // -- 2. 生成数据 --
-        sql = "SELECT * FROM ..base_label_variable WHERE label_id = ? ORDER BY sequence, name";
-        rsVariable = dbSys.getRowSet(sql, labelId);
+        sql = "SELECT * FROM base_label_variable WHERE label_id = ? ORDER BY sequence, name";
+        rsVariable = dbBus.getRowSet(sql, labelId);
         while (rsVariable.next()) {
             String name = rsVariable.getString("name");
             String type = rsVariable.getString("type");
@@ -61,8 +61,8 @@ public class PrintService extends BaseService {
 
                 // -- 3. 更新末次打印值 --
                 valueString = String.format("%0" + valueLen + "d", valueLong);
-                sqlUpdate = "UPDATE ..base_label_variable SET value = ? WHERE label_id = ? AND name = ?";
-                dbSys.exec(sqlUpdate, valueString, labelId, name);
+                sqlUpdate = "UPDATE base_label_variable SET value = ? WHERE label_id = ? AND name = ?";
+                dbBus.exec(sqlUpdate, valueString, labelId, name);
             }
             else if (type.equalsIgnoreCase("date")) {
                 String valueString = LocalDateTime.now().format(DateTimeFormatter.ofPattern(format));
@@ -71,8 +71,8 @@ public class PrintService extends BaseService {
                 }
 
                 // -- 3. 更新末次打印值 --
-                sqlUpdate = "UPDATE ..base_label_variable SET value = ? WHERE label_id = ? AND name = ?";
-                dbSys.exec(sqlUpdate, valueString, labelId, name);
+                sqlUpdate = "UPDATE base_label_variable SET value = ? WHERE label_id = ? AND name = ?";
+                dbBus.exec(sqlUpdate, valueString, labelId, name);
             }
             else {
                 for (int i = 0; i < qty; i++) {
@@ -86,20 +86,20 @@ public class PrintService extends BaseService {
         builderField.append("task_id, row_no");
         builderValue.append("?, ?");
 
-        builder.append("INSERT INTO ..x_label_" + labelId + " ");
+        builder.append("INSERT INTO x_label_" + labelId + " ");
         builder.append("(" + builderField.toString() + ") ");
         builder.append("VALUES (" + builderValue.toString() + ")");
         sqlInsert = builder.toString();
-        dbSys.batchUpdate(sqlInsert, listInsert);
+        dbBus.batchUpdate(sqlInsert, listInsert);
     }
-    public static void deleteTask(DBFactory dbSys, int taskId) throws Exception {
+    public static void deleteTask(DBFactory dbBus, int taskId) throws Exception {
         int labelId;
 
         String sql;
         SqlRowSet rsTask;
         // ------------------------------------------------
-        sql = "SELECT * FROM ..core_task WHERE id = ?";
-        rsTask = dbSys.getRowSet(sql, taskId);
+        sql = "SELECT * FROM core_task WHERE id = ?";
+        rsTask = dbBus.getRowSet(sql, taskId);
         if (rsTask.next()) {
             labelId = rsTask.getInt("label_id");
         }
@@ -108,14 +108,14 @@ public class PrintService extends BaseService {
         }
 
         // ------------------------------------------------
-        sql = "DELETE FROM ..x_label_" + labelId + " WHERE task_id = ?";
-        dbSys.exec(sql, taskId);
+        sql = "DELETE FROM x_label_" + labelId + " WHERE task_id = ?";
+        dbBus.exec(sql, taskId);
 
-        sql = "DELETE FROM ..core_task WHERE id = ?";
-        dbSys.exec(sql, taskId);
+        sql = "DELETE FROM core_task WHERE id = ?";
+        dbBus.exec(sql, taskId);
     }
-    public static SqlRowSet getTaskData(DBFactory dbSys, int labelId, int taskId, int rowNoFrom, int rowNoTo) throws Exception {
-        String sql = "SELECT * FROM ..x_label_" + labelId + " WHERE task_id = ? AND row_no >= ? AND row_no <= ?";
-        return dbSys.getRowSet(sql, taskId, rowNoFrom, rowNoTo);
+    public static SqlRowSet getTaskData(DBFactory dbBus, int labelId, int taskId, int rowNoFrom, int rowNoTo) throws Exception {
+        String sql = "SELECT * FROM x_label_" + labelId + " WHERE task_id = ? AND row_no >= ? AND row_no <= ?";
+        return dbBus.getRowSet(sql, taskId, rowNoFrom, rowNoTo);
     }
 }

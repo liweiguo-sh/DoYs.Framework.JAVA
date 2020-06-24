@@ -1,4 +1,4 @@
-package com.doys.framework.dts;
+package com.doys.framework.dts.parent;
 import com.doys.framework.database.DBFactory;
 
 import java.util.HashMap;

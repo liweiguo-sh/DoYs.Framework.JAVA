@@ -23,9 +23,9 @@ public class JustDo extends BaseController {
         try {
             nMax = Integer.parseInt(req.get("nMaxCount"));
             for (int i = 1; i <= nMax; i++) {
-                logger.info("第 " + i + " 次执行开始 ...");
+                logger.info("第 " + i + " 次执行开始...");
 
-                ViewService.refreshViewField(dbSys, "label");
+                ViewService.refreshViewField(dbSys, dbBus, "label");
 
                 logger.info("第 " + i + " 次执行完毕.");
             }

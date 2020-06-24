@@ -18,16 +18,16 @@ public class QuickPrintController extends BaseController {
         SqlRowSet rsLabel, rsCustomer, rsProductPn;
         // ------------------------------------------------
         try {
-            sql = "SELECT id, code, name FROM ..base_label ORDER BY code, name";
+            sql = "SELECT id, code, name FROM base_label ORDER BY code, name";
             rsLabel = dbBus.getRowSet(sql);
             ok("dtbLabel", rsLabel);
 
-            sql = "SELECT id, code, name FROM ..base_customer ORDER BY code, name";
+            sql = "SELECT id, code, name FROM base_customer ORDER BY code, name";
             rsCustomer = dbBus.getRowSet(sql);
             ok("dtbCustomer", rsCustomer);
 
             sql = "SELECT pn.id, p.name product_name, pn.pn "
-                + "FROM ..base_product p INNER JOIN ..base_product_pn pn ON p.id = pn.product_id ORDER BY p.name, pn.pn";
+                + "FROM base_product p INNER JOIN base_product_pn pn ON p.id = pn.product_id ORDER BY p.name, pn.pn";
             rsProductPn = dbBus.getRowSet(sql);
             ok("dtbProductPn", rsProductPn);
         } catch (Exception e) {
@@ -43,11 +43,11 @@ public class QuickPrintController extends BaseController {
         SqlRowSet rsLabel, rsLabelVariable;
         // ------------------------------------------------
         try {
-            sql = "SELECT * FROM ..base_label WHERE id = ?";
+            sql = "SELECT * FROM base_label WHERE id = ?";
             rsLabel = dbBus.getRowSet(sql, labelId);
             ok("dtbLabel", rsLabel);
 
-            sql = "SELECT * FROM ..base_label_variable WHERE label_id = ? ORDER BY sequence, name";
+            sql = "SELECT * FROM base_label_variable WHERE label_id = ? ORDER BY sequence, name";
             rsLabelVariable = dbBus.getRowSet(sql, labelId);
             ok("dtbLabelVariable", rsLabelVariable);
         } catch (Exception e) {

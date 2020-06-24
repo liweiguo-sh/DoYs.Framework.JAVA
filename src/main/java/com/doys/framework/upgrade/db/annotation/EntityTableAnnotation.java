@@ -15,7 +15,7 @@ import java.lang.annotation.*;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface EntityClassAnnotation {
+public @interface EntityTableAnnotation {
     /**
      * 数据库名称
      */

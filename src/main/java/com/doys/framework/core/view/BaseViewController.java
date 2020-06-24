@@ -79,10 +79,17 @@ public class BaseViewController extends BaseController {
         String treePk = in("treePk");
         String nodeValue = in("nodeValue");
 
-        SqlRowSet rsTreeNode;
+        SqlRowSet rsTree, rsTreeNode;
         // ------------------------------------------------
         try {
-            rsTreeNode = BaseViewService.getTreeNode(dbSys, treePk, nodeLevel, nodeValue);
+            rsTree = BaseViewService.getTree(dbSys, treePk);
+            rsTree.first();
+            if (rsTree.getString("database_pk").equalsIgnoreCase("sys")) {
+                dbBus = null;
+                dbBus = dbSys;
+            }
+
+            rsTreeNode = BaseViewService.getTreeNode(dbSys, dbBus, treePk, nodeLevel, nodeValue);
             ok("dtbTreeNode", rsTreeNode);
         } catch (Exception e) {
             return ResultErr(e);
@@ -131,9 +138,15 @@ public class BaseViewController extends BaseController {
         SqlRowSet rsView, rsViewField, rsFlowButton, rsViewButton;
         // ------------------------------------------------
         try {
+            rsView = BaseViewService.getView(dbSys, viewPk);
+            rsView.first();
+            if (rsView.getString("database_pk").equalsIgnoreCase("sys")) {
+                dbBus = null;
+                dbBus = dbSys;
+            }
             rsViewField = this.getViewField(viewPk);
 
-            HashMap<String, SqlRowSet> mapDS = BaseViewService.getViewDS(dbSys, rsViewField);
+            HashMap<String, SqlRowSet> mapDS = BaseViewService.getViewDS(dbBus, rsViewField);
             for (Map.Entry<String, SqlRowSet> entry : mapDS.entrySet()) {
                 ok("dtbCDS_" + entry.getKey(), entry.getValue());
             }

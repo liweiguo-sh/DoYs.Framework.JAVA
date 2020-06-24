@@ -33,10 +33,10 @@ public class XLabelView extends BaseViewController {
 
         String sql;
         if (labelId == 0) {
-            sql = "SELECT * FROM ..x_label";
+            sql = "SELECT * FROM x_label";
         }
         else {
-            sql = "SELECT * FROM ..x_label_" + labelId;
+            sql = "SELECT * FROM x_label_" + labelId;
         }
         return sql;
     }

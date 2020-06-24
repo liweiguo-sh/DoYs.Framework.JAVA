@@ -11,9 +11,9 @@ public class ProductPnParaView extends BaseViewController {
         String sql;
         // ------------------------------------------------
         if (addnew) {
-            sql = "INSERT INTO ..base_product_para (product_id, para_code, para_name, para_value) "
+            sql = "INSERT INTO base_product_para (product_id, para_code, para_name, para_value) "
                 + "SELECT ? product_id, code para_code, name para_name, default_value para_value "
-                + "FROM ..base_para_def WHERE category = 'customer'";
+                + "FROM base_para_def WHERE category = 'customer'";
             //dbMaster.exec(sql, id);
         }
         return true;

@@ -20,7 +20,7 @@ public class DatabaseView extends BaseViewController {
         String pk = in("pk");
         // ------------------------------------------------
         if (buttonName.equalsIgnoreCase("refresh")) {
-            DBSchema schema = new DBSchema(dbSys);
+            DBSchema schema = new DBSchema(dbSys, dbBus);
             schema.refreshDBStruct(pk, "");
         }
         else {
