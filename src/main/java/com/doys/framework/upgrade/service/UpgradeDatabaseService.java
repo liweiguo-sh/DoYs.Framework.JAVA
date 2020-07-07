@@ -1,29 +1,28 @@
 package com.doys.framework.upgrade.service;
 import com.doys.framework.common.io.ScanFile;
-import com.doys.framework.config.DataSourceDelegating;
 import com.doys.framework.core.base.BaseService;
-import com.doys.framework.core.ex.UnImplementException;
 import com.doys.framework.database.DBFactory;
+import com.doys.framework.database.ds.UtilDDS;
 import com.doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
 import com.doys.framework.upgrade.db.annotation.EntityIndexAnnotation;
 import com.doys.framework.upgrade.db.annotation.EntityTableAnnotation;
 import com.doys.framework.upgrade.db.enum1.EntityFieldType;
 import com.doys.framework.upgrade.db.enum1.EntityIndexType;
-import com.doys.framework.upgrade.db.obj.EntityClass;
 import com.doys.framework.upgrade.db.obj.EntityField;
+import com.doys.framework.upgrade.db.obj.EntityTable;
 import com.doys.framework.upgrade.db.util.ClassReflect;
 import com.doys.framework.upgrade.db.util.MySqlSysHelper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UpgradeDatabaseService extends BaseService {
-    public static void upgrade(DBFactory dbSys, DataSource busDS, String entityPaths) throws Exception {
+    public static void upgrade(DBFactory dbSys, String entityPaths) throws Exception {
+        String sql, databaseName;
         String classFile = "";
-        ArrayList<EntityClass> entityClasses = new ArrayList<>();
+        ArrayList<EntityTable> entityClasses = new ArrayList<>();
         try {
             // -- 扫描实体类 --
             ArrayList<String> alClassFile = ScanFile.scanClass(entityPaths, true);
@@ -37,7 +36,7 @@ public class UpgradeDatabaseService extends BaseService {
                 try {
                     Object entity = clazz.getDeclaredConstructor().newInstance();
 
-                    EntityClass entityClass = parseTable(entity);
+                    EntityTable entityClass = parseTable(entity);
                     if (entityClass != null) {
                         entityClasses.add(entityClass);
                         System.err.println("======== 实体类 ======== " + classFile);
@@ -55,21 +54,31 @@ public class UpgradeDatabaseService extends BaseService {
             }
 
             // -- 升级数据库 --
-            for (EntityClass entityClass : entityClasses) {
-                //System.out.println("\n" + entityClass.toString());
-                //System.out.println("\nDROP TABLE IF EXISTS " + entityClass.name + ";");
-                //System.out.println(entityClass.getCreateTableSql());
-                //System.out.println("\nSELECT * FROM " + entityClass.name + ";");
+            for (EntityTable entityClass : entityClasses) {
+                sql = "SELECT name FROM sys_database WHERE pk = ?";
+                databaseName = dbSys.getValue(sql, entityClass.datbasePK);
 
-                upgradeTable(dbSys, busDS, entityClass);
+                if (entityClass.datbasePK.equalsIgnoreCase("sys")) {
+                    upgradeTable(dbSys, databaseName, entityClass);
+                }
+                else {
+                    sql = "SELECT id FROM sys_tenant";
+                    SqlRowSet rsTenant = dbSys.getRowSet(sql);
+                    while (rsTenant.next()) {
+                        int tenantId = rsTenant.getInt("id");
+                        String dynamicDbName = databaseName + tenantId;
+                        DBFactory dbBus = UtilDDS.getDBFactory(tenantId);
+                        upgradeTable(dbBus, dynamicDbName, entityClass);
+                    }
+                }
             }
             logger.info("upgrade database success, total entity class: " + entityClasses.size());
         } catch (Exception e) {
             throw e;
         }
     }
-    private static EntityClass parseTable(Object entity) throws Exception {
-        EntityClass table = new EntityClass();
+    private static EntityTable parseTable(Object entity) throws Exception {
+        EntityTable table = new EntityTable();
         EntityTableAnnotation tableProperty = entity.getClass().getAnnotation(EntityTableAnnotation.class);
         // -- 1. 判断是否实体类 --
         if (tableProperty == null) {
@@ -149,65 +158,30 @@ public class UpgradeDatabaseService extends BaseService {
         return cd;
     }
 
-    private static void upgradeTable(DBFactory dbSys, DataSource busDataSource, EntityClass entityClass) throws Exception {
+    private static void upgradeTable(DBFactory dbBus, String databaseName, EntityTable entityClass) throws Exception {
         int result;
 
         String sql;
-        String databasePk = entityClass.datbasePK;
-        String databaseName, dbNamePrefix;
         String tableName = entityClass.name;
-
-        SqlRowSet rsTenant;
         // ------------------------------------------------
-        sql = "SELECT name FROM sys_database WHERE pk = ?";
-        databaseName = dbSys.getValue(sql, databasePk);
-
-        if (databasePk.equalsIgnoreCase("sys")) {
-            sql = "SELECT COUNT(1) FROM information_schema.TABLES WHERE table_schema = ? table_type = 'BASE TABLE' AND table_name = ?";
-            result = dbSys.getInt(sql, databaseName, tableName);
-            if (result == 0) {
-                // -- 1. 表不存在：创建 --
-                sql = entityClass.getCreateTableSql();
-                dbSys.exec(sql);
-            }
-            else {
-                // -- 2. 表存在：比对字段、比对索引 --
-                upgradeField(dbSys, dbSys, entityClass, databaseName);
-                upgradeIndex(dbSys, entityClass);
-            }
-        }
-        else if (databasePk.equalsIgnoreCase("prefix")) {
-            sql = "SELECT id FROM sys_tenant ORDER BY id";
-            rsTenant = dbSys.getRowSet(sql);
-            while (rsTenant.next()) {
-                dbNamePrefix = databaseName + rsTenant.getInt("id");
-
-                DBFactory dbBus = new DBFactory(new DataSourceDelegating(busDataSource, dbNamePrefix));
-                String strCategory = dbBus.getDataSource().getConnection().getCatalog();
-
-                sql = "SELECT COUNT(1) FROM information_schema.TABLES WHERE table_schema = ? AND table_type = 'BASE TABLE' AND table_name = ?";
-                result = dbBus.getInt(sql, dbNamePrefix, tableName);
-                if (result == 0) {
-                    // -- 1. 表不存在：创建 --
-                    sql = entityClass.getCreateTableSql();
-                    dbBus.exec(sql);
-                }
-                else {
-                    // -- 2. 表存在：比对字段、比对索引 --
-                    upgradeField(dbSys, dbBus, entityClass, dbNamePrefix);
-                    upgradeIndex(dbSys, entityClass);
-                }
-            }
+        sql = "SELECT COUNT(1) FROM information_schema.TABLES WHERE table_schema = ? AND table_type = 'BASE TABLE' AND table_name = ?";
+        result = dbBus.getInt(sql, databaseName, tableName);
+        if (result == 0) {
+            // -- 1. 表不存在：创建 --
+            sql = entityClass.getCreateTableSql();
+            dbBus.exec(sql);
         }
         else {
-            throw new UnImplementException();
+            // -- 2. 表存在：比对字段、比对索引 --
+            upgradeField(dbBus, entityClass, databaseName);
+            upgradeIndex(dbBus, entityClass);
         }
     }
-    private static void upgradeField(DBFactory dbSys, DBFactory dbBus, EntityClass entityClass, String databaseName) throws Exception {
+    private static void upgradeField(DBFactory dbBus, EntityTable entityClass, String databaseName) throws Exception {
         boolean blInvalidColumn;
         String columnName = "";
         String sql = "SELECT * FROM information_schema.COLUMNS WHERE table_schema = ? AND table_name = ?";
-        SqlRowSet rsColumn = dbSys.getRowSet(sql, databaseName, entityClass.name);
+        SqlRowSet rsColumn = dbBus.getRowSet(sql, databaseName, entityClass.name);
         for (EntityField entityField : entityClass.entityFields) {
             boolean isNewColumn = true;
             rsColumn.beforeFirst();
@@ -337,7 +311,7 @@ public class UpgradeDatabaseService extends BaseService {
 
         return needUpgrage;
     }
-    private static void upgradeIndex(DBFactory dbSys, EntityClass entityClass) throws Exception {
+    private static void upgradeIndex(DBFactory dbSys, EntityTable entityClass) throws Exception {
         String indexFields = "";
         ArrayList<String[]> alIndex;
 

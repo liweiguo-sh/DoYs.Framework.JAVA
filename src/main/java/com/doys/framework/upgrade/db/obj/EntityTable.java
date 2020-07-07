@@ -3,7 +3,7 @@ import com.doys.framework.upgrade.db.enum1.EntityFieldType;
 
 import java.util.ArrayList;
 
-public class EntityClass {
+public class EntityTable {
     public String datbasePK = "";
     public String name = "";
     /**

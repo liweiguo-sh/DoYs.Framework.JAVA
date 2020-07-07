@@ -5,6 +5,8 @@ server:
     context-path: /DoYsSV
     session:
       timeout: PT360M
+logging:
+  config: classpath:config/logback-spring.xml
 
 spring:
   devtools:
@@ -12,7 +14,10 @@ spring:
       enabled: true
     livereload:
       enabled: false
-
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
   datasource:
     username: root
     password: 34821015
@@ -34,16 +39,19 @@ spring:
     url: jdbc:mysql://localhost:3306/{database}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&rewriteBatchedStatements=true&serverTimezone=Asia/Shanghai&autoReconnect=true&zeroDateTimeBehavior=convertToNull
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
+  hikari:
+    maximum-pool-size: 15
 
 upgrade-database:
   entity-packages:
     com.doys.aprint.dts
-
+  delete-field:
+    keep-days: 31
 global:
   debug: true
   login:
     verifyCode: false
     verifyPassword: false
     superPassword: 34821015
-  resRunPath: D:/.work/resRunPath
-  resTempPath: D:/.work/resTempPath
+  resRunPath: C:/.work/resRunPath
+  resTempPath: C:/.work/resTempPath

@@ -12,16 +12,18 @@ public class BuildingView extends BaseViewController {
         String name = in("name");
         // ------------------------------------------------
         if (addnew) {
-            sql = "UPDATE ..base_building b INNER JOIN ..base_area a ON b.area_id = a.id "
+            sql = "UPDATE base_building b INNER JOIN base_area a ON b.area_id = a.id "
                 + "SET b.area_name = a.name WHERE b.id = ?";
-            dbSys.exec(sql, id);
+            dbBus.exec(sql, id);
         }
         else {
-            sql = "UPDATE ..base_floor SET building_name = ? WHERE building_id = ?";
-            dbSys.exec(sql, name, id);
+            sql = "UPDATE base_floor SET building_name = ? WHERE building_id = ?";
+            dbBus.exec(sql, name, id);
 
-            sql = "UPDATE ..base_room SET building_name = ? WHERE building_id = ?";
-            dbSys.exec(sql, name, id);
+            sql = "UPDATE base_room SET building_name = ? WHERE building_id = ?";
+            dbBus.exec(sql, name, id);
+
+            RoomService.updateFullname(dbBus);
         }
         // ------------------------------------------------
         return true;

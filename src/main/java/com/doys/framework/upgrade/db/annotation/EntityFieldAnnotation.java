@@ -44,6 +44,7 @@ public @interface EntityFieldAnnotation {
 
     /**
      * 默认值
+     * 数据库时间：CURRENT_TIMESTAMP
      */
     String default_value() default "";
 

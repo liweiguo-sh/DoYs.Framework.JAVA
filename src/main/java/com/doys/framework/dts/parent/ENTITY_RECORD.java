@@ -2,7 +2,7 @@ package com.doys.framework.dts.parent;
 import com.doys.framework.database.DBFactory;
 
 import java.util.HashMap;
-public class EntityTable {
+public class ENTITY_RECORD {
     private long id = 0;
 
     private String tableName;
@@ -11,13 +11,13 @@ public class EntityTable {
 
     protected DBFactory dbSys;
     // ------------------------------------------------------------------------
-    public EntityTable(DBFactory dbSys, String tableName) throws Exception {
-        _EntityTable(dbSys, tableName, 0);
+    public ENTITY_RECORD(DBFactory dbSys, String tableName) throws Exception {
+        _ENTITY_RECORD(dbSys, tableName, 0);
     }
-    public EntityTable(DBFactory dbSys, String tableName, long id) throws Exception {
-        _EntityTable(dbSys, tableName, id);
+    public ENTITY_RECORD(DBFactory dbSys, String tableName, long id) throws Exception {
+        _ENTITY_RECORD(dbSys, tableName, id);
     }
-    private void _EntityTable(DBFactory dbSys, String tableName, long id) throws Exception {
+    private void _ENTITY_RECORD(DBFactory dbSys, String tableName, long id) throws Exception {
         this.dbSys = dbSys;
         this.tableName = dbSys.replaceSQL(tableName);
 
@@ -25,7 +25,7 @@ public class EntityTable {
     }
 
     // ------------------------------------------------------------------------
-    public EntityTable setValue(String columnName, Object columnValue) {
+    public ENTITY_RECORD setValue(String columnName, Object columnValue) {
         columnName = columnName.toLowerCase();
         if (this.map.containsKey(columnName)) {
             this.map.replace(columnName, columnValue);

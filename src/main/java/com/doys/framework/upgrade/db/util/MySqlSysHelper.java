@@ -1,7 +1,7 @@
 package com.doys.framework.upgrade.db.util;
-
 import com.doys.framework.database.DBFactory;
 import com.doys.framework.upgrade.db.enum1.EntityIndexType;
+import com.doys.framework.util.UtilYml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,7 +9,6 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
@@ -18,7 +17,6 @@ import java.util.ArrayList;
  */
 public class MySqlSysHelper {
     private static Logger log = LoggerFactory.getLogger("MySqlSysHelper");
-    private static Period Periodbe;
 
     /**
      * @param tableName 表名称
@@ -82,7 +80,6 @@ public class MySqlSysHelper {
         System.out.println(sql);
         jdbcTemplate.execute(sql);
     }
-
     public static void addIndex(JdbcTemplate jdbcTemplate, String tableName, EntityIndexType indexType, String indexName, String indexFields) throws Exception {
         String sql = "";
         if (indexType == EntityIndexType.PRIMARY) {
@@ -105,10 +102,7 @@ public class MySqlSysHelper {
         String sql = "ALTER TABLE " + tableName + " DROP COLUMN " + columnName;
         dbBus.exec(sql);
     }
-
     public static void disableColumn(DBFactory dbBus, String databaseName, String tableName, String columnName, String columnType, String columnComment) throws Exception {
-        long maxDays = 30;
-
         String sql = "";
         String columnNameMock = "", prefixMock = "__$$__";
 
@@ -131,7 +125,8 @@ public class MySqlSysHelper {
         String dtUpgradeStr = columnComment.substring(0, nIdx);
         LocalDate dtUpgrade = LocalDate.parse(dtUpgradeStr, formatter);
         long days = LocalDate.now().toEpochDay() - dtUpgrade.toEpochDay();
-        if (days > maxDays) {
+        long maxDays = UtilYml.getInt("deleteFieldKeepDays");
+        if (days >= maxDays) {
             dropColumn(dbBus, tableName, columnName);
         }
     }

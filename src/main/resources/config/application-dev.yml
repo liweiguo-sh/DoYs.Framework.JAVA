@@ -1,10 +1,12 @@
-## -- development environment --
+## -- aprint --
 server:
   port: 9988
   servlet:
     context-path: /DoYsSV
     session:
       timeout: PT360M
+logging:
+  config: classpath:config/logback-spring.xml
 
 spring:
   devtools:
@@ -12,68 +14,44 @@ spring:
       enabled: true
     livereload:
       enabled: false
-
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
   datasource:
     username: root
     password: 34821015
-    url: jdbc:mysql://localhost:3306/sys?useUnicode=true&characterEncoding=utf-8&rewriteBatchedStatements=true&useSSL=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/aprint?useUnicode=true&characterEncoding=UTF-8&useSSL=false&rewriteBatchedStatements=true&serverTimezone=Asia/Shanghai&autoReconnect=true&zeroDateTimeBehavior=convertToNull
     driver-class-name: com.mysql.cj.jdbc.Driver
-    type: com.alibaba.druid.pool.DruidDataSource
-    dbcp2:
-      initial-size: 5
-      max-total: 100
-      max-wait-millis: 5000
-      min-idle: 20
-      test-while-idle: true
-      validation-query: select 1
-      test-on-borrow: false
-      test-on-return: false
-
-    aprint:
-      username: root
-      password: 34821015
-      url: jdbc:mysql://localhost:3306/sys_100?useUnicode=true&characterEncoding=utf-8&rewriteBatchedStatements=true&useSSL=true&serverTimezone=Asia/Shanghai
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      type: com.alibaba.druid.pool.DruidDataSource
-      dbcp2:
-        initial-size: 5
-        max-total: 100
-        max-wait-millis: 5000
-        min-idle: 20
-        test-while-idle: true
-        validation-query: select 1
-        test-on-borrow: false
-        test-on-return: false
-
-    db2:
-      username: root
-      password: 34821015
-      url: jdbc:mysql://localhost:3306/db2?useUnicode=true&characterEncoding=utf-8&rewriteBatchedStatements=true&useSSL=true&serverTimezone=Asia/Shanghai
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      type: com.alibaba.druid.pool.DruidDataSource
-      dbcp2:
-        initial-size: 5
-        max-total: 100
-        max-wait-millis: 5000
-        min-idle: 20
-        test-while-idle: true
-        validation-query: select 1
-        test-on-borrow: false
-        test-on-return: false
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      pool-name: DatebookHikariCP
+      minimum-idle: 5
+      maximum-pool-size: 15
+      auto-commit: true
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+  datasource-dynamic:
+    username: root
+    password: 34821015
+    url: jdbc:mysql://localhost:3306/{database}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&rewriteBatchedStatements=true&serverTimezone=Asia/Shanghai&autoReconnect=true&zeroDateTimeBehavior=convertToNull
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      maximum-pool-size: 15
 
 upgrade-database:
   entity-packages:
-    --com.fortec.bm;--com.fortec.bm.modules.upgrade.db.entity
-
+    com.doys.aprint.dts
+  delete-field:
+    keep-days: 31
 global:
   debug: true
   login:
     verifyCode: false
     verifyPassword: false
     superPassword: 34821015
-  resRunPath: D:/.work/resRunPath
-  resTempPath: D:/.work/resTempPath
-
-#logging:
-#  level:
-#    org.springframework.jdbc.core.JdbcTemplate: INFO
+  resRunPath: C:/.work/resRunPath
+  resTempPath: C:/.work/resTempPath

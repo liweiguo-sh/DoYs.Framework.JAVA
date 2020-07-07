@@ -47,7 +47,6 @@ public class LabelController extends BaseController {
             dbBus.exec(sql, content, vars, id);
         } catch (Exception e) {
             return ResultErr(e);
-        } finally {
         }
         return ResultOk();
     }

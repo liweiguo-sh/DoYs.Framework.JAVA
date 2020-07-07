@@ -14,14 +14,16 @@ public class AreaView extends BaseViewController {
         if (addnew) {
         }
         else {
-            sql = "UPDATE ..base_building SET area_name = ? WHERE area_id = ?";
-            dbSys.exec(sql, name, id);
+            sql = "UPDATE base_building SET area_name = ? WHERE area_id = ?";
+            dbBus.exec(sql, name, id);
 
-            sql = "UPDATE ..base_floor SET area_name = ? WHERE area_id = ?";
-            dbSys.exec(sql, name, id);
+            sql = "UPDATE base_floor SET area_name = ? WHERE area_id = ?";
+            dbBus.exec(sql, name, id);
 
-            sql = "UPDATE ..base_room SET area_name = ? WHERE area_id = ?";
-            dbSys.exec(sql, name, id);
+            sql = "UPDATE base_room SET area_name = ? WHERE area_id = ?";
+            dbBus.exec(sql, name, id);
+
+            RoomService.updateFullname(dbBus);
         }
         // ------------------------------------------------
         return true;

@@ -200,8 +200,13 @@ public class BaseController extends BaseTop {
         _ok(key, value);
     }
     protected void ok(String key, SqlRowSet rowSet) throws Exception {
-        key = key + Const.CHAR1 + "datatable";
-        _ok(key, UtilDataSet.getRowSetString(rowSet));
+        if (rowSet == null) {
+            _ok(key, "");
+        }
+        else {
+            key = key + Const.CHAR1 + "datatable";
+            _ok(key, UtilDataSet.getRowSetString(rowSet));
+        }
     }
     private void _ok(String key, Object value) throws Exception {
         RestResult result = getRestResult();

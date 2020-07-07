@@ -11,13 +11,14 @@ public class RoomView extends BaseViewController {
         String sql;
         // ------------------------------------------------
         if (addnew) {
-            sql = "UPDATE ..base_room r INNER JOIN ..base_floor f ON r.floor_id = f.id "
+            sql = "UPDATE base_room r INNER JOIN base_floor f ON r.floor_id = f.id "
                 + "SET r.area_id = f.area_id, r.area_name = f.area_name, r.building_id = f.building_id, r.building_name = f.building_name, r.floor_name = f.name "
                 + "WHERE r.id = ?";
-            dbSys.exec(sql, id);
+            dbBus.exec(sql, id);
         }
         else {
-
+            sql = "UPDATE base_room SET fullname = CONCAT_WS(' \\\\ ', area_name, building_name, floor_name, name) WHERE id = ?";
+            dbBus.exec(sql, id);
         }
         // ------------------------------------------------
         return true;

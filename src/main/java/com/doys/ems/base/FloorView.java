@@ -12,13 +12,15 @@ public class FloorView extends BaseViewController {
         String name = in("name");
         // ------------------------------------------------
         if (addnew) {
-            sql = "UPDATE ..base_floor f INNER JOIN ..base_building b ON f.building_id = b.id "
+            sql = "UPDATE base_floor f INNER JOIN ..base_building b ON f.building_id = b.id "
                 + "SET f.area_id = b.area_id, f.area_name = b.area_name, f.building_name = b.name WHERE f.id = ?";
-            dbSys.exec(sql, id);
+            dbBus.exec(sql, id);
         }
         else {
-            sql = "UPDATE ..base_room SET floor_name = ? WHERE floor_id = ?";
-            dbSys.exec(sql, name, id);
+            sql = "UPDATE base_room SET floor_name = ? WHERE floor_id = ?";
+            dbBus.exec(sql, name, id);
+
+            RoomService.updateFullname(dbBus);
         }
         // ------------------------------------------------
         return true;

@@ -2,9 +2,8 @@ package com.doys.aprint.dts;
 import com.doys.framework.dts.parent.BASE_CRUD;
 import com.doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
 import com.doys.framework.upgrade.db.annotation.EntityTableAnnotation;
-
-@EntityTableAnnotation(databasePk = "prefix")
-public class SYS_GROUP extends BASE_CRUD {
+@EntityTableAnnotation()
+public class base_label extends BASE_CRUD {
     @EntityFieldAnnotation(length = "20")
-    public String name;
+    String label_file_name;
 }

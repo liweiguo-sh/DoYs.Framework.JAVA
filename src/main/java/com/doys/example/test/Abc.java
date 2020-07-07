@@ -1,4 +1,4 @@
-package com.doys.framework.test;
+package com.doys.example.test;
 import org.springframework.stereotype.Component;
 @Component()
 public class Abc {

@@ -71,19 +71,27 @@ public class DBFactory extends JdbcTemplate {
 
     private Object _getObject(String sql, Object... args) throws Exception {
         Map<String, Object> map;
-
-        sql = replaceSQL(sql);
-        if (args.length > 0) {
-            map = this.queryForMap(sql, args);
-        }
-        else {
-            map = this.queryForMap(sql);
-        }
-
-        if (map.size() == 1) {
-            for (Object value : map.values()) {
-                return value;
+        LocalDateTime startTime = LocalDateTime.now();
+        // ------------------------------------------------
+        try {
+            sql = replaceSQL(sql);
+            if (args.length > 0) {
+                map = this.queryForMap(sql, args);
             }
+            else {
+                map = this.queryForMap(sql);
+            }
+
+
+            if (map.size() == 1) {
+                for (Object value : map.values()) {
+                    return value;
+                }
+            }
+            writeSqlLog(1, UtilDate.getDateTimeDiff(startTime), sql, args);
+        } catch (Exception e) {
+            writeSqlLog(-1, UtilDate.getDateTimeDiff(startTime), sql, args);
+            throw e;
         }
         return null;
     }
@@ -148,20 +156,10 @@ public class DBFactory extends JdbcTemplate {
         }
 
         if (result >= -1) {
-            if (interval == 0) {
-                logger.info(result + " => " + sql);
-            }
-            else {
-                logger.info(result + "(" + interval + "ms)" + " => " + sql);
-            }
+            logger.info(result + "(" + interval + "ms)" + " => " + sql);
         }
         else {
-            if (interval == 0) {
-                logger.info(sql);
-            }
-            else {
-                logger.info(interval + "ms => " + sql);
-            }
+            logger.info(interval + "ms => " + sql);
         }
     }
 

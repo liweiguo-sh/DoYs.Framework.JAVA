@@ -2,7 +2,7 @@
 <configuration debug="false">
     <springProfile name="aprint,ems">
         <property name="charset" value="UTF-8"/>
-        <property name="LOG_HOME" value="D:\\DoYsSV\\work\\logs"/>
+        <property name="LOG_HOME" value="C:\\.work\\logs"/>
 
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">

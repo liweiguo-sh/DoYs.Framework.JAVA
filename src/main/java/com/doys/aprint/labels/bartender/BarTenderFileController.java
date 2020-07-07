@@ -10,10 +10,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/aprint/labels/bartender")
 public class BarTenderFileController extends BaseController {
     @RequestMapping(value = "/upload")
-    private RestResult uploadFile(@RequestParam("file") MultipartFile multipartFile, @RequestParam("labelId") int labelId) {
+    private RestResult uploadFile(@RequestParam("file") MultipartFile multipartFile, @RequestParam("labelId") int labelId,
+                                  @RequestParam("labelType") String labelType, @RequestParam("fileType") String fileType) {
         // ------------------------------------------------
         try {
-            LabelFileService.SaveLabelFiel(labelId, "BarTender", multipartFile);
+            String fileName = LabelFileService.SaveLabelFile(dbBus, multipartFile, labelId, labelType, fileType);
+
+            ok("filename", fileName);
         } catch (Exception e) {
             return ResultErr(e);
         } finally {
