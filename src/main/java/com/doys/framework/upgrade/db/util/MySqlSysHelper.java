@@ -108,6 +108,10 @@ public class MySqlSysHelper {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+        if (true) {
+            // -- TODO: 暂定只追加修改字段，不删除字段。待数据库实体类双向同步功能完成后再启用。启用时增加恢复删除功能和无数据直接删除 --
+            return;
+        }
         // -- 1. 模拟删除 --
         if (!columnName.startsWith(prefixMock)) {
             columnNameMock = prefixMock + columnName;

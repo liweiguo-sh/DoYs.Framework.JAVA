@@ -1,6 +1,7 @@
 package com.doys.aprint.base;
 import com.doys.framework.core.base.BaseService;
 import com.doys.framework.database.DBFactory;
+import com.doys.framework.database.ds.UtilDDS;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 public class LabelService extends BaseService {
     /**
@@ -19,7 +20,7 @@ public class LabelService extends BaseService {
         StringBuilder builder = new StringBuilder();
         SqlRowSet rs;
         // ------------------------------------------------
-        dbPrefix = dbSys.getTenantDbName();
+        dbPrefix = UtilDDS.getTenantDbName(dbSys);
         tableName = dbPrefix + ".x_label_" + labelId;
         builder.append("CREATE TABLE " + tableName + " (");
         builder.append("\n\ttask_id int NOT NULL,");

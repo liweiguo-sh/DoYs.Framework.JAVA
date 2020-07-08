@@ -8,6 +8,7 @@
  */
 package com.doys.framework.aid;
 import com.doys.framework.database.DBFactory;
+import com.doys.framework.database.ds.UtilDDS;
 import com.doys.framework.database.dtb.DataTable;
 import com.doys.framework.util.UtilDataSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -34,6 +35,9 @@ public class DBSchema {
                 if (databasePk.equalsIgnoreCase("sys")) {
                     dbBus = null;
                     dbBus = dbSys;
+                }
+                else {
+                    databaseName += UtilDDS.getTenantId();
                 }
             }
             else {

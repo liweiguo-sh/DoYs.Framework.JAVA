@@ -1,13 +1,10 @@
 package com.doys.framework.database;
-import com.doys.framework.core.ex.SessionTimeoutException;
 import com.doys.framework.database.dtb.DataTable;
 import com.doys.framework.util.UtilDate;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
@@ -170,25 +167,10 @@ public class DBFactory extends JdbcTemplate {
     }
 
     // -- public static method ------------------------------------------------
-    public static int getTenantId() throws Exception {
-        try {
-            return (int) ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession().getAttribute("tenantId");
-        } catch (NullPointerException e) {
-            throw new SessionTimeoutException();
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-    public String getTenantDbName() throws Exception {
-        if (prefix == null) {
-            Map<String, Object> map = this.queryForMap("SELECT name FROM sys_database WHERE pk = 'prefix'");
-            prefix = (String) map.get("name");
-        }
-        return prefix + getTenantId();
-    }
     public String replaceSQL(String sql) throws Exception {
-        if (sql.indexOf("..") >= 0) {
-            return sql.replaceAll("\\.\\.", this.getTenantDbName() + ".");
+        if (sql.contains("..")) {
+            throw new Exception("待改进的sql写法。");
+            //return sql.replaceAll("\\.\\.", UtilDDS.getTenantDbName() + ".");
         }
         else {
             return sql;

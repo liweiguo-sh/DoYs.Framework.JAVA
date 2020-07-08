@@ -10,7 +10,7 @@ public class MenuService extends BaseService {
         SqlRowSet rowSet = null;
         // ------------------------------------------------
         try {
-            sql = "SELECT pk, name, text FROM sys_system ORDER BY sequence";
+            sql = "SELECT pk, name, text FROM sys_system WHERE flag_disabled = 0 ORDER BY sequence";
             rowSet = dbSys.getRowSet(sql);
             return rowSet;
         } catch (Exception e) {

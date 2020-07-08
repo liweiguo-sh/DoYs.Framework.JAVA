@@ -6,12 +6,15 @@
  * 动态数据源工具类
  *****************************************************************************/
 package com.doys.framework.database.ds;
+import com.doys.framework.core.ex.SessionTimeoutException;
 import com.doys.framework.database.DBFactory;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -96,7 +99,25 @@ public class UtilDDS {
         // ------------------------------------------------
         mapDS.put(dataSourceName, new HikariDataSource(hikariConfig));
     }
+    private static void close() {
+        for (DataSource ds : mapDS.values()) {
+            ((HikariDataSource) ds).close();
+        }
+    }
 
+    // -- Tenant --------------------------------------------------------------
+    public static int getTenantId() throws Exception {
+        try {
+            return (int) ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession().getAttribute("tenantId");
+        } catch (NullPointerException e) {
+            throw new SessionTimeoutException();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+    public static String getTenantDbName(DBFactory dbSys) throws Exception {
+        return prefix + UtilDDS.getTenantId();
+    }
     // -- DBFactory -----------------------------------------------------------
     public static DBFactory getDBFactory(int tenantId) throws Exception {
         return new DBFactory(getDatasource(tenantId));

@@ -44,7 +44,7 @@ spring:
 
 upgrade-database:
   entity-packages:
-    com.doys.aprint.dts
+    com.doys.framework.dts.sys, com.doys.aprint.dts
   delete-field:
     keep-days: 31
 global:

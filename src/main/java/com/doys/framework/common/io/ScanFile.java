@@ -72,7 +72,7 @@ public class ScanFile {
 
             entityFiles = ScanFile.scan(folderPath, "class", includeSubDirectory);
             for (EntityFile entityFile : entityFiles) {
-                if (!entityFile.path.endsWith("\\dts\\")) {
+                if (entityFile.path.indexOf("\\dts\\") <= 0) {
                     continue;
                 }
 
