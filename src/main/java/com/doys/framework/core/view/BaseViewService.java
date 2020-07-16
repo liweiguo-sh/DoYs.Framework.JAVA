@@ -59,7 +59,7 @@ public class BaseViewService extends BaseService {
         String sql, sqlData;
 
         sql = "SELECT sql_data FROM sys_tree_level WHERE tree_pk = ? AND level = ?";
-        sqlData = dbSys.getValue(sql, treePk, nodeLevel);
+        sqlData = dbSys.getValue(sql, "", treePk, nodeLevel);
 
         sql = sqlData.replaceAll("\\{node_value}", nodeValue);
         return dbBus.getRowSet(sql);
@@ -86,7 +86,7 @@ public class BaseViewService extends BaseService {
             if (!sqlFilter.equals("")) {
                 sql += "WHERE " + sqlFilter;
             }
-            long totalRows = dbSys.getLong(sql);
+            long totalRows = dbSys.getInt(sql);
             map.put("totalRows", totalRows);
             pageNum = 1;
         }

@@ -22,6 +22,8 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 @Inherited
 public @interface EntityFieldAnnotation {
+    public static String datetime = "CURRENT_TIMESTAMP";    // -- 数据库时间，格式：yyyy-MM-dd HH:mm:ss --
+
     /**
      * 字段类型
      */

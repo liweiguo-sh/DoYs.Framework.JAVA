@@ -32,8 +32,8 @@ public class FloorView extends BaseViewController {
 
         String sql;
         // ------------------------------------------------
-        sql = "SELECT COUNT(1) FROM ..base_room WHERE floor_id = ?";
-        result = dbSys.getInt(sql, id);
+        sql = "SELECT COUNT(1) FROM base_room WHERE floor_id = ?";
+        result = dbBus.getInt(sql, 0, id);
         if (result > 0) {
             err("当前楼层存在下级房间数据，不能删除。");
             return false;

@@ -27,7 +27,7 @@ public class ElectricityMeterView extends BaseViewController {
         String sql;
         // ------------------------------------------------
         sql = "SELECT COUNT(1) FROM core_electricity WHERE electricity_meter_id = ?";
-        result = dbBus.getInt(sql, id);
+        result = dbBus.getInt(sql, 0, id);
         if (result > 0) {
             err("当前电表存在历史数据，不能删除。");
             return false;

@@ -21,7 +21,7 @@ public class PrintService extends BaseService {
 
         // -- 1. 预处理 --
         sql = "SELECT COUNT(1) FROM base_label_variable WHERE label_id = ?";
-        columnCount = dbBus.getInt(sql, labelId);
+        columnCount = dbBus.getInt(sql, 0, labelId);
         for (int i = 0; i < qty; i++) {
             paraInsert = new Object[columnCount + 2];
             paraInsert[columnCount] = taskId;

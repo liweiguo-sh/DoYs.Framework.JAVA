@@ -1,7 +1,3 @@
-package com.doys.framework.upgrade.db.annotation;
-
-import java.lang.annotation.*;
-
 /**
  * 数据库实体类注解<br>
  * <b>databasePk:</b> 库名称<br>
@@ -12,6 +8,10 @@ import java.lang.annotation.*;
  * @author volant
  * @since 2020-03-08
  */
+package com.doys.framework.upgrade.db.annotation;
+import com.doys.framework.upgrade.db.enum1.EntityTableMatch;
+
+import java.lang.annotation.*;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -34,4 +34,6 @@ public @interface EntityTableAnnotation {
      * 表备注
      */
     String remark() default "";
+
+    EntityTableMatch match() default EntityTableMatch.appand;
 }

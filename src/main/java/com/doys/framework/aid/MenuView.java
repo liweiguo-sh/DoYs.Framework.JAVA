@@ -29,7 +29,7 @@ public class MenuView extends BaseViewController {
             }
             len = pkParent.length();
             sql = "SELECT MAX(pk) FROM sys_menu WHERE LEFT(pk, ?) = ? AND LENGTH(pk) = ?";
-            pkMax = dbSys.getValue(sql, len, pkParent, len + 3);
+            pkMax = dbSys.getValue(sql, "", len, pkParent, len + 3);
             if (pkMax.equals("")) {
                 pkNew = pkParent + "001";
                 // -- 修改上级菜单is_leaf属性 --
@@ -54,7 +54,7 @@ public class MenuView extends BaseViewController {
         // ------------------------------------------------
         len = pk.length();
         sql = "SELECT COUNT(1) FROM sys_menu WHERE LEFT(pk, ?) = ? AND LENGTH(pk) = ?";
-        result = dbSys.getInt(sql, len, pk, len + 3);
+        result = dbSys.getInt(sql, 0, len, pk, len + 3);
         if (result > 0) {
             err("当前菜单存在下级子菜单，不能删除。");
             return false;
@@ -73,7 +73,7 @@ public class MenuView extends BaseViewController {
             pkParent = pk.substring(0, pk.length() - 3);
             len = pkParent.length();
             sql = "SELECT COUNT(1) FROM sys_menu WHERE LEFT(pk, ?) = ? AND LENGTH(pk) = ?";
-            result = dbSys.getInt(sql, len, pkParent, len + 3);
+            result = dbSys.getInt(sql, 0, len, pkParent, len + 3);
 
             if (result == 0) {
                 sql = "UPDATE sys_menu SET is_leaf = 1 WHERE pk = ?";

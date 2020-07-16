@@ -1,5 +1,6 @@
 package com.doys.framework.upgrade.db.obj;
 import com.doys.framework.upgrade.db.enum1.EntityFieldType;
+import com.doys.framework.upgrade.db.enum1.EntityTableMatch;
 
 import java.util.ArrayList;
 
@@ -14,6 +15,7 @@ public class EntityTable {
      * 表说明
      */
     public String remark = "";
+    public EntityTableMatch match = EntityTableMatch.appand;
 
     /**
      * 字段数量
@@ -90,7 +92,7 @@ public class EntityTable {
                 if (cd.auto || cd.not_null) {
                     sb.append(" NOT NULL");
                 }
-                if (!cd.default_value.equals("")) {
+                if (cd.default_value != null && !cd.default_value.equals("")) {
                     if (cd.type == EntityFieldType.INT || cd.type == EntityFieldType.TINYINT || cd.type == EntityFieldType.LONG) {
                         sb.append(" DEFAULT " + cd.default_value);
                     }
@@ -118,10 +120,10 @@ public class EntityTable {
             }
 
             for (int i = 0; i < ux.length; i++) {
-                sb.append(",\r\n\tUNIQUE INDEX UX__" + (i + 1) + "(" + ux[i] + ")");
+                sb.append(",\r\n\tUNIQUE INDEX ux" + (i + 1) + "_" + name + "(" + ux[i] + ")");
             }
             for (int i = 0; i < ix.length; i++) {
-                sb.append(",\r\n\tINDEX IX__" + (i + 1) + "(" + ix[i] + ")");
+                sb.append(",\r\n\tINDEX ix" + (i + 1) + "_" + name + "(" + ix[i] + ")");
             }
 
             // -- 9. end --

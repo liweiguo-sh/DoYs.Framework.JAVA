@@ -41,14 +41,14 @@ public class MySqlSysHelper {
      * @param tableName 表名称
      * @return 返回表指定索引类型的索引数组
      */
-    public static ArrayList<String[]> getIndex(JdbcTemplate jdbcTemplate, String tableName, EntityIndexType indexType) throws Exception {
+    public static ArrayList<String[]> getIndex(JdbcTemplate jdbcTemplate, String databaseName, String tableName, EntityIndexType indexType) throws Exception {
         ArrayList<String[]> alIndex = new ArrayList<>();
         String indexName = "", indexFields = "", columnName = "";
 
         String sql = "SELECT index_name, column_name FROM INFORMATION_SCHEMA.STATISTICS "
-            + "WHERE table_name = '" + tableName + "' AND index_name <> 'PRIMARY' AND non_unique = " + (indexType == EntityIndexType.UNIQUE_INDEX ? 0 : 1) + " "
+            + "WHERE table_schema = ? AND table_name = ? AND index_name <> 'PRIMARY' AND non_unique = " + (indexType == EntityIndexType.UNIQUE_INDEX ? 0 : 1) + " "
             + "ORDER BY index_name, seq_in_index";
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql);
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, databaseName, tableName);
         while (rowSet.next()) {
             columnName = rowSet.getString("column_name");
             if (indexName.equals(rowSet.getString("index_name"))) {
@@ -102,9 +102,10 @@ public class MySqlSysHelper {
         String sql = "ALTER TABLE " + tableName + " DROP COLUMN " + columnName;
         dbBus.exec(sql);
     }
-    public static void disableColumn(DBFactory dbBus, String databaseName, String tableName, String columnName, String columnType, String columnComment) throws Exception {
+    public static void disableColumn(DBFactory dbBus, String tableName, String columnName, String columnType) throws Exception {
         String sql = "";
         String columnNameMock = "", prefixMock = "__$$__";
+        String columnComment;
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 

@@ -1,5 +1,4 @@
 package com.doys.framework.upgrade.db.util;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,6 +50,18 @@ public class ClassReflect {
                 }
             }
 
+            try {
+                if (lstField.size() == 3) {
+                    if (lstField.get(2).getName().equalsIgnoreCase("field_test1")) {
+                        Field fld = lstField.get(2);
+                        fld.setAccessible(true);
+                        String str = fld.get(entity).toString();
+                        System.out.println(str);
+                    }
+                }
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
             return lstField;
         } catch (Exception e) {
             throw e;

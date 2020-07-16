@@ -8,6 +8,7 @@ import com.doys.framework.upgrade.db.annotation.EntityIndexAnnotation;
 import com.doys.framework.upgrade.db.annotation.EntityTableAnnotation;
 import com.doys.framework.upgrade.db.enum1.EntityFieldType;
 import com.doys.framework.upgrade.db.enum1.EntityIndexType;
+import com.doys.framework.upgrade.db.enum1.EntityTableMatch;
 import com.doys.framework.upgrade.db.obj.EntityField;
 import com.doys.framework.upgrade.db.obj.EntityTable;
 import com.doys.framework.upgrade.db.util.ClassReflect;
@@ -22,60 +23,55 @@ public class UpgradeDatabaseService extends BaseService {
     public static void upgrade(DBFactory dbSys, String entityPaths) throws Exception {
         String sql, databaseName;
         String classFile = "";
-        ArrayList<EntityTable> entityClasses = new ArrayList<>();
-        try {
-            // -- 扫描实体类 --
-            ArrayList<String> alClassFile = ScanFile.scanClass(entityPaths, true);
-            for (int i = 0; i < alClassFile.size(); i++) {
-                classFile = alClassFile.get(i);
-                if (classFile.indexOf("Student") <= 0) {
-                    // continue;   // -- todo: 调试用 --
-                }
-
-                Class clazz = Thread.currentThread().getContextClassLoader().loadClass(classFile);
-                try {
-                    Object entity = clazz.getDeclaredConstructor().newInstance();
-
-                    EntityTable entityClass = parseTable(entity);
-                    if (entityClass != null) {
-                        entityClasses.add(entityClass);
-                        System.err.println("======== 实体类 ======== " + classFile);
-                    }
-                    else {
-                        System.out.println("====== 不是实体类 ====== " + classFile);
-                    }
-                } catch (InstantiationException e) {
-                    logger.error("不是普通类，不能实例化。" + classFile);
-                    continue;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    System.err.println("出错了" + classFile);
-                }
+        ArrayList<EntityTable> entityTables = new ArrayList<>();
+        // -- 扫描实体类 --
+        ArrayList<String> alClassFile = ScanFile.scanClass(entityPaths, true);
+        for (int i = 0; i < alClassFile.size(); i++) {
+            classFile = alClassFile.get(i);
+            if (classFile.indexOf("Student") <= 0) {
+                // continue;   // -- todo: 调试用 --
             }
 
-            // -- 升级数据库 --
-            for (EntityTable entityClass : entityClasses) {
-                sql = "SELECT name FROM sys_database WHERE pk = ?";
-                databaseName = dbSys.getValue(sql, entityClass.datbasePK);
+            Class clazz = Thread.currentThread().getContextClassLoader().loadClass(classFile);
+            try {
+                Object entity = clazz.getDeclaredConstructor().newInstance();
 
-                if (entityClass.datbasePK.equalsIgnoreCase("sys")) {
-                    upgradeTable(dbSys, databaseName, entityClass);
+                EntityTable entityTable = parseTable(entity);
+                if (entityTable != null) {
+                    entityTables.add(entityTable);
+                    System.err.println("======== 实体类 ======== " + classFile);
                 }
                 else {
-                    sql = "SELECT id FROM sys_tenant";
-                    SqlRowSet rsTenant = dbSys.getRowSet(sql);
-                    while (rsTenant.next()) {
-                        int tenantId = rsTenant.getInt("id");
-                        String dynamicDbName = databaseName + tenantId;
-                        DBFactory dbBus = UtilDDS.getDBFactory(tenantId);
-                        upgradeTable(dbBus, dynamicDbName, entityClass);
-                    }
+                    System.out.println("====== 不是实体类 ====== " + classFile);
+                }
+            } catch (InstantiationException e) {
+                logger.error("不是普通类，不能实例化。" + classFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println("出错了" + classFile);
+            }
+        }
+
+        // -- 升级数据库 --
+        for (EntityTable entityTable : entityTables) {
+            sql = "SELECT name FROM sys_database WHERE pk = ?";
+            databaseName = dbSys.getValue(sql, "", entityTable.datbasePK);
+
+            if (entityTable.datbasePK.equalsIgnoreCase("sys")) {
+                upgradeTable(dbSys, databaseName, entityTable);
+            }
+            else {
+                sql = "SELECT id FROM sys_tenant";
+                SqlRowSet rsTenant = dbSys.getRowSet(sql);
+                while (rsTenant.next()) {
+                    int tenantId = rsTenant.getInt("id");
+                    String dynamicDbName = databaseName + tenantId;
+                    DBFactory dbBus = UtilDDS.getDBFactory(tenantId);
+                    upgradeTable(dbBus, dynamicDbName, entityTable);
                 }
             }
-            logger.info("upgrade database success, total entity class: " + entityClasses.size());
-        } catch (Exception e) {
-            throw e;
         }
+        logger.info("upgrade database success, total entity table: " + entityTables.size());
     }
     private static EntityTable parseTable(Object entity) throws Exception {
         EntityTable table = new EntityTable();
@@ -99,6 +95,7 @@ public class UpgradeDatabaseService extends BaseService {
         if (table.name.equals("")) {
             table.name = entity.getClass().getName().substring(entity.getClass().getPackageName().length() + 1);
         }
+        table.match = tableProperty.match();
         // -- 3. parse index --
         EntityIndexAnnotation indexProperty = entity.getClass().getAnnotation(EntityIndexAnnotation.class);
         if (indexProperty != null) {
@@ -110,7 +107,7 @@ public class UpgradeDatabaseService extends BaseService {
         // -- 4. parse fields --
         List<Field> arrField = ClassReflect.getClassAllFields(entity);
         for (int i = 0; i < arrField.size(); i++) {
-            EntityField entityField = parseField(arrField.get(i));
+            EntityField entityField = parseField(entity, arrField.get(i));
             if (entityField != null) {
                 table.columnCount++;
                 table.addColumnDefinition(entityField);
@@ -122,67 +119,76 @@ public class UpgradeDatabaseService extends BaseService {
 
         return table;
     }
-    private static EntityField parseField(Field field) throws Exception {
-        EntityField cd = new EntityField();
-        cd.name = field.getName();
-        cd.type = cd.parseType(field.getType().getName());
+    private static EntityField parseField(Object entity, Field field) throws Exception {
+        EntityField entityField = new EntityField();
+        entityField.name = field.getName();
+        entityField.type = entityField.parseType(field.getType().getName());
 
-        // -- CPAS注解分析 --
+        // -- 1. 实体类字段属性(默认值) --
+        field.setAccessible(true);
+        Object defaultValue = field.get(entity);
+        if (defaultValue != null) {
+            entityField.default_value = defaultValue.toString();
+        }
+
+        // -- 2. 字段注解(注解值覆盖原生值) --
         EntityFieldAnnotation efAnnotation = field.getAnnotation(EntityFieldAnnotation.class);
         if (efAnnotation != null) {
             if (efAnnotation.auto()) {
-                cd.auto = true;
+                entityField.auto = true;
             }
             if (efAnnotation.type() != EntityFieldType.UNKNOWN) {
-                cd.type = efAnnotation.type();
+                entityField.type = efAnnotation.type();
             }
             if (!efAnnotation.default_value().equals("")) {
-                cd.default_value = efAnnotation.default_value();
+                entityField.default_value = efAnnotation.default_value();
             }
-            cd.not_null = efAnnotation.not_null();
-            cd.length = efAnnotation.length();
-            cd.text = efAnnotation.text();
-            cd.comment = efAnnotation.comment();
+            entityField.not_null = efAnnotation.not_null();
+            entityField.length = efAnnotation.length();
+            entityField.text = efAnnotation.text();
+            entityField.comment = efAnnotation.comment();
         }
 
-        // -- 属性默认值 --
-        if (cd.length.equals("")) {
-            if (cd.type == EntityFieldType.STRING) {
-                cd.length = "50";
+        // -- 3. 未定义的字段属性缺省值 --
+        if (entityField.auto) {
+            entityField.not_null = true;
+            entityField.default_value = null;
+        }
+        if (entityField.length.equals("")) {
+            if (entityField.type == EntityFieldType.STRING) {
+                entityField.length = "50";
             }
         }
-        if (cd.auto) {
-            cd.not_null = true;
-        }
-        // -- end --
-        return cd;
+
+        // -- 9. end --
+        return entityField;
     }
 
-    private static void upgradeTable(DBFactory dbBus, String databaseName, EntityTable entityClass) throws Exception {
+    private static void upgradeTable(DBFactory dbBus, String databaseName, EntityTable entityTable) throws Exception {
         int result;
 
         String sql;
-        String tableName = entityClass.name;
+        String tableName = entityTable.name;
         // ------------------------------------------------
         sql = "SELECT COUNT(1) FROM information_schema.TABLES WHERE table_schema = ? AND table_type = 'BASE TABLE' AND table_name = ?";
-        result = dbBus.getInt(sql, databaseName, tableName);
+        result = dbBus.getInt(sql, 0, databaseName, tableName);
         if (result == 0) {
             // -- 1. 表不存在：创建 --
-            sql = entityClass.getCreateTableSql();
+            sql = entityTable.getCreateTableSql();
             dbBus.exec(sql);
         }
         else {
             // -- 2. 表存在：比对字段、比对索引 --
-            upgradeField(dbBus, entityClass, databaseName);
-            upgradeIndex(dbBus, entityClass);
+            upgradeField(dbBus, entityTable, databaseName, entityTable.match);
+            upgradeIndex(dbBus, entityTable, databaseName);
         }
     }
-    private static void upgradeField(DBFactory dbBus, EntityTable entityClass, String databaseName) throws Exception {
+    private static void upgradeField(DBFactory dbBus, EntityTable entityTable, String databaseName, EntityTableMatch match) throws Exception {
         boolean blInvalidColumn;
         String columnName = "";
         String sql = "SELECT * FROM information_schema.COLUMNS WHERE table_schema = ? AND table_name = ?";
-        SqlRowSet rsColumn = dbBus.getRowSet(sql, databaseName, entityClass.name);
-        for (EntityField entityField : entityClass.entityFields) {
+        SqlRowSet rsColumn = dbBus.getRowSet(sql, databaseName, entityTable.name);
+        for (EntityField entityField : entityTable.entityFields) {
             boolean isNewColumn = true;
             rsColumn.beforeFirst();
 
@@ -195,7 +201,7 @@ public class UpgradeDatabaseService extends BaseService {
 
             if (isNewColumn) {
                 // -- 1. 列不存在，创建新列 --
-                sql = "alter table " + entityClass.name + " add " + entityField.name + " " + entityField.getCreateColumnSql(true);
+                sql = "alter table " + entityTable.name + " add " + entityField.name + " " + entityField.getCreateColumnSql(true);
                 System.err.println("新增字段：" + sql);
                 dbBus.exec(sql);
             }
@@ -204,7 +210,7 @@ public class UpgradeDatabaseService extends BaseService {
                 if (checkColumnNeedUpgrade(entityField, rsColumn.getString("data_type"),
                     rsColumn.getString("character_maximum_length"), rsColumn.getInt("numeric_precision"), rsColumn.getInt("numeric_scale"),
                     rsColumn.getString("is_nullable").equalsIgnoreCase("NO"), rsColumn.getString("column_default"), rsColumn.getString("column_comment"))) {
-                    sql = "alter table " + entityClass.name + " MODIFY COLUMN " + entityField.name + " " + entityField.getCreateColumnSql(false);
+                    sql = "alter table " + entityTable.name + " MODIFY COLUMN " + entityField.name + " " + entityField.getCreateColumnSql(false);
                     System.err.println("升级字段：" + sql);
                     dbBus.exec(sql);
                 }
@@ -216,18 +222,72 @@ public class UpgradeDatabaseService extends BaseService {
         while (rsColumn.next()) {
             blInvalidColumn = true;
             columnName = rsColumn.getString("column_name");
-            for (EntityField entityField : entityClass.entityFields) {
+            for (EntityField entityField : entityTable.entityFields) {
                 if (entityField.name.equalsIgnoreCase(columnName)) {
                     blInvalidColumn = false;
                     break;
                 }
             }
             if (blInvalidColumn) {
-                //MySqlSysHelper.dropColumn(dbBus, databaseName, entityClass.name, columnName);
-                MySqlSysHelper.disableColumn(dbBus, databaseName, entityClass.name, columnName, rsColumn.getString("column_type"), rsColumn.getString("column_comment"));
+                if (match == EntityTableMatch.strict) {
+                    MySqlSysHelper.dropColumn(dbBus, entityTable.name, columnName);
+                }
+                else {
+                    MySqlSysHelper.disableColumn(dbBus, entityTable.name, columnName, rsColumn.getString("column_type"));
+                }
             }
         }
     }
+    private static void upgradeIndex(DBFactory dbBus, EntityTable entityTable, String databaseName) throws Exception {
+        String indexFields = "";
+        ArrayList<String[]> alIndex;
+
+        // -- 1. 主键 --
+        indexFields = MySqlSysHelper.getPrimaryKey(dbBus, entityTable.name);
+        if (!entityTable.pk.equals(indexFields)) {
+            if (!indexFields.equals("")) {
+                MySqlSysHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.PRIMARY, "PRIMARY");
+            }
+            if (!entityTable.pk.equals("")) {
+                MySqlSysHelper.addIndex(dbBus, entityTable.name, EntityIndexType.PRIMARY, "PRIMARY", entityTable.pk);
+            }
+        }
+
+        // -- 2. 唯一索引 --
+        alIndex = MySqlSysHelper.getIndex(dbBus, databaseName, entityTable.name, EntityIndexType.UNIQUE_INDEX);
+        for (int i = entityTable.ux.length; i < alIndex.size(); i++) {
+            MySqlSysHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.UNIQUE_INDEX, alIndex.get(i)[0]);
+        }
+        for (int i = 0; i < entityTable.ux.length; i++) {
+            if (i < alIndex.size()) {
+                if (!entityTable.ux[i].equals(alIndex.get(i)[1])) {
+                    MySqlSysHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.UNIQUE_INDEX, alIndex.get(i)[0]);
+                    MySqlSysHelper.addIndex(dbBus, entityTable.name, EntityIndexType.UNIQUE_INDEX, "ux" + (i + 1) + "_" + entityTable.name, entityTable.ux[i]);
+                }
+            }
+            else {
+                MySqlSysHelper.addIndex(dbBus, entityTable.name, EntityIndexType.UNIQUE_INDEX, "ux" + (i + 1) + "_" + entityTable.name, entityTable.ux[i]);
+            }
+        }
+
+        // -- 3. 普通索引 --
+        alIndex = MySqlSysHelper.getIndex(dbBus, databaseName, entityTable.name, EntityIndexType.INDEX);
+        for (int i = entityTable.ix.length; i < alIndex.size(); i++) {
+            MySqlSysHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.INDEX, alIndex.get(i)[0]);
+        }
+        for (int i = 0; i < entityTable.ix.length; i++) {
+            if (i < alIndex.size()) {
+                if (!entityTable.ix[i].equals(alIndex.get(i)[1])) {
+                    MySqlSysHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.INDEX, alIndex.get(i)[0]);
+                    MySqlSysHelper.addIndex(dbBus, entityTable.name, EntityIndexType.INDEX, "ix" + (i + 1) + "_" + entityTable.name, entityTable.ix[i]);
+                }
+            }
+            else {
+                MySqlSysHelper.addIndex(dbBus, entityTable.name, EntityIndexType.INDEX, "ix" + (i + 1) + "_" + entityTable.name, entityTable.ix[i]);
+            }
+        }
+    }
+
     /**
      * 对比是否需要升级
      *
@@ -310,54 +370,5 @@ public class UpgradeDatabaseService extends BaseService {
         // -- 3. --
 
         return needUpgrage;
-    }
-    private static void upgradeIndex(DBFactory dbSys, EntityTable entityClass) throws Exception {
-        String indexFields = "";
-        ArrayList<String[]> alIndex;
-
-        // -- 1. 主键 --
-        indexFields = MySqlSysHelper.getPrimaryKey(dbSys, entityClass.name);
-        if (!entityClass.pk.equals(indexFields)) {
-            if (!indexFields.equals("")) {
-                MySqlSysHelper.dropIndex(dbSys, entityClass.name, EntityIndexType.PRIMARY, "PRIMARY");
-            }
-            if (!entityClass.pk.equals("")) {
-                MySqlSysHelper.addIndex(dbSys, entityClass.name, EntityIndexType.PRIMARY, "PRIMARY", entityClass.pk);
-            }
-        }
-
-        // -- 2. 唯一索引 --
-        alIndex = MySqlSysHelper.getIndex(dbSys, entityClass.name, EntityIndexType.UNIQUE_INDEX);
-        for (int i = entityClass.ux.length; i < alIndex.size(); i++) {
-            MySqlSysHelper.dropIndex(dbSys, entityClass.name, EntityIndexType.UNIQUE_INDEX, alIndex.get(i)[0]);
-        }
-        for (int i = 0; i < entityClass.ux.length; i++) {
-            if (i < alIndex.size()) {
-                if (!entityClass.ux[i].equals(alIndex.get(i)[1])) {
-                    MySqlSysHelper.dropIndex(dbSys, entityClass.name, EntityIndexType.UNIQUE_INDEX, alIndex.get(i)[0]);
-                    MySqlSysHelper.addIndex(dbSys, entityClass.name, EntityIndexType.UNIQUE_INDEX, "UX__" + (i + 1), entityClass.ux[i]);
-                }
-            }
-            else {
-                MySqlSysHelper.addIndex(dbSys, entityClass.name, EntityIndexType.UNIQUE_INDEX, "UX__" + (i + 1), entityClass.ux[i]);
-            }
-        }
-
-        // -- 3. 普通索引 --
-        alIndex = MySqlSysHelper.getIndex(dbSys, entityClass.name, EntityIndexType.INDEX);
-        for (int i = entityClass.ix.length; i < alIndex.size(); i++) {
-            MySqlSysHelper.dropIndex(dbSys, entityClass.name, EntityIndexType.INDEX, alIndex.get(i)[0]);
-        }
-        for (int i = 0; i < entityClass.ix.length; i++) {
-            if (i < alIndex.size()) {
-                if (!entityClass.ix[i].equals(alIndex.get(i)[1])) {
-                    MySqlSysHelper.dropIndex(dbSys, entityClass.name, EntityIndexType.INDEX, alIndex.get(i)[0]);
-                    MySqlSysHelper.addIndex(dbSys, entityClass.name, EntityIndexType.INDEX, "IX__" + (i + 1), entityClass.ix[i]);
-                }
-            }
-            else {
-                MySqlSysHelper.addIndex(dbSys, entityClass.name, EntityIndexType.INDEX, "IX__" + (i + 1), entityClass.ix[i]);
-            }
-        }
     }
 }

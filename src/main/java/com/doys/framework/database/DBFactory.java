@@ -9,10 +9,10 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
+
 public class DBFactory extends JdbcTemplate {
-    private static String prefix;
+    private static int NULL_NUMBER = -31415926;
     private static String regInject = "(\\b(delete|update|insert|drop|truncate|alter|exec|execute)\\b)";
     private static Pattern sqlPattern = Pattern.compile(regInject, Pattern.CASE_INSENSITIVE);
 
@@ -32,65 +32,96 @@ public class DBFactory extends JdbcTemplate {
 
     // -- getValue ------------------------------------------------------------
     public int getInt(String sql) throws Exception {
-        return _getInt(sql);
+        return _getInt(sql, NULL_NUMBER);
     }
-    public int getInt(String sql, Object... args) throws Exception {
-        return _getInt(sql, args);
+    public int getInt(String sql, int defaultValue) throws Exception {
+        return _getInt(sql, defaultValue);
     }
-    private int _getInt(String sql, Object... args) throws Exception {
-        String valueString = _getValue(sql, args);
+    public int getInt(String sql, int defaultValue, Object... args) throws Exception {
+        return _getInt(sql, defaultValue, args);
+    }
+    private int _getInt(String sql, int defaultValue, Object... args) throws Exception {
+        String valueString = _getValue(sql, null, args);
+        if (valueString == null) {
+            if (defaultValue == NULL_NUMBER) {
+                throw new Exception("记录不存在，请检查。");
+            }
+            else {
+                return defaultValue;
+            }
+        }
         return Integer.parseInt(valueString);
     }
 
     public long getLong(String sql) throws Exception {
-        return _getLong(sql);
+        return _getLong(sql, 0);
     }
-    private long _getLong(String sql) throws Exception {
-        String valueString = _getValue(sql);
+    public long getLong(String sql, long defaultValue) throws Exception {
+        return _getLong(sql, defaultValue);
+    }
+    public long getLong(String sql, long defaultValue, Object... args) throws Exception {
+        return _getLong(sql, defaultValue, args);
+    }
+    private long _getLong(String sql, long defaultValue, Object... args) throws Exception {
+        String valueString = _getValue(sql, null, args);
+        if (valueString == null) {
+            if (defaultValue == NULL_NUMBER) {
+                throw new Exception("记录不存在，请检查。");
+            }
+            else {
+                return defaultValue;
+            }
+        }
         return Long.parseLong(valueString);
     }
 
     public String getValue(String sql) throws Exception {
-        return _getValue(sql);
+        return _getValue(sql, null);
     }
-    public String getValue(String sql, Object... args) throws Exception {
-        return _getValue(sql, args);
+    public String getValue(String sql, Object defaultValue) throws Exception {
+        return _getValue(sql, defaultValue);
     }
-    private String _getValue(String sql, Object... args) throws Exception {
-        Object objValue = _getObject(sql, args);
+    public String getValue(String sql, Object defaultValue, Object... args) throws Exception {
+        return _getValue(sql, defaultValue, args);
+    }
+    private String _getValue(String sql, Object defaultValue, Object... args) throws Exception {
+        Object objValue = _getObject(sql, defaultValue, args);
         if (objValue == null) {
-            return "";
+            return null;
         }
         else {
             return objValue.toString();
         }
     }
 
-    private Object _getObject(String sql, Object... args) throws Exception {
-        Map<String, Object> map;
+    private Object _getObject(String sql, Object defaultValue, Object... args) throws Exception {
+        Object objectReturn = null;
+
+        SqlRowSet rs;
         LocalDateTime startTime = LocalDateTime.now();
         // ------------------------------------------------
         try {
             sql = replaceSQL(sql);
             if (args.length > 0) {
-                map = this.queryForMap(sql, args);
+                rs = this.getRowSet(sql, args);
             }
             else {
-                map = this.queryForMap(sql);
+                rs = this.getRowSet(sql);
             }
 
-
-            if (map.size() == 1) {
-                for (Object value : map.values()) {
-                    return value;
-                }
+            if (rs.next()) {
+                objectReturn = rs.getObject(1);
             }
-            writeSqlLog(1, UtilDate.getDateTimeDiff(startTime), sql, args);
+            else {
+                objectReturn = defaultValue;
+            }
+
+            writeSqlInfo(1, startTime, sql, args);
         } catch (Exception e) {
-            writeSqlLog(-1, UtilDate.getDateTimeDiff(startTime), sql, args);
+            writeSqlErr(-1, startTime, sql, args);
             throw e;
         }
-        return null;
+        return objectReturn;
     }
 
     // -- Override(rename) base method ----------------------------------------
@@ -101,9 +132,9 @@ public class DBFactory extends JdbcTemplate {
         try {
             sql = replaceSQL(sql);
             rowSet = super.queryForRowSet(sql, args);
-            writeSqlLog(-9, UtilDate.getDateTimeDiff(startTime), sql, args);
+            writeSqlInfo(-9, startTime, sql, args);
         } catch (Exception e) {
-            writeSqlLog(-1, UtilDate.getDateTimeDiff(startTime), sql, args);
+            writeSqlErr(-1, startTime, sql, args);
             throw e;
         }
         return rowSet;
@@ -115,13 +146,12 @@ public class DBFactory extends JdbcTemplate {
         try {
             sql = replaceSQL(sql);
             result = super.update(sql, args);
-            writeSqlLog(result, UtilDate.getDateTimeDiff(startTime), sql, args);
+            writeSqlInfo(result, startTime, sql, args);
         } catch (DuplicateKeyException e) {
-            writeSqlLog(-1, UtilDate.getDateTimeDiff(startTime), sql, args);
-            //throw new Exception("录入数据冲突，关键信息重复，请检查。 \r\n" + e.getCause().getLocalizedMessage());
+            writeSqlErr(-1, startTime, sql, args);
             throw new Exception("录入数据冲突，关键信息重复，请检查。");
         } catch (Exception e) {
-            writeSqlLog(-1, UtilDate.getDateTimeDiff(startTime), sql, args);
+            writeSqlErr(-1, startTime, sql, args);
             throw e;
         }
         return result;
@@ -137,9 +167,9 @@ public class DBFactory extends JdbcTemplate {
             result = super.batchUpdate(sql, batchArgs);
 
             nInterval = UtilDate.getDateTimeDiff(startTime);
-            writeSqlLog(result.length, UtilDate.getDateTimeDiff(startTime), sql, new Object[] {});
+            writeSqlInfo(result.length, startTime, sql, new Object[] {});
         } catch (DataAccessException e) {
-            writeSqlLog(-1, UtilDate.getDateTimeDiff(startTime), sql, new Object[] {});
+            writeSqlErr(-1, startTime, sql, new Object[] {});
             throw e;
         } catch (Exception e) {
             e.printStackTrace();
@@ -147,16 +177,31 @@ public class DBFactory extends JdbcTemplate {
         return result;
     }
 
-    private void writeSqlLog(int result, long interval, String sql, Object... args) {
+    private void writeSqlInfo(int result, LocalDateTime startTime, String sql, Object... args) {
+        String logString = getSqlLog(result, startTime, sql, args);
+        logger.info(logString);
+    }
+    private void writeSqlErr(int result, LocalDateTime startTime, String sql, Object... args) {
+        String logString = getSqlLog(result, startTime, sql, args);
+        logger.error(logString);
+    }
+    private String getSqlLog(int result, LocalDateTime startTime, String sql, Object... args) {
+        long interval = UtilDate.getDateTimeDiff(startTime);
+
         for (int i = 0; i < args.length; i++) {
-            sql = sql.replaceFirst("\\?", "'" + args[i].toString() + "'");
+            if (args[i] == null) {
+                sql = sql.replaceFirst("\\?", "null");
+            }
+            else {
+                sql = sql.replaceFirst("\\?", "'" + args[i].toString() + "'");
+            }
         }
 
         if (result >= -1) {
-            logger.info(result + "(" + interval + "ms)" + " => " + sql);
+            return result + "(" + interval + "ms)" + " => " + sql;
         }
         else {
-            logger.info(interval + "ms => " + sql);
+            return interval + "ms => " + sql;
         }
     }
 
@@ -168,13 +213,7 @@ public class DBFactory extends JdbcTemplate {
 
     // -- public static method ------------------------------------------------
     public String replaceSQL(String sql) throws Exception {
-        if (sql.contains("..")) {
-            throw new Exception("待改进的sql写法。");
-            //return sql.replaceAll("\\.\\.", UtilDDS.getTenantDbName() + ".");
-        }
-        else {
-            return sql;
-        }
+        return sql;
     }
 
     // -- Check SQL injection -------------------------------------------------

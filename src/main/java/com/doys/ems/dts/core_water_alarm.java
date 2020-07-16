@@ -1,10 +1,10 @@
 package com.doys.ems.dts;
-import com.doys.framework.dts.parent.BASE_STANDARD_TABLE;
+import com.doys.framework.dts.parent.BASE_ENTITY_AUTO;
 import com.doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
 import com.doys.framework.upgrade.db.annotation.EntityTableAnnotation;
 
 @EntityTableAnnotation
-public class core_water_alarm extends BASE_STANDARD_TABLE {
+public class core_water_alarm extends BASE_ENTITY_AUTO {
     @EntityFieldAnnotation(text = "水表ID", not_null = true)
     int water_meter_id;
 
