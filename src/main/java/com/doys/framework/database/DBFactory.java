@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class DBFactory extends JdbcTemplate {
-    private static int NULL_NUMBER = -31415926;
     private static String regInject = "(\\b(delete|update|insert|drop|truncate|alter|exec|execute)\\b)";
     private static Pattern sqlPattern = Pattern.compile(regInject, Pattern.CASE_INSENSITIVE);
+    public static int NULL_NUMBER = -31415926;
 
     public DBFactory(DataSource dataSource) {
         setDataSource(dataSource);
@@ -111,14 +111,14 @@ public class DBFactory extends JdbcTemplate {
 
             if (rs.next()) {
                 objectReturn = rs.getObject(1);
+                if (objectReturn == null) {
+                    objectReturn = defaultValue;
+                }
             }
             else {
                 objectReturn = defaultValue;
             }
-
-            writeSqlInfo(1, startTime, sql, args);
         } catch (Exception e) {
-            writeSqlErr(-1, startTime, sql, args);
             throw e;
         }
         return objectReturn;

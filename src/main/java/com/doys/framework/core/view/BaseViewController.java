@@ -215,6 +215,7 @@ public class BaseViewController extends BaseController {
             }
 
             // -- 2.1 beforeSave --
+            dstm.setDataSource(dbBus.getDataSource());
             tStatus = dstm.getTransaction(tDef);
             if (!BeforeSave(blAddnew, id)) {
                 return ResultErr();
@@ -250,7 +251,7 @@ public class BaseViewController extends BaseController {
         long idNext = inInt("idNext", 0);
 
         String viewPk = in("viewPk");
-        String databasePk, tableName;
+        String tableName;
 
         SqlRowSet rsView, rsFormData;
         TransactionStatus tStatus = null;
@@ -265,6 +266,7 @@ public class BaseViewController extends BaseController {
             }
 
             // -- 2.1 beforeDelete --
+            dstm.setDataSource(dbBus.getDataSource());
             tStatus = dstm.getTransaction(tDef);
             if (!BeforeDelete(id)) {
                 return ResultErr();
@@ -314,6 +316,7 @@ public class BaseViewController extends BaseController {
             rsFlowButton = BaseViewService.getFlowButton(dbSys, flowPk, buttonPk);
 
             // -- 2.1 beforeSave --
+            dstm.setDataSource(dbBus.getDataSource());
             tStatus = dstm.getTransaction(tDef);
             if (!BeforeFlowClick(id, rsFlowButton)) {
                 return ResultErr();
@@ -348,6 +351,7 @@ public class BaseViewController extends BaseController {
         TransactionStatus tStatus = null;
         // ------------------------------------------------
         try {
+            dstm.setDataSource(dbBus.getDataSource());
             tStatus = dstm.getTransaction(tDef);
 
             if (!ButtonClick(id, null, buttonName)) {
