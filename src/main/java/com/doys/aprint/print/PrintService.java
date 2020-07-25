@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 public class PrintService extends BaseService {
+
     public static void generatePrintData(DBFactory dbBus, int labelId, int qty, int taskId, ArrayList<HashMap<String, Object>> variables) throws Exception {
         int columnCount, colIndex = 0;
 
@@ -47,7 +48,7 @@ public class PrintService extends BaseService {
             for (HashMap<String, Object> variable : variables) {
                 String paraKey = (String) variable.get("name");
                 if (paraKey.equalsIgnoreCase(name)) {
-                    value = (String) variable.get("value");
+                    value = variable.get("value").toString();
                 }
             }
             // -- 2. 执行规则 --
@@ -83,7 +84,7 @@ public class PrintService extends BaseService {
         }
 
         // -- 9 .批量插入数据 --
-        builderField.append("task_id, row_no");
+        builderField.append("task_id, $row_no");
         builderValue.append("?, ?");
 
         builder.append("INSERT INTO x_label_" + labelId + " ");
@@ -92,6 +93,7 @@ public class PrintService extends BaseService {
         sqlInsert = builder.toString();
         dbBus.batchUpdate(sqlInsert, listInsert);
     }
+
     public static void deleteTask(DBFactory dbBus, int taskId) throws Exception {
         int labelId;
 
@@ -115,7 +117,7 @@ public class PrintService extends BaseService {
         dbBus.exec(sql, taskId);
     }
     public static SqlRowSet getTaskData(DBFactory dbBus, int labelId, int taskId, int rowNoFrom, int rowNoTo) throws Exception {
-        String sql = "SELECT * FROM x_label_" + labelId + " WHERE task_id = ? AND row_no >= ? AND row_no <= ?";
+        String sql = "SELECT * FROM x_label_" + labelId + " WHERE task_id = ? AND $row_no >= ? AND $row_no <= ?";
         return dbBus.getRowSet(sql, taskId, rowNoFrom, rowNoTo);
     }
 }

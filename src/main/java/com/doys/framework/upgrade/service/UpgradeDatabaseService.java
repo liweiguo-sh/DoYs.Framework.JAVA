@@ -12,7 +12,7 @@ import com.doys.framework.upgrade.db.enum1.EntityTableMatch;
 import com.doys.framework.upgrade.db.obj.EntityField;
 import com.doys.framework.upgrade.db.obj.EntityTable;
 import com.doys.framework.upgrade.db.util.ClassReflect;
-import com.doys.framework.upgrade.db.util.MySqlSysHelper;
+import com.doys.framework.upgrade.db.util.MySqlHelper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import java.lang.reflect.Field;
@@ -230,10 +230,10 @@ public class UpgradeDatabaseService extends BaseService {
             }
             if (blInvalidColumn) {
                 if (match == EntityTableMatch.strict) {
-                    MySqlSysHelper.dropColumn(dbBus, entityTable.name, columnName);
+                    MySqlHelper.dropColumn(dbBus, entityTable.name, columnName);
                 }
                 else {
-                    MySqlSysHelper.disableColumn(dbBus, entityTable.name, columnName, rsColumn.getString("column_type"));
+                    MySqlHelper.disableColumn(dbBus, entityTable.name, columnName, rsColumn.getString("column_type"));
                 }
             }
         }
@@ -243,47 +243,47 @@ public class UpgradeDatabaseService extends BaseService {
         ArrayList<String[]> alIndex;
 
         // -- 1. 主键 --
-        indexFields = MySqlSysHelper.getPrimaryKey(dbBus, entityTable.name);
+        indexFields = MySqlHelper.getPrimaryKey(dbBus, entityTable.name);
         if (!entityTable.pk.equals(indexFields)) {
             if (!indexFields.equals("")) {
-                MySqlSysHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.PRIMARY, "PRIMARY");
+                MySqlHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.PRIMARY, "PRIMARY");
             }
             if (!entityTable.pk.equals("")) {
-                MySqlSysHelper.addIndex(dbBus, entityTable.name, EntityIndexType.PRIMARY, "PRIMARY", entityTable.pk);
+                MySqlHelper.addIndex(dbBus, entityTable.name, EntityIndexType.PRIMARY, "PRIMARY", entityTable.pk);
             }
         }
 
         // -- 2. 唯一索引 --
-        alIndex = MySqlSysHelper.getIndex(dbBus, databaseName, entityTable.name, EntityIndexType.UNIQUE_INDEX);
+        alIndex = MySqlHelper.getIndex(dbBus, databaseName, entityTable.name, EntityIndexType.UNIQUE_INDEX);
         for (int i = entityTable.ux.length; i < alIndex.size(); i++) {
-            MySqlSysHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.UNIQUE_INDEX, alIndex.get(i)[0]);
+            MySqlHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.UNIQUE_INDEX, alIndex.get(i)[0]);
         }
         for (int i = 0; i < entityTable.ux.length; i++) {
             if (i < alIndex.size()) {
                 if (!entityTable.ux[i].equals(alIndex.get(i)[1])) {
-                    MySqlSysHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.UNIQUE_INDEX, alIndex.get(i)[0]);
-                    MySqlSysHelper.addIndex(dbBus, entityTable.name, EntityIndexType.UNIQUE_INDEX, "ux" + (i + 1) + "_" + entityTable.name, entityTable.ux[i]);
+                    MySqlHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.UNIQUE_INDEX, alIndex.get(i)[0]);
+                    MySqlHelper.addIndex(dbBus, entityTable.name, EntityIndexType.UNIQUE_INDEX, "ux" + (i + 1) + "_" + entityTable.name, entityTable.ux[i]);
                 }
             }
             else {
-                MySqlSysHelper.addIndex(dbBus, entityTable.name, EntityIndexType.UNIQUE_INDEX, "ux" + (i + 1) + "_" + entityTable.name, entityTable.ux[i]);
+                MySqlHelper.addIndex(dbBus, entityTable.name, EntityIndexType.UNIQUE_INDEX, "ux" + (i + 1) + "_" + entityTable.name, entityTable.ux[i]);
             }
         }
 
         // -- 3. 普通索引 --
-        alIndex = MySqlSysHelper.getIndex(dbBus, databaseName, entityTable.name, EntityIndexType.INDEX);
+        alIndex = MySqlHelper.getIndex(dbBus, databaseName, entityTable.name, EntityIndexType.INDEX);
         for (int i = entityTable.ix.length; i < alIndex.size(); i++) {
-            MySqlSysHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.INDEX, alIndex.get(i)[0]);
+            MySqlHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.INDEX, alIndex.get(i)[0]);
         }
         for (int i = 0; i < entityTable.ix.length; i++) {
             if (i < alIndex.size()) {
                 if (!entityTable.ix[i].equals(alIndex.get(i)[1])) {
-                    MySqlSysHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.INDEX, alIndex.get(i)[0]);
-                    MySqlSysHelper.addIndex(dbBus, entityTable.name, EntityIndexType.INDEX, "ix" + (i + 1) + "_" + entityTable.name, entityTable.ix[i]);
+                    MySqlHelper.dropIndex(dbBus, entityTable.name, EntityIndexType.INDEX, alIndex.get(i)[0]);
+                    MySqlHelper.addIndex(dbBus, entityTable.name, EntityIndexType.INDEX, "ix" + (i + 1) + "_" + entityTable.name, entityTable.ix[i]);
                 }
             }
             else {
-                MySqlSysHelper.addIndex(dbBus, entityTable.name, EntityIndexType.INDEX, "ix" + (i + 1) + "_" + entityTable.name, entityTable.ix[i]);
+                MySqlHelper.addIndex(dbBus, entityTable.name, EntityIndexType.INDEX, "ix" + (i + 1) + "_" + entityTable.name, entityTable.ix[i]);
             }
         }
     }

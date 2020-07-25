@@ -25,7 +25,7 @@ public class CustomerView extends BaseViewController {
                 + "FROM base_para_def WHERE category = 'customer'";
             dbBus.exec(sql, id);
         }
-
+        // ------------------------------------------------
         return true;
     }
 

@@ -1,6 +1,7 @@
 package com.doys.framework.upgrade.db.util;
 import com.doys.framework.database.DBFactory;
 import com.doys.framework.upgrade.db.enum1.EntityIndexType;
+import com.doys.framework.upgrade.db.obj.EntityField;
 import com.doys.framework.util.UtilYml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,11 +13,17 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-/**
- * MySql 系统库助手
- */
-public class MySqlSysHelper {
+public class MySqlHelper {
     private static Logger log = LoggerFactory.getLogger("MySqlSysHelper");
+
+    public static boolean hasTable(DBFactory dbBus, String tableName) throws Exception {
+        String sql = "SELECT COUNT(1) FROM information_schema.tables "
+            + "WHERE table_schema = (SELECT database()) AND table_name = ?";
+        if (dbBus.getInt(sql, 0, tableName) == 1) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * @param tableName 表名称
@@ -37,67 +44,19 @@ public class MySqlSysHelper {
         return primaryKey;
     }
 
-    /**
-     * @param tableName 表名称
-     * @return 返回表指定索引类型的索引数组
-     */
-    public static ArrayList<String[]> getIndex(JdbcTemplate jdbcTemplate, String databaseName, String tableName, EntityIndexType indexType) throws Exception {
-        ArrayList<String[]> alIndex = new ArrayList<>();
-        String indexName = "", indexFields = "", columnName = "";
 
-        String sql = "SELECT index_name, column_name FROM INFORMATION_SCHEMA.STATISTICS "
-            + "WHERE table_schema = ? AND table_name = ? AND index_name <> 'PRIMARY' AND non_unique = " + (indexType == EntityIndexType.UNIQUE_INDEX ? 0 : 1) + " "
-            + "ORDER BY index_name, seq_in_index";
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, databaseName, tableName);
-        while (rowSet.next()) {
-            columnName = rowSet.getString("column_name");
-            if (indexName.equals(rowSet.getString("index_name"))) {
-                indexFields += "," + columnName;
-            }
-            else {
-                if (!indexFields.equals("")) {
-                    alIndex.add(new String[] { indexName, indexFields });
-                }
-                indexName = rowSet.getString("index_name");
-                indexFields = columnName;
-            }
+    public static boolean hasColumn(DBFactory dbBus, String tableName, String columnName) throws Exception {
+        String sql = "SELECT COUNT(1) FROM information_schema.columns "
+            + "WHERE table_schema = (SELECT database()) AND table_name = ? AND column_name = ?";
+        if (dbBus.getInt(sql, 0, tableName, columnName) == 1) {
+            return true;
         }
-        if (!indexFields.equals("")) {
-            alIndex.add(new String[] { indexName, indexFields });
-        }
-
-        return alIndex;
+        return false;
     }
-
-    public static void dropIndex(JdbcTemplate jdbcTemplate, String tableName, EntityIndexType indexType, String indexName) throws Exception {
-        String sql = "";
-        if (indexType == EntityIndexType.PRIMARY) {
-            sql = "ALTER TABLE " + tableName + " DROP PRIMARY KEY";
-        }
-        else {
-            sql = "ALTER TABLE " + tableName + " DROP INDEX " + indexName;
-        }
-        System.out.println(sql);
-        jdbcTemplate.execute(sql);
+    public static void addColumn(DBFactory dbBus, String tableName, EntityField field) throws Exception {
+        String sql = "ALTER TABLE " + tableName + " ADD " + field.name + " " + field.getCreateColumnSql(true);
+        dbBus.exec(sql);
     }
-    public static void addIndex(JdbcTemplate jdbcTemplate, String tableName, EntityIndexType indexType, String indexName, String indexFields) throws Exception {
-        String sql = "";
-        if (indexType == EntityIndexType.PRIMARY) {
-            sql = "ALTER TABLE " + tableName + " ADD PRIMARY KEY(" + indexFields + ")";
-        }
-        else if (indexType == EntityIndexType.UNIQUE_INDEX) {
-            sql = "ALTER TABLE " + tableName + " ADD UNIQUE INDEX " + indexName + "(" + indexFields + ")";
-        }
-        else if (indexType == EntityIndexType.INDEX) {
-            sql = "ALTER TABLE " + tableName + " ADD INDEX " + indexName + "(" + indexFields + ")";
-        }
-        else {
-            throw new Exception("unknown index type: " + indexType);
-        }
-
-        jdbcTemplate.execute(sql);
-    }
-
     public static void dropColumn(DBFactory dbBus, String tableName, String columnName) throws Exception {
         String sql = "ALTER TABLE " + tableName + " DROP COLUMN " + columnName;
         dbBus.exec(sql);
@@ -135,4 +94,65 @@ public class MySqlSysHelper {
             dropColumn(dbBus, tableName, columnName);
         }
     }
+
+    /**
+     * @param tableName 表名称
+     * @return 返回表指定索引类型的索引数组
+     */
+    public static ArrayList<String[]> getIndex(JdbcTemplate jdbcTemplate, String databaseName, String tableName, EntityIndexType indexType) throws Exception {
+        ArrayList<String[]> alIndex = new ArrayList<>();
+        String indexName = "", indexFields = "", columnName = "";
+
+        String sql = "SELECT index_name, column_name FROM INFORMATION_SCHEMA.STATISTICS "
+            + "WHERE table_schema = ? AND table_name = ? AND index_name <> 'PRIMARY' AND non_unique = " + (indexType == EntityIndexType.UNIQUE_INDEX ? 0 : 1) + " "
+            + "ORDER BY index_name, seq_in_index";
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, databaseName, tableName);
+        while (rowSet.next()) {
+            columnName = rowSet.getString("column_name");
+            if (indexName.equals(rowSet.getString("index_name"))) {
+                indexFields += "," + columnName;
+            }
+            else {
+                if (!indexFields.equals("")) {
+                    alIndex.add(new String[] { indexName, indexFields });
+                }
+                indexName = rowSet.getString("index_name");
+                indexFields = columnName;
+            }
+        }
+        if (!indexFields.equals("")) {
+            alIndex.add(new String[] { indexName, indexFields });
+        }
+
+        return alIndex;
+    }
+    public static void dropIndex(JdbcTemplate jdbcTemplate, String tableName, EntityIndexType indexType, String indexName) throws Exception {
+        String sql = "";
+        if (indexType == EntityIndexType.PRIMARY) {
+            sql = "ALTER TABLE " + tableName + " DROP PRIMARY KEY";
+        }
+        else {
+            sql = "ALTER TABLE " + tableName + " DROP INDEX " + indexName;
+        }
+        System.out.println(sql);
+        jdbcTemplate.execute(sql);
+    }
+    public static void addIndex(JdbcTemplate jdbcTemplate, String tableName, EntityIndexType indexType, String indexName, String indexFields) throws Exception {
+        String sql = "";
+        if (indexType == EntityIndexType.PRIMARY) {
+            sql = "ALTER TABLE " + tableName + " ADD PRIMARY KEY(" + indexFields + ")";
+        }
+        else if (indexType == EntityIndexType.UNIQUE_INDEX) {
+            sql = "ALTER TABLE " + tableName + " ADD UNIQUE INDEX " + indexName + "(" + indexFields + ")";
+        }
+        else if (indexType == EntityIndexType.INDEX) {
+            sql = "ALTER TABLE " + tableName + " ADD INDEX " + indexName + "(" + indexFields + ")";
+        }
+        else {
+            throw new Exception("unknown index type: " + indexType);
+        }
+
+        jdbcTemplate.execute(sql);
+    }
+
 }

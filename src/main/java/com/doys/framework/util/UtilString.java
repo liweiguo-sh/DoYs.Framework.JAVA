@@ -1,5 +1,9 @@
 package com.doys.framework.util;
 
+import com.doys.framework.database.DBFactory;
+import com.doys.framework.database.ds.DynamicDataSource;
+import com.doys.framework.database.ds.UtilDDS;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 public class UtilString {
     /**
      * 驼峰转下划线
@@ -82,5 +86,100 @@ public class UtilString {
             }
         }
         return pNodeKey + new String(chArr);
+    }
+
+    public static String getSN(DBFactory db, String snKey, String defaultRule) throws Exception {
+        return _getSN(db, snKey, "", defaultRule, 1);
+    }
+    public static String getSN(DBFactory db, String snKey, String scope, String defaultRule) throws Exception {
+        return _getSN(db, snKey, scope, defaultRule, 1);
+    }
+    private static synchronized String _getSN(DBFactory dbBus, String snKey, String scope, String defaultRule, int step) throws Exception {
+        int tenantId = ((DynamicDataSource) dbBus.getDataSource()).getTenantId();
+        int n1, n2, nLen;
+        int nNewValue;
+
+        String sql, sqlInsert;
+        String strRule, strNewSN, strNewValue;
+        String strYYYYMMDD, strYYYY, strYY, strMM, strDD = "";
+
+        SqlRowSet rs;
+
+        DBFactory db = UtilDDS.getDBFactory(tenantId);
+        // ------------------------------------------------
+        strYYYYMMDD = (new java.text.SimpleDateFormat("yyyyMMdd")).format(new java.util.Date());
+        strYYYY = strYYYYMMDD.substring(0, 4);
+        strYY = strYYYYMMDD.substring(2, 4);
+        strMM = strYYYYMMDD.substring(4, 6);
+        strDD = strYYYYMMDD.substring(6, 8);
+
+        // -- 1. 取序列定义 ------------------------------------
+        sql = "SELECT t.sn_pk, m.rule, year, month, day, value "
+            + "FROM aid_serial_definition m INNER JOIN aid_serial t ON m.pk = t.sn_pk WHERE t.scope = ? AND t.sn_pk = ?";
+        rs = db.getRowSet(sql, scope, snKey);
+        if (!rs.next()) {
+            sqlInsert = "INSERT INTO aid_serial(scope, sn_pk, year, month, day, value) VALUES (?, ?, ?, ?, ?, 0)";
+            db.exec(sqlInsert, scope, snKey, strYYYY, strMM, strDD);
+
+            rs = db.getRowSet(sql, scope, snKey);
+            if (!rs.next()) {
+                if (!defaultRule.equals("")) {
+                    sqlInsert = "INSERT INTO aid_serial_definition (pk, name, rule) VALUES (?, ?, ?)";
+                    db.exec(sqlInsert, snKey, snKey, defaultRule);
+
+                    rs = db.getRowSet(sql, scope, snKey);
+                    if (!rs.next()) {
+                        throw new Exception("创建序列 " + snKey + " 遇到意外错误，请检查。");
+                    }
+                }
+                else {
+                    sql = "DELETE FROM aid_serial WHERE sn_pk NOT IN (SELECT pk FROM aid_serial_definition)";
+                    db.exec(sql);
+                }
+            }
+        }
+        strRule = rs.getString("rule").toUpperCase();
+        // -- 2. 更新序列值 ------------------------------------
+        if (((strRule.contains("{YYYY}") || strRule.contains("{YY}")) && !rs.getString("year").equals(strYYYY))
+            || (strRule.contains("{MM}") && rs.getInt("month") != Integer.parseInt(strMM))
+            || (strRule.contains("{DD}") && rs.getInt("day") != Integer.parseInt(strDD))) {
+            sql = "UPDATE aid_serial SET year = ?, month = ?, day = ?, value = ? WHERE scope = ? AND sn_pk = ?";
+            db.exec(sql, strYYYY, strMM, strDD, step, scope, snKey);
+            nNewValue = step;
+        }
+        else {
+            nNewValue = step + rs.getInt("value");
+            sql = "UPDATE aid_serial SET value = ? WHERE scope = ? AND sn_pk = ?";
+            db.exec(sql, nNewValue, scope, snKey);
+        }
+        // -- 3. 生成序列值 ------------------------------------
+        strNewSN = strRule;
+        if (strNewSN.contains("{YYYY}")) {
+            strNewSN = strNewSN.replaceAll("\\{YYYY}", strYYYY);
+        }
+        if (strNewSN.contains("{YY}")) {
+            strNewSN = strNewSN.replaceAll("\\{YY}", strYY);
+        }
+        if (strNewSN.contains("{MM}")) {
+            strNewSN = strNewSN.replaceAll("\\{MM}", strMM);
+        }
+        if (strNewSN.contains("{DD}")) {
+            strNewSN = strNewSN.replaceAll("\\{DD}", strDD);
+        }
+
+        n1 = strNewSN.indexOf("{");
+        n2 = strNewSN.indexOf("}");
+        if (n1 >= n2 - 1) {
+            return "";
+        }
+        nLen = Integer.parseInt(strNewSN.substring(n1 + 1, n2));
+        strNewValue = String.format("%0" + nLen + "d", nNewValue);
+        strNewSN = strNewSN.substring(0, n1) + strNewValue + strNewSN.substring(n2 + 1);
+
+        // -- 4. 检查是否越界 -----------------------------------
+        if (String.valueOf(nNewValue).length() > nLen) {
+            throw new Exception("序列号越界, 请检查.");
+        }
+        return strNewSN;
     }
 }

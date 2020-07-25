@@ -1,4 +1,5 @@
 package com.doys.aprint.print;
+import com.doys.aprint.base.LabelTableService;
 import com.doys.aprint.task.TaskService;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.entity.RestResult;
@@ -69,6 +70,8 @@ public class QuickPrintController extends BaseController {
         ArrayList<HashMap<String, Object>> variables = inArrayList("variables");
         // ------------------------------------------------
         try {
+            LabelTableService.dynamicAddLabelTableColumn(dbBus, labelId, variables);
+
             taskId = TaskService.createQuickPrintTask(dbBus, labelId, userkey);
             PrintService.generatePrintData(dbBus, labelId, qty, taskId, variables);
 
@@ -106,5 +109,4 @@ public class QuickPrintController extends BaseController {
         }
         return ResultOk();
     }
-
 }

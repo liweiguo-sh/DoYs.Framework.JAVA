@@ -1,4 +1,6 @@
 package com.doys.framework.database;
+import com.doys.framework.core.ex.SessionTimeoutException;
+import com.doys.framework.database.ds.UtilDDS;
 import com.doys.framework.database.dtb.DataTable;
 import com.doys.framework.util.UtilDate;
 import org.springframework.dao.DataAccessException;
@@ -25,8 +27,8 @@ public class DBFactory extends JdbcTemplate {
     public DataTable getDataTable(String sql) throws Exception {
         return getDataTable(sql, new Object[] {});
     }
-    public DataTable getDataTable(String sql, Object[] parameters) throws Exception {
-        DataTable dtb = new DataTable(this, sql, parameters);
+    public DataTable getDataTable(String sql, Object... args) throws Exception {
+        DataTable dtb = new DataTable(this, sql, args);
         return dtb;
     }
 
@@ -133,6 +135,14 @@ public class DBFactory extends JdbcTemplate {
             sql = replaceSQL(sql);
             rowSet = super.queryForRowSet(sql, args);
             writeSqlInfo(-9, startTime, sql, args);
+
+        } catch (NullPointerException e) {
+            try {
+                UtilDDS.getTenantId();
+            } catch (SessionTimeoutException ex) {
+                throw ex;
+            }
+            throw e;
         } catch (Exception e) {
             writeSqlErr(-1, startTime, sql, args);
             throw e;

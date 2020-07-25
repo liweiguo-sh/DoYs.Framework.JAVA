@@ -5,6 +5,7 @@ import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.database.DBFactory;
 import com.doys.framework.util.UtilDataSet;
 import com.doys.framework.util.UtilEnv;
+import com.doys.framework.util.UtilResultSet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 public class BaseController extends BaseTop {
@@ -206,6 +208,15 @@ public class BaseController extends BaseTop {
         else {
             key = key + Const.CHAR1 + "datatable";
             _ok(key, UtilDataSet.getRowSetString(rowSet));
+        }
+    }
+    protected void ok(String key, ResultSet rs) throws Exception {
+        if (rs == null) {
+            _ok(key, "");
+        }
+        else {
+            key = key + Const.CHAR1 + "datatable";
+            _ok(key, UtilResultSet.getRowSetString(rs));
         }
     }
     private void _ok(String key, Object value) throws Exception {

@@ -1,22 +1,23 @@
 package com.doys.framework.util;
 import com.doys.framework.config.Const;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
-public class UtilDataSet {
-    public static String getRowSetString(SqlRowSet rowSet) throws Exception {
-        return getRsFieldString(rowSet) + Const.CHAR7 + getRsDataString(rowSet);
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+public class UtilResultSet {
+    public static String getRowSetString(ResultSet rs) throws Exception {
+        return getRsFieldString(rs) + Const.CHAR7 + getRsDataString(rs);
     }
-    private static String getRsFieldString(SqlRowSet rowSet) throws Exception {
+    private static String getRsFieldString(ResultSet rs) throws Exception {
         int columnCount = 0;
 
-        SqlRowSetMetaData metaData = null;
+        ResultSetMetaData metaData = null;
         StringBuilder builder = new StringBuilder();
         try {
-            metaData = rowSet.getMetaData();
+            metaData = rs.getMetaData();
             columnCount = metaData.getColumnCount();
             for (int i = 1; i <= columnCount; i++) {
                 String dataType = metaData.getColumnTypeName(i);
-                String columnType = UtilDataSet.getFieldType(dataType);
+                String columnType = UtilResultSet.getFieldType(dataType);
 
                 if (i > 1) {
                     builder.append(Const.CHAR1);
@@ -32,14 +33,12 @@ public class UtilDataSet {
         }
         return builder.toString();
     }
-    private static String getRsDataString(SqlRowSet rowSet) {
+    private static String getRsDataString(ResultSet rowSet) {
         int rowCount = 0;
         int columnCount = 0;
         StringBuilder builder = new StringBuilder();
-        // ------------------------------------------------
         try {
             columnCount = rowSet.getMetaData().getColumnCount();
-            rowSet.beforeFirst();
             while (rowSet.next()) {
                 if (rowCount++ > 0)
                     builder.append(Const.CHAR1);
@@ -53,7 +52,8 @@ public class UtilDataSet {
             }
             return builder.toString();
         } catch (Exception e) {
-            throw e;
+            e.printStackTrace();
+            return "";
         }
     }
 
@@ -80,42 +80,5 @@ public class UtilDataSet {
             throw new Exception("com.xznext.Const.getFileType, Unknown dataType " + dataType);
         }
         return fieldType;
-    }
-    public static int getColumnWidth(String fieldType, String fieldText, int fieldLength) {
-        int nWidth = 0, nWidthType = 0, nWidthText = 0, nWidthLength = 0;
-        // ------------------------------------------------
-        if (fieldType.equalsIgnoreCase("int")) {
-            nWidthType = 80;
-        }
-        else if (fieldType.equalsIgnoreCase("number")) {
-            nWidthType = 100;
-        }
-        else if (fieldType.equalsIgnoreCase("datetime")) {
-            nWidthType = 80;
-        }
-        else if (fieldType.equalsIgnoreCase("string")) {
-            nWidthLength = fieldLength;
-        }
-        else {
-            System.out.println("com.xznext.Const.getColumnWidth: unknown fieldType " + fieldType + ".");
-            nWidthType = 100;
-        }
-        // ------------------------------------------------
-        for (int i = 0; i < fieldText.length(); i++) {
-            int ascii = (int) fieldText.charAt(i);
-            if (ascii <= 126) {
-                nWidthText += 10;
-            }
-            else {
-                nWidthText += 25;
-            }
-        }
-        // ------------------------------------------------
-        nWidth = Math.max(50, nWidthType);
-        nWidth = Math.max(nWidth, nWidthText);
-        nWidth = Math.max(nWidth, nWidthLength);
-        nWidth = Math.min(nWidth, 300);
-
-        return nWidth;
     }
 }

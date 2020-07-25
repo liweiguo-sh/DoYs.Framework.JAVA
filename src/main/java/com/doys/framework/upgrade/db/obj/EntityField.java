@@ -47,25 +47,35 @@ public class EntityField {
         type = type.toLowerCase();
         if (type.equals("java.lang.string")) {
             columnType = EntityFieldType.STRING;
-        } else if (type.equals("boolean") || type.equalsIgnoreCase("java.lang.boolean")) {
+        }
+        else if (type.equals("boolean") || type.equalsIgnoreCase("java.lang.boolean")) {
             columnType = EntityFieldType.TINYINT;
-        } else if (type.equals("int") || type.equals("java.lang.integer")) {
+        }
+        else if (type.equals("int") || type.equals("java.lang.integer")) {
             columnType = EntityFieldType.INT;
-        } else if (type.equals("long") || type.equals("java.lang.long")) {
+        }
+        else if (type.equals("long") || type.equals("java.lang.long")) {
             columnType = EntityFieldType.LONG;
-        } else if (type.equals("float") || type.equals("java.lang.float")) {
+        }
+        else if (type.equals("float") || type.equals("java.lang.float")) {
             columnType = EntityFieldType.FLOAT;
-        } else if (type.equals("double") || type.equals("java.lang.double")) {
+        }
+        else if (type.equals("double") || type.equals("java.lang.double")) {
             columnType = EntityFieldType.DOUBLE;
-        } else if (type.equals("java.time.localdatetime") || type.equals("java.util.date") || type.equals("java.sql.timestamp")) {
+        }
+        else if (type.equals("java.time.localdatetime") || type.equals("java.util.date") || type.equals("java.sql.timestamp")) {
             columnType = EntityFieldType.DATETIME;
-        } else if (type.equals("java.sql.date")) {
+        }
+        else if (type.equals("java.sql.date")) {
             columnType = EntityFieldType.DATE;
-        } else if (type.equals("java.sql.time")) {
+        }
+        else if (type.equals("java.sql.time")) {
             columnType = EntityFieldType.TIME;
-        } else if (type.equals("date")) {
+        }
+        else if (type.equals("date")) {
             columnType = EntityFieldType.DATE;
-        } else {
+        }
+        else {
             throw new Exception("unknown columnType: " + type + ", please check it.");
         }
 
@@ -81,58 +91,74 @@ public class EntityField {
 
         if (type == EntityFieldType.STRING) {
             sb.append("varchar(" + length + ")");
-        } else if (type == EntityFieldType.INT) {
+        }
+        else if (type == EntityFieldType.INT) {
             sb.append("int");
-        } else if (type == EntityFieldType.TINYINT) {
+        }
+        else if (type == EntityFieldType.TINYINT) {
             sb.append("tinyint");
-        } else if (type == EntityFieldType.LONG) {
+        }
+        else if (type == EntityFieldType.LONG) {
             sb.append("bigint");
-        } else if (type == EntityFieldType.FLOAT || type == EntityFieldType.DOUBLE) {
+        }
+        else if (type == EntityFieldType.FLOAT || type == EntityFieldType.DOUBLE) {
             sb.append(type + " (" + length + ")");
-        } else if (type == EntityFieldType.DATETIME || type == EntityFieldType.DATE || type == EntityFieldType.TIME) {
+        }
+        else if (type == EntityFieldType.DATETIME || type == EntityFieldType.DATE || type == EntityFieldType.TIME) {
             sb.append(type);
-        } else if (type == EntityFieldType.TEXT) {
+        }
+        else if (type == EntityFieldType.TEXT) {
             sb.append("text");
-        } else {
+        }
+        else {
             throw new Exception("debug here: getAddColumnSql 1");
         }
 
         if (not_null || auto) {
             sb.append(" NOT NULL");
         }
-        if (default_value != null && !default_value.equals("")) {
+        if (!auto && default_value != null && !default_value.equals("")) {
             if (type == EntityFieldType.STRING) {
                 if (default_value.equals("''")) {
                     sb.append(" DEFAULT ''");
-                } else {
+                }
+                else {
                     sb.append(" DEFAULT '" + default_value + "'");
                 }
-            } else if (type == EntityFieldType.INT || type == EntityFieldType.LONG || type == EntityFieldType.TINYINT) {
+            }
+            else if (type == EntityFieldType.INT || type == EntityFieldType.LONG || type == EntityFieldType.TINYINT) {
                 sb.append(" DEFAULT " + default_value);
-            } else if (type == EntityFieldType.DATETIME || type == EntityFieldType.DATE || type == EntityFieldType.TIME) {
+            }
+            else if (type == EntityFieldType.DATETIME || type == EntityFieldType.DATE || type == EntityFieldType.TIME) {
                 sb.append(" DEFAULT " + default_value);
-            } else if (type == EntityFieldType.TEXT) {
+            }
+            else if (type == EntityFieldType.TEXT) {
                 // BLOB, TEXT, GEOMETRY or JSON column  can't have a default value
                 // do nothing
-            } else {
+            }
+            else {
                 throw new Exception("debug here: getAddColumnSql 2");
             }
         }
 
         if (!text.equals("") && !comment.equals("")) {
             sb.append(" COMMENT '" + text + "|" + comment + "'");
-        } else if (!text.equals("")) {
+        }
+        else if (!text.equals("")) {
             sb.append(" COMMENT '" + text + "'");
-        } else if (!comment.equals("")) {
+        }
+        else if (!comment.equals("")) {
             sb.append(" COMMENT '" + name + "|" + comment + "'");
-        } else {
+        }
+        else {
             sb.append(" COMMENT ''");
         }
 
         if (auto && (type == EntityFieldType.INT || type == EntityFieldType.LONG)) {
             if (addMode) {
                 sb.append(" AUTO_INCREMENT, ADD PRIMARY KEY(" + name + ")");
-            } else {
+            }
+            else {
                 sb.append(" AUTO_INCREMENT");
             }
         }

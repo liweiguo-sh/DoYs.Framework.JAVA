@@ -50,19 +50,19 @@ public class DataTable {
     private Logger logger = LoggerFactory.getLogger("DataTable");
     // -------------------------------------------------------------------------
     public DataTable(DBFactory dbFactory, String sql) throws Exception {
-        _DataTable(dbFactory, sql, new Object[0]);
+        _DataTable(dbFactory, sql, null);
     }
-    public DataTable(DBFactory dbFactory, String sql, Object[] parameters) throws Exception {
-        _DataTable(dbFactory, sql, parameters);
+    public DataTable(DBFactory dbFactory, String sql, Object... args) throws Exception {
+        _DataTable(dbFactory, sql, args);
     }
-    private void _DataTable(DBFactory dbFactory, String sql, Object[] parameters) throws Exception {
+    private void _DataTable(DBFactory dbFactory, String sql, Object... args) throws Exception {
         try {
             this.close();
             this.SQL = sql;
 
             long t1 = new Date().getTime();
             ///rs = dbFactory.openResultset(sql, parameters, SqlRowSet.TYPE_SCROLL_INSENSITIVE);
-            rs = dbFactory.getRowSet(sql, parameters);
+            rs = dbFactory.getRowSet(sql, args);
 
             long t2 = new Date().getTime();
             if (rs != null) {

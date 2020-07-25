@@ -45,10 +45,10 @@ public class ViewService extends BaseService {
         }
 
         // -- 2.表ST_FIELD字段信息更新到表ST_VIEW_FIELD --------
-        dtbView_Field = dbSys.getDataTable("SELECT * FROM sys_view_field WHERE view_pk = ?", new Object[] { viewPk });
+        dtbView_Field = dbSys.getDataTable("SELECT * FROM sys_view_field WHERE view_pk = ?", viewPk);
         dtbView_Field.Sort("name");
 
-        dtbField = dbSys.getDataTable("SELECT * FROM sys_field WHERE table_pk = ?", new Object[] { tablePk });
+        dtbField = dbSys.getDataTable("SELECT * FROM sys_field WHERE table_pk = ?", tablePk);
         dtbField.Sort("name");
         for (int i = 0; i < dtbField.getRowCount(); i++) {
             fieldName = dtbField.DataCell(i, "name");
