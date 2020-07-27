@@ -64,7 +64,7 @@ public class UtilDataSet {
         if (dataType.indexOf("char") >= 0 || dataType.indexOf("text") >= 0) {
             fieldType = "string";
         }
-        else if (dataType.equals("int") || dataType.equals("integer") || dataType.equals("smallint") || dataType.equals("bigint") || dataType.equals("number")) {
+        else if (dataType.equals("int") || dataType.equals("integer") || dataType.equals("tinyint") || dataType.equals("smallint") || dataType.equals("bigint") || dataType.equals("number")) {
             fieldType = "number";
         }
         else if (dataType.equals("numeric") || dataType.equals("decimal") || dataType.equals("float") || dataType.equals("real") || dataType.equals("money")) {

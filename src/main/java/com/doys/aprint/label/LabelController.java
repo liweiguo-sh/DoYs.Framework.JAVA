@@ -1,10 +1,15 @@
 package com.doys.aprint.label;
+import com.doys.aprint.base.LabelTableService;
+import com.doys.framework.config.Const;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.util.UtilString;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 @RestController
 @RequestMapping("/aprint/label")
 public class LabelController extends BaseController {
@@ -41,10 +46,27 @@ public class LabelController extends BaseController {
         String sql;
         String content = in("content");
         String vars = in("vars");
+
+        ArrayList<HashMap<String, Object>> listVars = new ArrayList<>();
         // ------------------------------------------------
         try {
             sql = "UPDATE base_label SET content = ?, vars = ? WHERE id = ?";
             dbBus.exec(sql, content, vars, id);
+
+            // --------------------------------------------
+            String[] arrVars = vars.split(Const.CHAR3);
+            for (int i = 0; i < arrVars.length; i++) {
+                String[] arrVar = arrVars[i].split(Const.CHAR4);
+                String name = arrVar[0];
+                String value = (arrVar.length == 2 ? arrVar[1] : "");
+
+                HashMap<String, Object> map = new HashMap<>();
+                map.put("name", name);
+                map.put("value", value);
+                listVars.add(map);
+            }
+
+            LabelTableService.dynamicAddLabelTableColumn(dbBus, id, listVars);
         } catch (Exception e) {
             return ResultErr(e);
         }

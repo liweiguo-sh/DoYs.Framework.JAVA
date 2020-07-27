@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UpgradeDatabaseService extends BaseService {
+    private static String debugEntityClass = "";    // -- 如果有值，则只升级这个实体类，用于调试。eg: .base_label_variable --
+    // ------------------------------------------------------------------------
     public static void upgrade(DBFactory dbSys, String entityPaths) throws Exception {
         String sql, databaseName;
         String classFile = "";
@@ -28,8 +30,10 @@ public class UpgradeDatabaseService extends BaseService {
         ArrayList<String> alClassFile = ScanFile.scanClass(entityPaths, true);
         for (int i = 0; i < alClassFile.size(); i++) {
             classFile = alClassFile.get(i);
-            if (classFile.indexOf("Student") <= 0) {
-                // continue;   // -- todo: 调试用 --
+            if (!debugEntityClass.equals("")) {
+                if (!classFile.endsWith(".base_label_variable")) {
+                    continue;
+                }
             }
 
             Class clazz = Thread.currentThread().getContextClassLoader().loadClass(classFile);
@@ -300,7 +304,7 @@ public class UpgradeDatabaseService extends BaseService {
 
         // -- 0. 预处理 --
         if (columnDefault == null) {
-            columnDefault = "";
+            //columnDefault = "";
         }
         else if (columnDefault.equals("")) {
             columnDefault = "''";
@@ -327,7 +331,9 @@ public class UpgradeDatabaseService extends BaseService {
             if (columnNotNull != entityField.not_null) {
                 break;          // -- 1.4 是否为空 --
             }
-            if (!columnDefault.equals(entityField.default_value)) {
+            if ((columnDefault != null && !columnDefault.equals(entityField.default_value))
+                || (columnDefault == null && (entityField.default_value != null && !entityField.default_value.equals("")))) {
+                //logger.info(entityField.name);
                 break;          // -- 1.5 默认值不同 --
             }
 

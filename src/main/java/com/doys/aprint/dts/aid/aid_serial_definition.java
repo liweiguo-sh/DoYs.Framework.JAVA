@@ -5,7 +5,7 @@ import com.doys.framework.upgrade.db.annotation.EntityTableAnnotation;
 @EntityTableAnnotation
 @EntityIndexAnnotation(pk = "pk")
 public class aid_serial_definition {
-    @EntityFieldAnnotation(text = "序列标识", length = "30")
+    @EntityFieldAnnotation(text = "序列标识", not_null = true, length = "30")
     public String pk;
 
     @EntityFieldAnnotation(length = "30", text = "序列名称")

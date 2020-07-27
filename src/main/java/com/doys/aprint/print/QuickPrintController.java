@@ -48,7 +48,7 @@ public class QuickPrintController extends BaseController {
             rsLabel = dbBus.getRowSet(sql, labelId);
             ok("dtbLabel", rsLabel);
 
-            sql = "SELECT * FROM base_label_variable WHERE label_id = ? ORDER BY sequence, name";
+            sql = "SELECT * FROM base_label_variable WHERE label_id = ? AND type <> 'fixed' AND hidden = 0 ORDER BY sequence, name";
             rsLabelVariable = dbBus.getRowSet(sql, labelId);
             ok("dtbLabelVariable", rsLabelVariable);
         } catch (Exception e) {
@@ -65,9 +65,11 @@ public class QuickPrintController extends BaseController {
         int qty = inInt("qty");
         int copies = inInt("copies");
 
+        String sql;
         String userkey = this.ssValue("userkey");
 
         ArrayList<HashMap<String, Object>> variables = inArrayList("variables");
+        SqlRowSet rsTask, rsLabelVariable;
         // ------------------------------------------------
         try {
             LabelTableService.dynamicAddLabelTableColumn(dbBus, labelId, variables);
@@ -75,7 +77,13 @@ public class QuickPrintController extends BaseController {
             taskId = TaskService.createQuickPrintTask(dbBus, labelId, userkey);
             PrintService.generatePrintData(dbBus, labelId, qty, taskId, variables);
 
-            ok("taskId", taskId);
+            sql = "SELECT * FROM core_task WHERE id = ?";
+            rsTask = dbBus.getRowSet(sql, taskId);
+            ok("dtbTask", rsTask);
+
+            sql = "SELECT * FROM base_label_variable WHERE label_id = ? AND type <> 'fixed' AND hidden = 0 ORDER BY sequence, name";
+            rsLabelVariable = dbBus.getRowSet(sql, labelId);
+            ok("dtbLabelVariable", rsLabelVariable);
         } catch (Exception e) {
             return ResultErr(e);
         }

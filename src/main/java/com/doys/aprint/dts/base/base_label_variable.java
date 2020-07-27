@@ -10,8 +10,12 @@ public class base_label_variable {
     @EntityFieldAnnotation(auto = true)
     public int id;
 
+    @EntityFieldAnnotation(text = "变量名称", not_null = true, length = "30")
     public String name;
 
     @EntityFieldAnnotation(text = "隐藏变量", not_null = true, comment = "程序生成的变量，非用户手工定义")
     public int hidden = 0;
+
+    @EntityFieldAnnotation(text = "允许打印前修改")
+    boolean flag_manual_modify = true;
 }

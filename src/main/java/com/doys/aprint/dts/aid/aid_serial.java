@@ -5,9 +5,9 @@ import com.doys.framework.upgrade.db.annotation.EntityTableAnnotation;
 @EntityTableAnnotation
 @EntityIndexAnnotation(pk = "scope,sn_pk")
 public class aid_serial {
-    @EntityFieldAnnotation(length = "30", text = "序列所属范围", comment = "示例：office_id，warehouse_id等")
+    @EntityFieldAnnotation(length = "30", text = "序列所属范围", not_null = true, comment = "示例：office_id，warehouse_id等")
     public String scope;
-    @EntityFieldAnnotation(length = "30")
+    @EntityFieldAnnotation(length = "30", not_null = true)
     public String sn_pk;
 
     public int year;

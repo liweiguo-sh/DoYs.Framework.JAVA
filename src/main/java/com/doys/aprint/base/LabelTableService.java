@@ -6,12 +6,13 @@ import com.doys.framework.dts.parent.ENTITY_RECORD;
 import com.doys.framework.upgrade.db.enum1.EntityFieldType;
 import com.doys.framework.upgrade.db.obj.EntityField;
 import com.doys.framework.upgrade.db.util.MySqlHelper;
+import com.doys.framework.util.UtilTable;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 public class LabelTableService extends BaseService {
-    private static String getLabelXTableName(int labelId) {
+    public static String getLabelXTableName(long labelId) {
         return "x_label_" + labelId;
     }
     private static void createLabelTable(DBFactory dbBus, String tableName) throws Exception {
@@ -64,19 +65,30 @@ public class LabelTableService extends BaseService {
                 EntityField field = new EntityField();
                 field.name = columnName;
                 field.type = EntityFieldType.STRING;
-                field.length = "50";
+                field.length = "" + rsVaribles.getInt("value_len");
                 field.not_null = false;
 
                 MySqlHelper.addColumn(dbBus, tableName, field);
             }
         }
     }
+    public static void dynamicDelLabelTableColumn(DBFactory dbBus, int labelId, String varName) throws Exception {
+        String sql;
+        String tableName = getLabelXTableName(labelId);
+
+        if (MySqlHelper.hasColumn(dbBus, tableName, varName)) {
+            MySqlHelper.dropColumn(dbBus, tableName, varName);
+        }
+
+        sql = "DELETE FROM base_label_variable WHERE label_id = ? AND name = ?";
+        dbBus.exec(sql, labelId, varName);
+    }
     public static void dynamicAddLabelTableColumn(DBFactory dbBus, int labelId, ArrayList<HashMap<String, Object>> variables) throws Exception {
-        int nFind;
+        int nFind, fieldLenth;
 
         String sql;
         String tableName = getLabelXTableName(labelId);
-        String columnName;
+        String name, value, type;
         String[] oFind = new String[1];
 
         DataTable dtbFields, dtbVariables;
@@ -95,28 +107,61 @@ public class LabelTableService extends BaseService {
         dtbVariables.Sort("name");
 
         for (HashMap<String, Object> map : variables) {
-            columnName = (String) map.get("name");
-            oFind[0] = columnName;
+            name = (String) map.get("name");
+            value = map.get("value").toString();
+            if (map.containsKey("type")) {
+                type = (String) map.get("type");
+            }
+            else {
+                type = "string";
+            }
+
+            if (type.equalsIgnoreCase("seq")) {
+                if (map.containsKey("value_len")) {
+                    fieldLenth = Integer.parseInt(map.get("value_len").toString());
+                }
+                else {
+                    fieldLenth = value.length();
+                }
+            }
+            else {
+                fieldLenth = Math.max(value.length(), 20);
+            }
+
+            if (name.contains("标签元素") || name.contains("共享变量")) {
+                continue;
+            }
+            if (!UtilTable.isValidColumnName(name)) {
+                continue;
+            }
+
+            // -- 创建字段 ------------------------------------
+            oFind[0] = name;
             nFind = dtbFields.Find(oFind);
             if (nFind < 0) {
                 EntityField field = new EntityField();
-                field.name = columnName;
+                field.name = name;
                 field.type = EntityFieldType.STRING;
-                field.length = "50";
+                field.length = fieldLenth + "";
                 field.not_null = false;
 
-                MySqlHelper.addColumn(dbBus, tableName, field);
+                try {
+                    MySqlHelper.addColumn(dbBus, tableName, field);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    continue;
+                }
             }
-            // --------------------------------------------
+            // -- 创建变量定义 ----------------------------------
             nFind = dtbVariables.Find(oFind);
             if (nFind < 0) {
                 ENTITY_RECORD entity = new ENTITY_RECORD(dbBus, "base_label_variable");
                 entity.setValue("label_id", labelId)
-                    .setValue("name", columnName)
+                    .setValue("name", name)
                     .setValue("type", "string")
-                    .setValue("value", "")
-                    .setValue("value_len", 50)
-                    .setValue("hidden", 1)
+                    .setValue("value", value)
+                    .setValue("value_len", fieldLenth)
+                    .setValue("hidden", 0)
                     .Save();
             }
         }
