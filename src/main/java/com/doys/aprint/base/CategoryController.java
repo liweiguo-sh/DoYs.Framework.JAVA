@@ -22,7 +22,7 @@ public class CategoryController extends BaseController {
             sql = "SELECT id FROM base_category WHERE node_key = ?";
             idParent = dbBus.getInt(sql, DBFactory.NULL_NUMBER, nodeKeyParent);
 
-            sql = "SELECT node_key, id, name, is_leaf FROM base_category WHERE id_parent = ? ORDER BY sequence, name";
+            sql = "SELECT node_key, id, name, fullname, is_leaf FROM base_category WHERE id_parent = ? ORDER BY sequence, name";
             rsNode = dbBus.getRowSet(sql, idParent);
             ok("dtbNode", rsNode);
 
