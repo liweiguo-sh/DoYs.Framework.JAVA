@@ -2,6 +2,7 @@ package com.doys.aprint.dts.base;
 import com.doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
 import com.doys.framework.upgrade.db.annotation.EntityIndexAnnotation;
 import com.doys.framework.upgrade.db.annotation.EntityTableAnnotation;
+import com.doys.framework.upgrade.db.enum1.EntityFieldType;
 import com.doys.framework.upgrade.db.enum1.EntityTableMatch;
 @EntityTableAnnotation(match = EntityTableMatch.appand)
 @EntityIndexAnnotation(pk = "id", ux = "label_id,name", ix = { "label_id" })
@@ -16,6 +17,6 @@ public class base_label_variable {
     @EntityFieldAnnotation(text = "隐藏变量", not_null = true, comment = "程序生成的变量，非用户手工定义")
     public int hidden = 0;
 
-    @EntityFieldAnnotation(text = "允许打印前修改")
-    boolean flag_manual_modify = true;
+    @EntityFieldAnnotation(type = EntityFieldType.TINYINT, text = "允许打印前修改")
+    public int flag_manual_modify = 1;
 }

@@ -1,7 +1,8 @@
-package com.doys.framework.dts.parent;
+package com.doys.framework.dts.base;
 import com.doys.framework.database.DBFactory;
 import com.doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
 import com.doys.framework.upgrade.db.enum1.EntityFieldType;
+
 public class BASE_ENTITY_AUTO extends BASE_ENTITY {
     @EntityFieldAnnotation(type = EntityFieldType.INT, auto = true, not_null = true, comment = "主键")
     public long id;

@@ -1,5 +1,5 @@
 package com.doys.aprint.dts.cfg;
-import com.doys.framework.dts.parent.BASE_ENTITY;
+import com.doys.framework.dts.base.BASE_ENTITY;
 import com.doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
 import com.doys.framework.upgrade.db.annotation.EntityIndexAnnotation;
 import com.doys.framework.upgrade.db.annotation.EntityTableAnnotation;
@@ -9,7 +9,7 @@ import com.doys.framework.upgrade.db.enum1.EntityTableMatch;
 @EntityTableAnnotation(match = EntityTableMatch.strict)
 @EntityIndexAnnotation(pk = "pk")
 public class cfg_jdbc extends BASE_ENTITY {
-    @EntityFieldAnnotation(length = "30")
+    @EntityFieldAnnotation(length = "30", not_null = true)
     public String pk;
 
     @EntityFieldAnnotation(length = "200")
@@ -28,5 +28,5 @@ public class cfg_jdbc extends BASE_ENTITY {
     public String fieldname;
 
     @EntityFieldAnnotation(text = "启用标志", type = EntityFieldType.TINYINT)
-    public boolean flag_active = false;
+    public int flag_active = 0;
 }

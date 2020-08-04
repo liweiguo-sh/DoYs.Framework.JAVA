@@ -2,6 +2,7 @@ package com.doys.framework.system.service;
 import com.doys.framework.aid.DBSchema;
 import com.doys.framework.core.base.BaseService;
 import com.doys.framework.database.DBFactory;
+import com.doys.framework.database.ds.UtilDDS;
 import com.doys.framework.database.dtb.DataTable;
 import com.doys.framework.util.UtilDataSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -71,7 +72,7 @@ public class ViewService extends BaseService {
             }
             dr.setDataCell("type", fieldType);
             dr.setDataCell("datatype", dtbField.DataCell(i, "datatype"));
-            dr.setDataCell("length", dtbField.DataCell(i, "length"));
+            dr.setDataCell("len", dtbField.DataCell(i, "len"));
             dr.setDataCell("field_pk", dtbField.DataCell(i, "pk"));
             dr.setDataCell("flag_identity", dtbField.DataCell(i, "flag_identity"));
             if (dr.DataCell("flag_nullable") == null) {
@@ -103,7 +104,13 @@ public class ViewService extends BaseService {
 
         // -- 3.根据视图SQL执行结果，将非基础表字段添加到ST_VIEW_FIELD ---
         sql = "SELECT * FROM (" + sqlViewDS + ") t WHERE 1 = 0";
-        rs = dbBus.getRowSet(sql);
+        if (databasePk.equalsIgnoreCase("sys")) {
+            rs = dbSys.getRowSet(sql);
+        }
+        else {
+            DBFactory dbPrefix = UtilDDS.getDBFactory(UtilDDS.getTenantId());
+            rs = dbPrefix.getRowSet(sql);
+        }
         rsmd = rs.getMetaData();
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
             fieldName = rsmd.getColumnLabel(i).toLowerCase();
@@ -136,12 +143,12 @@ public class ViewService extends BaseService {
             }
             dr.setDataCell("datatype", rsmd.getColumnTypeName(i));
             dr.setDataCell("type", UtilDataSet.getFieldType(rsmd.getColumnTypeName(i)));
-            dr.setDataCell("length", rsmd.getColumnDisplaySize(i));
+            dr.setDataCell("len", rsmd.getColumnDisplaySize(i));
             dr.setDataCell("flag_pkey", "0");
             dr.setDataCell("flag_identity", "0");
             ///dr.setDataCell("field_nullable", rsmd.isNullable(i));
             if (dr.DataCell("width", true).equals("")) {
-                dr.setDataCell("width", UtilDataSet.getColumnWidth(dr.DataCell("type"), dr.DataCell("text"), Integer.parseInt(dr.DataCell("length"))));
+                dr.setDataCell("width", UtilDataSet.getColumnWidth(dr.DataCell("type"), dr.DataCell("text"), Integer.parseInt(dr.DataCell("len"))));
             }
 
             if (dr.DataCell("align") == null || dr.DataCell("align").equals("")) {
@@ -172,7 +179,7 @@ public class ViewService extends BaseService {
             }
         }
         // -- 5.提交保存 ----------------------------------
-        nResult = dtbView_Field.Update(dbSys, "sys_view_field", "view_pk,name");
+        nResult = dtbView_Field.Update(dbSys, "sys_view_field", "id");
         if (nResult < 0) {
             throw new Exception("意外错误。");
         }

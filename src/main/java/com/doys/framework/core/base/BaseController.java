@@ -98,6 +98,9 @@ public class BaseController extends BaseTop {
     protected String ssValue(String attrName) {
         return _getSessionValue(attrName, "").toString();
     }
+    protected boolean ssBoolean(String attrName) {
+        return (boolean) _getSessionValue(attrName, false);
+    }
     private Object _getSessionValue(String attrName, Object defaultValue) {
         Object object = this.session().getAttribute(attrName);
         if (object == null) {

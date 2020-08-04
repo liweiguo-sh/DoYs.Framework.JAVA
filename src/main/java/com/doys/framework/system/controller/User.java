@@ -40,7 +40,7 @@ public class User extends BaseController {
         int tenantId = 0;
 
         String dbName = "";
-        String userkey = in("userkey");
+        String userPk = in("userPk");
         String password = in("password");
         String loginTime = in("loginTime");
         String verifyCode = in("verifyCode");
@@ -78,23 +78,26 @@ public class User extends BaseController {
             }
             // -- 1.2. 验证登录密码 --
             if (blVerifyPassword) {
-                UserService.verifyUser(dbBus, dbName, userkey, password, loginTime, superPassword);
+                UserService.verifyUser(dbBus, userPk, password, loginTime, superPassword);
             }
 
             // -- 2. 返回用户信息 --
-            rsUser = UserService.getUser(dbBus, dbName, userkey);
+            rsUser = UserService.getUser(dbBus, userPk);
             if (rsUser.next()) {
                 setSession(rsUser);
+                if (!ssBoolean("isDeveloper") && rsUser.getInt("flag_menu_overdue") == 1) {
+                    // -- 如果不是开发人员并且访问菜单的配置已过期，重新计算用户可访问菜单 --
+                    UserService.recalUserMenu(dbBus, userPk, ssValue("sqlUserGroupPks"));
+                }
             }
             else {
                 return ResultErr("用户不存在，请检查。");
             }
 
             // -- 3. 登录日志 --
-            logger.info("用户 " + userkey + " 登录成功, session_id = " + this.session().getId());
+            logger.info("用户 " + userPk + " 成功登录系统");
         } catch (Exception e) {
             return ResultErr(e);
-        } finally {
         }
         return ResultOk();
     }
@@ -140,13 +143,42 @@ public class User extends BaseController {
         return tenantId;
     }
     private void setSession(SqlRowSet rsUser) throws Exception {
+        String sql;
+        String userPk, userName;
+        String strGroupPks = "";
+        String sqlGroupPks = "", sqlUserGroupPks = "";
+
         HttpSession ss = session();
-
+        SqlRowSet rsGroupUser;
+        // ------------------------------------------------
         rsUser.first();
-        ok("userkey", rsUser.getString("user_key"));
-        ok("username", rsUser.getString("user_name"));
+        userPk = rsUser.getString("pk");
+        userName = rsUser.getString("name");
 
-        ss.setAttribute("userkey", rsUser.getString("user_key"));
-        ss.setAttribute("username", rsUser.getString("user_name"));
+        ok("userPk", userPk);
+        ok("userName", userName);
+
+        ss.setAttribute("userPk", userPk);
+        ss.setAttribute("userName", userName);
+
+        // ------------------------------------------------
+        sql = "SELECT group_pk FROM sys_group_user WHERE user_pk = ?";
+        rsGroupUser = dbBus.getRowSet(sql, userPk);
+        while (rsGroupUser.next()) {
+            strGroupPks += "," + rsGroupUser.getString("group_pk");
+            sqlGroupPks += ",'" + rsGroupUser.getString("group_pk") + "'";
+        }
+        if (sqlGroupPks.length() > 0) {
+            strGroupPks = strGroupPks.substring(1);
+            sqlGroupPks = sqlGroupPks.substring(1);
+            sqlUserGroupPks = "'" + userPk + "'," + sqlGroupPks;
+        }
+        else {
+            sqlUserGroupPks = "'" + userPk + "'";
+        }
+        ok("groupPks", strGroupPks);
+        ss.setAttribute("sqlGroupPks", sqlGroupPks);
+        ss.setAttribute("sqlUserGroupPks", sqlUserGroupPks);
+        ss.setAttribute("isDeveloper", (sqlUserGroupPks.contains("'developer'") || sqlUserGroupPks.contains("'developers'")));
     }
 }

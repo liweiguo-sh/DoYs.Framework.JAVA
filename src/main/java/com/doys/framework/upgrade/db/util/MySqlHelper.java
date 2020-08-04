@@ -3,8 +3,6 @@ import com.doys.framework.database.DBFactory;
 import com.doys.framework.upgrade.db.enum1.EntityIndexType;
 import com.doys.framework.upgrade.db.obj.EntityField;
 import com.doys.framework.util.UtilYml;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
@@ -14,8 +12,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class MySqlHelper {
-    private static Logger log = LoggerFactory.getLogger("MySqlSysHelper");
-
     public static boolean hasTable(DBFactory dbBus, String tableName) throws Exception {
         String sql = "SELECT COUNT(1) FROM information_schema.tables "
             + "WHERE table_schema = (SELECT database()) AND table_name = ?";
@@ -127,7 +123,7 @@ public class MySqlHelper {
         return alIndex;
     }
     public static void dropIndex(JdbcTemplate jdbcTemplate, String tableName, EntityIndexType indexType, String indexName) throws Exception {
-        String sql = "";
+        String sql;
         if (indexType == EntityIndexType.PRIMARY) {
             sql = "ALTER TABLE " + tableName + " DROP PRIMARY KEY";
         }
@@ -152,6 +148,7 @@ public class MySqlHelper {
             throw new Exception("unknown index type: " + indexType);
         }
 
+        System.out.println(sql);
         jdbcTemplate.execute(sql);
     }
 

@@ -150,7 +150,7 @@ public class DBSchema {
         // -- 动态视图SQL -------------------------------------
         sql = "SELECT CONCAT('" + databasePk + "', '.', UPPER(table_name)) table_pk, ";
         sql += "CONCAT('" + databasePk + "', '.', UPPER(table_name), '.', column_name) pk, column_name name, data_type, ";
-        sql += "character_maximum_length length, CASE is_nullable WHEN 'YES' THEN 1 ELSE 0 END flag_nullable, ";
+        sql += "character_maximum_length len, CASE is_nullable WHEN 'YES' THEN 1 ELSE 0 END flag_nullable, ";
         sql += "CASE extra WHEN 'auto_increment' THEN 1 ELSE 0 END flag_identity, CASE column_key WHEN 'PRI' THEN 1 ELSE 0 END flag_pkey, ";
         sql += "IFNULL(column_default,'') default_value, column_comment note ";
         sql += "FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = '" + databaseName + "' ";
@@ -186,7 +186,7 @@ public class DBSchema {
                 drRow.setDataCell("flag_pkey", rs.getString("flag_pkey"));
                 drRow.setDataCell("flag_identity", rs.getString("flag_identity"));
                 drRow.setDataCell("text", rs.getString("name"));
-                drRow.setDataCell("length", rs.getString("length"));
+                drRow.setDataCell("len", rs.getString("len"));
                 drRow.setDataCell("flag_nullable", rs.getString("flag_nullable"));
                 // -- 2、field_default --
                 fieldDefault = rs.getString("default_value");
@@ -204,7 +204,7 @@ public class DBSchema {
                     drRow.setDataCell("width", 90);
                 }
                 else {
-                    drRow.setDataCell("width", UtilDataSet.getColumnWidth(fieldType, drRow.DataCell("text"), Integer.parseInt(drRow.DataCell("length"))));
+                    drRow.setDataCell("width", UtilDataSet.getColumnWidth(fieldType, drRow.DataCell("text"), Integer.parseInt(drRow.DataCell("len"))));
                 }
 
                 if (fieldType.equalsIgnoreCase("number")) {

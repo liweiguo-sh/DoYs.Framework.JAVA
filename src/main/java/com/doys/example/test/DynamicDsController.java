@@ -3,6 +3,7 @@ import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.database.DBFactory;
 import com.doys.framework.database.ds.UtilDDS;
+import com.doys.framework.database.dtb.DataTable;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,7 +53,7 @@ public class DynamicDsController extends BaseController {
     @RequestMapping("/test3")
     private RestResult test3() throws Exception {
         try {
-
+            DataTable dtb = dbSys.getDataTable("SELECT id, name FROM sys_view_field limit 2");
         } catch (Exception e) {
             return ResultErr(e);
         }

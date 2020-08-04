@@ -25,11 +25,10 @@ public class DBFactory extends JdbcTemplate {
 
     // -- DataTable -----------------------------------------------------------
     public DataTable getDataTable(String sql) throws Exception {
-        return getDataTable(sql, new Object[] {});
+        return new DataTable(this, sql);
     }
     public DataTable getDataTable(String sql, Object... args) throws Exception {
-        DataTable dtb = new DataTable(this, sql, args);
-        return dtb;
+        return new DataTable(this, sql, args);
     }
 
     // -- getValue ------------------------------------------------------------
@@ -198,12 +197,14 @@ public class DBFactory extends JdbcTemplate {
     private String getSqlLog(int result, LocalDateTime startTime, String sql, Object... args) {
         long interval = UtilDate.getDateTimeDiff(startTime);
 
-        for (int i = 0; i < args.length; i++) {
-            if (args[i] == null) {
-                sql = sql.replaceFirst("\\?", "null");
-            }
-            else {
-                sql = sql.replaceFirst("\\?", "'" + args[i].toString() + "'");
+        if (args != null) {
+            for (int i = 0; i < args.length; i++) {
+                if (args[i] == null) {
+                    sql = sql.replaceFirst("\\?", "null");
+                }
+                else {
+                    sql = sql.replaceFirst("\\?", "'" + args[i].toString() + "'");
+                }
             }
         }
 

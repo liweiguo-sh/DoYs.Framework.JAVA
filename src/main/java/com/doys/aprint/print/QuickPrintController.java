@@ -66,7 +66,7 @@ public class QuickPrintController extends BaseController {
         int copies = inInt("copies");
 
         String sql;
-        String userkey = this.ssValue("userkey");
+        String userPk = this.ssValue("userPk");
 
         ArrayList<HashMap<String, Object>> variables = inArrayList("variables");
         SqlRowSet rsTask, rsLabelVariable;
@@ -74,7 +74,7 @@ public class QuickPrintController extends BaseController {
         try {
             LabelTableService.dynamicAddLabelTableColumn(dbBus, labelId, variables);
 
-            taskId = TaskService.createQuickPrintTask(dbBus, labelId, userkey);
+            taskId = TaskService.createQuickPrintTask(dbBus, labelId, userPk);
             PrintService.generatePrintData(dbBus, labelId, qty, taskId, variables);
 
             sql = "SELECT * FROM core_task WHERE id = ?";

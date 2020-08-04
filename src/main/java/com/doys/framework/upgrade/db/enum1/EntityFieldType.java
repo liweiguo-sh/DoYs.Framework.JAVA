@@ -6,37 +6,46 @@ public enum EntityFieldType {
      * varchar
      */
     STRING,
+
     /**
      * int
      */
     INT,
+
     /**
      * boolean, tinyint
      */
     TINYINT,
+
     /**
      * bigint
      */
     LONG,
+
     /**
      * float
      */
     FLOAT,
+
     /**
      * double
      */
     DOUBLE,
+
     /**
      * java.util.Date, java.sql.Timestamp
      */
     DATETIME,
+
     /**
      * java.sql.Date
      */
     DATE,
+
     /**
      * java.sql.Time
      */
     TIME,
+
     TEXT
 }

@@ -1,10 +1,10 @@
 package com.doys.aprint.task;
 import com.doys.framework.database.DBFactory;
-import com.doys.framework.dts.parent.ENTITY_RECORD;
+import com.doys.framework.dts.base.ENTITY_RECORD;
 import com.doys.framework.util.UtilDate;
 import com.doys.framework.util.UtilString;
 public class TaskService {
-    public static int createQuickPrintTask(DBFactory dbBus, int labelId, String userkey) throws Exception {
+    public static int createQuickPrintTask(DBFactory dbBus, int labelId, String userPk) throws Exception {
         String taskPk;
 
         ENTITY_RECORD et;
@@ -16,7 +16,7 @@ public class TaskService {
         et.setValue("pk", taskPk)
             .setValue("label_id", labelId)
             .setValue("bus_date", UtilDate.getDateStr())
-            .setValue("creator", userkey);
+            .setValue("creator", userPk);
         et.Save();
 
         return (int) et.getId();

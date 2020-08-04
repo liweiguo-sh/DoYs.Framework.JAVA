@@ -14,6 +14,7 @@ import com.doys.framework.util.UtilString;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
+import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 public class BaseViewService extends BaseService {
     public static SqlRowSet getView(DBFactory dbSys, String viewPk) throws Exception {
@@ -21,7 +22,7 @@ public class BaseViewService extends BaseService {
         return dbSys.getRowSet(sql, viewPk);
     }
     public static SqlRowSet getViewField(DBFactory dbSys, String viewPk) throws Exception {
-        String sql = "SELECT  name, text, fixed, align, width, data_source_type, data_source, sequence "
+        String sql = "SELECT name, text, fixed, align, width, data_source_type, data_source, sequence "
             + "FROM sys_view_field "
             + "WHERE view_pk = ? AND sequence <> 0 "
             + "ORDER BY sequence";
@@ -96,7 +97,7 @@ public class BaseViewService extends BaseService {
         if (!sqlFilter.equals("")) {
             sql += "WHERE " + sqlFilter + " ";
         }
-        if (!sqlOrderBy.equals("")) {
+        if (!UtilString.KillNull(sqlOrderBy).equals("")) {
             sql += "ORDER BY " + sqlOrderBy + " ";
         }
         sql += "LIMIT " + Const.MAX_PAGE_ROWS * (pageNum - 1) + ", " + Const.MAX_PAGE_ROWS;
@@ -110,6 +111,12 @@ public class BaseViewService extends BaseService {
     }
 
     // -- ViewForm ------------------------------------------------------------
+    public static SqlRowSet getViewBaseField(DBFactory dbSys, String viewPk, String tablePk) throws Exception {
+        String sql = "SELECT  name, text, data_source_type, data_source "
+            + "FROM sys_view_field "
+            + "WHERE view_pk = ? AND table_pk = ?";
+        return dbSys.getRowSet(sql, viewPk, tablePk);
+    }
     public static HashMap<String, SqlRowSet> getViewDS(DBFactory dbBus, SqlRowSet rsViewField) throws Exception {
         HashMap<String, SqlRowSet> mapDS = new HashMap<>();
 
@@ -138,7 +145,7 @@ public class BaseViewService extends BaseService {
         return dbBus.getRowSet(sql, id);
     }
 
-    public static long insert(DBFactory dbBus, String tableName, HashMap form) throws Exception {
+    public static long insert(DBFactory dbBus, String tableName, HashMap form, HttpSession session) throws Exception {
         int nIdx = 0;
 
         String sql = "SELECT * FROM " + tableName + " LIMIT 0";
@@ -157,9 +164,20 @@ public class BaseViewService extends BaseService {
                 columnType = UtilDataSet.getFieldType(rsmd.getColumnTypeName(i));
                 columnName = rsmd.getColumnName(i);
 
-                if (!form.containsKey(columnName)) {
-                    continue;
+                // -- 预处理 ---------------------------------
+                if (columnName.equalsIgnoreCase("creator")) {
+                    if (!form.containsKey(columnName)) {
+                        form.put(columnName, (String) session.getAttribute("userPk"));
+                    }
+                    else
+                        form.replace(columnName, (String) session.getAttribute("userPk"));
                 }
+                else {
+                    if (!form.containsKey(columnName)) {
+                        continue;
+                    }
+                }
+                // ----------------------------------------
                 if (!columnName.equalsIgnoreCase("id")) {
                     quotes = "'";
                     buildField.append(nIdx == 0 ? "" : ", ");
@@ -202,7 +220,7 @@ public class BaseViewService extends BaseService {
             throw e;
         }
     }
-    public static boolean update(DBFactory dbSys, DBFactory dbBus, String tableName, HashMap form) throws Exception {
+    public static boolean update(DBFactory dbSys, DBFactory dbBus, String tableName, HashMap form, HttpSession session) throws Exception {
         int result = 0, nIdx = 0;
 
         String sql = "SELECT * FROM " + tableName + " LIMIT 0";
@@ -218,10 +236,20 @@ public class BaseViewService extends BaseService {
             columnType = UtilDataSet.getFieldType(rsmd.getColumnTypeName(i));
             columnName = rsmd.getColumnName(i);
 
+            // -- 预处理 ---------------------------------
             if (!form.containsKey(columnName)) {
                 continue;
             }
-            if (!columnName.equalsIgnoreCase("id")) {
+            // --------------------------------------------
+            if (columnName.equalsIgnoreCase("id")) {
+            }
+            else if (columnName.equalsIgnoreCase("modifier")) {
+                builder.append((nIdx++ == 0 ? "" : ", ") + columnName + " = '" + session.getAttribute("userPk") + "'");
+            }
+            else if (columnName.equalsIgnoreCase("mdate")) {
+                builder.append((nIdx++ == 0 ? "" : ", ") + columnName + " = now()");
+            }
+            else {
                 quotes = "'";
                 builder.append(nIdx++ == 0 ? "" : ", ");
                 if (columnType.equalsIgnoreCase("number")) {

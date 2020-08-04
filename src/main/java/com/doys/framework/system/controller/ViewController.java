@@ -10,18 +10,15 @@ import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.system.service.ViewService;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/system/view")
 public class ViewController extends BaseController {
     @PostMapping("/refresh")
-    public RestResult refreshDBStruct(@RequestBody Map<String, String> req) {
-        String viewPk = req.get("viewPk");
+    public RestResult refreshDBStruct() {
+        String viewPk = in("viewPk");
         // ------------------------------------------------
         try {
             ViewService.refreshViewField(dbSys, dbBus, viewPk);

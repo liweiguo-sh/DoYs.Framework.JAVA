@@ -1,5 +1,5 @@
 /*************************************************
- * Copyright (C), 2012-2014, xznext.com
+ * Copyright (C), 2012-2014, doys-next.com
  * @author Volant Lee.
  * @version 2.0
  * @date 2012-07-20
@@ -30,6 +30,7 @@ public class DataTable {
     public boolean SortByChinese = true;
     private boolean NullIsMaxValue = true;
 
+    private boolean hasAuto = false;                // -- 是否有自增列 --
     private int _nRowCount = -1;
     private int _nRowCount0 = -1;
     private int _nColCount = -1;
@@ -42,7 +43,7 @@ public class DataTable {
 
     private String[][] _arrRows = null;
     private String[][] _arrRowsDeleted = null;
-    private String[][] _arrCols = null;        // --Columns Property Collection--
+    private String[][] _arrCols = null;             // --Columns Property Collection--
     private String[][] _arrSortCols = null;
 
     private SqlRowSetMetaData rsmd = null;
@@ -50,7 +51,7 @@ public class DataTable {
     private Logger logger = LoggerFactory.getLogger("DataTable");
     // -------------------------------------------------------------------------
     public DataTable(DBFactory dbFactory, String sql) throws Exception {
-        _DataTable(dbFactory, sql, null);
+        _DataTable(dbFactory, sql, new Object[] {});
     }
     public DataTable(DBFactory dbFactory, String sql, Object... args) throws Exception {
         _DataTable(dbFactory, sql, args);
@@ -171,6 +172,10 @@ public class DataTable {
             _arrCols = new String[_nColCount + 1][3];
             // --初始化列集合--------------------------------------------------------
             for (int iCol = 1; iCol <= _nColCount; iCol++) {
+                if (!this.hasAuto && rsmd.getColumnLabel(iCol).equalsIgnoreCase("id")) {
+                    this.hasAuto = true;
+                }
+
                 _arrCols[iCol][1] = Integer.toString(rsmd.getColumnType(iCol));
                 _arrCols[iCol][2] = rsmd.getColumnTypeName(iCol);
                 if (_arrCols[iCol][2].equalsIgnoreCase("int") || _arrCols[iCol][2].equalsIgnoreCase("INTEGER") || _arrCols[iCol][2].equalsIgnoreCase("tinyint")
@@ -597,7 +602,7 @@ public class DataTable {
             }
             if (strNUD.compareTo("N") == 0) {
                 nIdx = 0;
-                paraInsert = new Object[_nColCount];
+                paraInsert = new Object[_nColCount - (this.hasAuto ? 1 : 0)];
                 for (int iCol = 1; iCol <= _nColCount; iCol++) {
                     DataColumn dc = Column(iCol);
                     if (!dc.isAutoIncrement) {
@@ -618,7 +623,7 @@ public class DataTable {
             }
             else if (strNUD.compareTo("U") == 0) {
                 nIdx = 0;
-                paraUpdate = new Object[_nColCount + arrPKeyIndex.length];
+                paraUpdate = new Object[_nColCount + arrPKeyIndex.length - (this.hasAuto ? 1 : 0)];
                 for (int iCol = 1; iCol <= _nColCount; iCol++) {
                     DataColumn dc = Column(iCol);
                     if (!dc.isAutoIncrement) {
@@ -645,7 +650,7 @@ public class DataTable {
         // --C、Delete--------------------------------------
         for (int iRow = 0; iRow < _nDeleteCount; iRow++) {
             nIdx = 0;
-            paraDelete = new Object[arrPKeyIndex.length];
+            paraDelete = new Object[arrPKeyIndex.length - (this.hasAuto ? 1 : 0)];
             for (int iCol = 0; iCol < arrPKeyIndex.length; iCol++) {
                 int colIndex = arrPKeyIndex[iCol];
                 paraDelete[nIdx++] = _arrRowsDeleted[iRow][colIndex];

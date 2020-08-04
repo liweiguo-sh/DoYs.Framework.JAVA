@@ -100,17 +100,17 @@ public class CategoryView extends BaseViewController {
         sql = "SELECT id FROM base_category WHERE node_key = ?";
         idL1 = dbBus.getInt(sql, DBFactory.NULL_NUMBER, nodeKeyL1);
 
-        sql = "UPDATE base_category SET fullname = name, sequences = sequence, id1 = id, name1 = name WHERE id = ?";
+        sql = "UPDATE base_category SET fullname = name, sequences = LPAD(sequence, 3 , 0), id1 = id, name1 = name WHERE id = ?";
         dbBus.exec(sql, idL1);
 
         // -- 1. 批量更新下级节点 ---------------------------------
-        sql = "SELECT node_key, id, name, fullname, sequence FROM base_category WHERE id = ?";
+        sql = "SELECT node_key, id, name, fullname, sequences FROM base_category WHERE id = ?";
         rsParent = dbBus.getRowSet(sql, idL1);
         rsParent.next();
 
         sql = "UPDATE base_category SET id1 = ?, name1 = ?, "
             + "fullname = CONCAT('" + rsParent.getString("name") + "', '" + Const.CHAR1 + "', name), "
-            + "sequences = CONCAT('" + rsParent.getString("sequence") + "', '_', sequence) "
+            + "sequences = CONCAT('" + rsParent.getString("sequences") + "', '_', LPAD(sequence, 3 , 0)) "
             + "WHERE node_key <> ? AND LEFT(node_key, 6) = ?";
         dbBus.exec(sql, idL1, rsParent.getString("name"), nodeKeyL1, nodeKeyL1);
 
@@ -140,7 +140,7 @@ public class CategoryView extends BaseViewController {
 
         sql = "UPDATE base_category SET "
             + "fullname = CONCAT('" + rsParent.getString("fullname") + "', '" + Const.CHAR1 + "', name), "
-            + "sequences = CONCAT('" + rsParent.getString("sequences") + "', '_', sequence) "
+            + "sequences = CONCAT('" + rsParent.getString("sequences") + "', '_', LPAD(sequence, 3 , 0)) "
             + "WHERE node_key <> ? AND LEFT(node_key, " + 3 * (level + 1) + ") = ?";
         dbBus.exec(sql, rsParent.getString("node_key"), rsParent.getString("node_key"));
 

@@ -1,4 +1,4 @@
-package com.doys.framework.dts.parent;
+package com.doys.framework.dts.base;
 import com.doys.framework.core.ex.UnImplementException;
 import com.doys.framework.database.DBFactory;
 

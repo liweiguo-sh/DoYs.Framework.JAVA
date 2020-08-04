@@ -144,7 +144,7 @@ public class BaseViewController extends BaseController {
                 dbBus = null;
                 dbBus = dbSys;
             }
-            rsViewField = this.getViewField(viewPk);
+            rsViewField = BaseViewService.getViewBaseField(dbSys, viewPk, rsView.getString("table_pk"));
 
             HashMap<String, SqlRowSet> mapDS = BaseViewService.getViewDS(dbBus, rsViewField);
             for (Map.Entry<String, SqlRowSet> entry : mapDS.entrySet()) {
@@ -222,10 +222,10 @@ public class BaseViewController extends BaseController {
             }
             // -- 3.2. save --
             if (blAddnew) {
-                id = BaseViewService.insert(dbBus, tableName, form);
+                id = BaseViewService.insert(dbBus, tableName, form, this.session());
             }
             else {
-                BaseViewService.update(dbSys, dbBus, tableName, form);
+                BaseViewService.update(dbSys, dbBus, tableName, form, this.session());
             }
             // -- 2.3 afterSave --
             if (!AfterSave(blAddnew, id)) {

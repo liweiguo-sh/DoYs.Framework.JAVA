@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UpgradeDatabaseService extends BaseService {
-    private static String debugEntityClass = "";    // -- 如果有值，则只升级这个实体类，用于调试。eg: .base_label_variable --
+    private static String debugEntityClass = "";        // -- 如果有值，则只升级这个实体类，用于调试。eg: .base_label_variable --
+    private static String debugEntityField = "";        // -- 如果有值，则只升级这个实体类字段，用于调试。 --
     // ------------------------------------------------------------------------
     public static void upgrade(DBFactory dbSys, String entityPaths) throws Exception {
         String sql, databaseName;
@@ -31,7 +32,7 @@ public class UpgradeDatabaseService extends BaseService {
         for (int i = 0; i < alClassFile.size(); i++) {
             classFile = alClassFile.get(i);
             if (!debugEntityClass.equals("")) {
-                if (!classFile.endsWith(".base_label_variable")) {
+                if (!classFile.endsWith(debugEntityClass)) {
                     continue;
                 }
             }
@@ -103,7 +104,7 @@ public class UpgradeDatabaseService extends BaseService {
         // -- 3. parse index --
         EntityIndexAnnotation indexProperty = entity.getClass().getAnnotation(EntityIndexAnnotation.class);
         if (indexProperty != null) {
-            table.pk = indexProperty.pk();
+            table.pk = indexProperty.pk().replaceAll(" ", "");
             table.ux = indexProperty.ux();
             table.ix = indexProperty.ix();
         }
@@ -303,6 +304,12 @@ public class UpgradeDatabaseService extends BaseService {
         String entityColumnType = entityField.getColumnType();
 
         // -- 0. 预处理 --
+        if (!debugEntityClass.equals("") && !debugEntityField.equals("")) {
+            if (!entityField.name.equalsIgnoreCase(debugEntityField)) {
+                return false;
+            }
+        }
+
         if (columnDefault == null) {
             //columnDefault = "";
         }
@@ -333,7 +340,7 @@ public class UpgradeDatabaseService extends BaseService {
             }
             if ((columnDefault != null && !columnDefault.equals(entityField.default_value))
                 || (columnDefault == null && (entityField.default_value != null && !entityField.default_value.equals("")))) {
-                //logger.info(entityField.name);
+                logger.info(entityField.name);
                 break;          // -- 1.5 默认值不同 --
             }
 
@@ -374,7 +381,6 @@ public class UpgradeDatabaseService extends BaseService {
         }
 
         // -- 3. --
-
         return needUpgrage;
     }
 }

@@ -2,7 +2,7 @@ package com.doys.aprint.base;
 import com.doys.framework.core.base.BaseService;
 import com.doys.framework.database.DBFactory;
 import com.doys.framework.database.dtb.DataTable;
-import com.doys.framework.dts.parent.ENTITY_RECORD;
+import com.doys.framework.dts.base.ENTITY_RECORD;
 import com.doys.framework.upgrade.db.enum1.EntityFieldType;
 import com.doys.framework.upgrade.db.obj.EntityField;
 import com.doys.framework.upgrade.db.util.MySqlHelper;

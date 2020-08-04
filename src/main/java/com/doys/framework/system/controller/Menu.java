@@ -19,37 +19,32 @@ import java.util.Map;
 public class Menu extends BaseController {
     @GetMapping("/getSystem")
     private RestResult getSystem() {
-        String userkey;
-
         SqlRowSet rsSystem;
         // ------------------------------------------------
         try {
-            userkey = (String) this.session().getAttribute("userkey");
-            rsSystem = MenuService.getSystem(dbSys, userkey);
+            rsSystem = MenuService.getSystem(dbSys, dbBus, ssValue("sqlUserGroupPks"));
 
             ok("dtbSystem", rsSystem);
         } catch (Exception e) {
             return ResultErr(e);
-        } finally {
         }
         return ResultOk();
     }
 
     @PostMapping("/getMenuByUser")
     private RestResult getMenuByUser(@RequestBody Map<String, String> req) {
-        String userkey;
+        String userPk;
         String systemKey = req.get("systemKey");
 
         SqlRowSet rsMenu;
         // ------------------------------------------------
         try {
-            userkey = (String) this.session().getAttribute("userkey");
-            rsMenu = MenuService.getMenuByUser(dbSys, systemKey, userkey);
+            userPk = (String) this.session().getAttribute("userPk");
+            rsMenu = MenuService.getMenuByUser(dbSys, systemKey, ssValue("sqlUserGroupPks"));
 
             ok("dtbMenu", rsMenu);
         } catch (Exception e) {
             return ResultErr(e);
-        } finally {
         }
         return ResultOk();
     }

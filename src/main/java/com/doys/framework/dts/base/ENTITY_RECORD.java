@@ -1,7 +1,8 @@
-package com.doys.framework.dts.parent;
+package com.doys.framework.dts.base;
 import com.doys.framework.database.DBFactory;
 
 import java.util.HashMap;
+
 public class ENTITY_RECORD {
     private long id = 0;
 

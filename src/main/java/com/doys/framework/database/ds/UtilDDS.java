@@ -118,6 +118,9 @@ public class UtilDDS {
     public static String getTenantDbName(DBFactory dbSys) throws Exception {
         return prefix + UtilDDS.getTenantId();
     }
+    public static String getSysDbName(DBFactory dbSys) throws Exception {
+        return dbSys.getValue("SELECT name FROM sys_database WHERE pk = 'sys'");
+    }
     // -- DBFactory -----------------------------------------------------------
     public static DBFactory getDBFactory(int tenantId) throws Exception {
         return new DBFactory(getDatasource(tenantId));

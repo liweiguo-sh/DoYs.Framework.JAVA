@@ -1,5 +1,5 @@
 package com.doys.aprint.dts.base;
-import com.doys.framework.dts.parent.BASE_ENTITY_AUTO;
+import com.doys.framework.dts.base.BASE_ENTITY_AUTO;
 import com.doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
 import com.doys.framework.upgrade.db.annotation.EntityIndexAnnotation;
 import com.doys.framework.upgrade.db.annotation.EntityTableAnnotation;

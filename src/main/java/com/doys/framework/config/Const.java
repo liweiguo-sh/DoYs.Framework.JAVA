@@ -15,6 +15,7 @@ public class Const {
     public static String datetimeFormat = "yyyy-MM-dd HH:mm:ss";     // -- 默认日期时间格式 --
     public static String longDtFormat = "yyyy-MM-dd HH:mm:ss.SSS";   // -- 毫秒日期时间格式 --
 
-    public static int MAX_PAGE_ROWS = 100;   // -- 视图每页数据行数 --
+    public static int MAX_MENU_LEVEL = 4;       // -- 系统最大支持 3 级菜单(注：第一级菜单是子系统) --
+    public static int MAX_PAGE_ROWS = 100;      // -- 视图每页数据行数 --
     // ------------------------------------------------------------------------
 }
