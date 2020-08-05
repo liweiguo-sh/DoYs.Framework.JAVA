@@ -12,9 +12,6 @@ public class ProductPnView extends BaseViewController {
 
         String sql;
         // ------------------------------------------------
-        sql = "DELETE FROM base_product_pn_para WHERE product_id <> ?";
-        dbBus.exec(sql, productId);
-
         sql = "INSERT INTO base_product_pn_para (product_id, product_para_id, product_pn_id, para_code, para_name, para_value) "
             + "SELECT product_id, id product_para_id, ? product_pn_id, code para_code, name para_name, default_value para_value "
             + "FROM base_product_para "

@@ -36,4 +36,19 @@ public class ViewView extends BaseViewController {
         // ------------------------------------------------
         return true;
     }
+
+    @Override
+    protected boolean AfterDelete(long id) throws Exception {
+        String sql;
+        String pk = in("pk");
+
+        // ------------------------------------------------
+        sql = "DELETE FROM sys_view_field WHERE view_pk = ?";
+        dbBus.exec(sql, pk);
+
+        sql = "DELETE FROM sys_view_button WHERE view_pk = ?";
+        dbBus.exec(sql, pk);
+        // ------------------------------------------------
+        return true;
+    }
 }

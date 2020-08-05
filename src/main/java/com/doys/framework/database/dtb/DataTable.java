@@ -650,7 +650,7 @@ public class DataTable {
         // --C、Delete--------------------------------------
         for (int iRow = 0; iRow < _nDeleteCount; iRow++) {
             nIdx = 0;
-            paraDelete = new Object[arrPKeyIndex.length - (this.hasAuto ? 1 : 0)];
+            paraDelete = new Object[arrPKeyIndex.length];
             for (int iCol = 0; iCol < arrPKeyIndex.length; iCol++) {
                 int colIndex = arrPKeyIndex[iCol];
                 paraDelete[nIdx++] = _arrRowsDeleted[iRow][colIndex];

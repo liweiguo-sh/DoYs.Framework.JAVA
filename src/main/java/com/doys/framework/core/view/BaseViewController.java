@@ -144,7 +144,9 @@ public class BaseViewController extends BaseController {
                 dbBus = null;
                 dbBus = dbSys;
             }
+            //ok("dtbView", rsView);
             rsViewField = BaseViewService.getViewBaseField(dbSys, viewPk, rsView.getString("table_pk"));
+            //ok("dtbViewField", rsViewField);
 
             HashMap<String, SqlRowSet> mapDS = BaseViewService.getViewDS(dbBus, rsViewField);
             for (Map.Entry<String, SqlRowSet> entry : mapDS.entrySet()) {

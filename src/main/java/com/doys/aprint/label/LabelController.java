@@ -41,19 +41,22 @@ public class LabelController extends BaseController {
     }
     @RequestMapping("/saveLabelContent")
     private RestResult saveLabelContent() {
+        boolean blFind = false;
         int id = inInt("id");
 
         String sql;
         String content = in("content");
         String vars = in("vars");
+        String varName;
 
         ArrayList<HashMap<String, Object>> listVars = new ArrayList<>();
+        SqlRowSet rs;
         // ------------------------------------------------
         try {
             sql = "UPDATE base_label SET content = ?, vars = ? WHERE id = ?";
             dbBus.exec(sql, content, vars, id);
 
-            // --------------------------------------------
+            // -- 添加新变量 -----------------------------------
             String[] arrVars = vars.split(Const.CHAR3);
             for (int i = 0; i < arrVars.length; i++) {
                 String[] arrVar = arrVars[i].split(Const.CHAR4);
@@ -65,8 +68,24 @@ public class LabelController extends BaseController {
                 map.put("value", value);
                 listVars.add(map);
             }
-
             LabelTableService.dynamicAddLabelTableColumn(dbBus, id, listVars);
+
+            // -- 删除无效的旧变量 --------------------------------
+            sql = "SELECT name FROM base_label_variable WHERE label_id = ?";
+            rs = dbBus.getRowSet(sql, id);
+            while (rs.next()) {
+                blFind = false;
+                varName = rs.getString("name");
+                for (HashMap<String, Object> map : listVars) {
+                    if (varName.equalsIgnoreCase((String) map.get("name"))) {
+                        blFind = true;
+                        break;
+                    }
+                }
+                if (!blFind) {
+                    LabelTableService.dynamicDelLabelTableColumn(dbBus, id, varName);
+                }
+            }
         } catch (Exception e) {
             return ResultErr(e);
         }
