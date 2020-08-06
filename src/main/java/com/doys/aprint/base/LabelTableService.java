@@ -109,6 +109,12 @@ public class LabelTableService extends BaseService {
         for (HashMap<String, Object> map : variables) {
             name = (String) map.get("name");
             value = map.get("value").toString();
+            if (map.containsKey("value_len")) {
+                fieldLenth = (int) map.get("value_len");
+            }
+            else {
+                fieldLenth = 20;
+            }
             if (map.containsKey("type")) {
                 type = (String) map.get("type");
             }
@@ -125,7 +131,7 @@ public class LabelTableService extends BaseService {
                 }
             }
             else {
-                fieldLenth = Math.max(value.length(), 20);
+                fieldLenth = Math.max(Math.max(value.length(), fieldLenth), 20);
             }
 
             if (name.contains("标签元素") || name.contains("共享变量")) {

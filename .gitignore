@@ -31,5 +31,4 @@ build/
 .vscode/
 
 ### user define ###
-src/main/resources/config/application.yml
-src/main/resources/config/application-prod.yml
+src/main/resources/config/
