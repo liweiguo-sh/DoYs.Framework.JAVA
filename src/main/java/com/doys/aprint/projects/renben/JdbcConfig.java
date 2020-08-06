@@ -34,18 +34,19 @@ public class JdbcConfig extends BaseController {
         String username = in("username");
         String password = in("password");
         String tablename = in("tablename");
-        String fieldname = in("fieldname");
+        String field_order_number = in("field_order_number");
+        String field_customer_code = in("field_customer_code");
 
         SqlRowSet rs;
         // ------------------------------------------------
         try {
             if (pk.equalsIgnoreCase("order")) {
-                sql = "UPDATE cfg_jdbc SET url = ?, driver = ?, username = ?, password = ?, tablename = ?, fieldname = ?, flag_active = ? WHERE pk = 'order'";
-                dbBus.exec(sql, url, driver, username, password, tablename, fieldname, active);
+                sql = "UPDATE cfg_jdbc SET url = ?, driver = ?, username = ?, password = ?, tablename = ?, field_order_number = ?, field_customer_code = ?, flag_active = ? WHERE pk = 'order'";
+                dbBus.exec(sql, url, driver, username, password, tablename, field_order_number, field_customer_code, active);
             }
             else {
-                sql = "INSERT INTO cfg_jdbc (pk, url, driver, username, password, tablename, fieldname, flag_active) VALUES ('order', ?, ?, ?, ?, ?, ?, ?)";
-                dbBus.exec(sql, url, driver, username, password, tablename, fieldname, active);
+                sql = "INSERT INTO cfg_jdbc (pk, url, driver, username, password, tablename, field_order_number, field_customer_code, flag_active) VALUES ('order', ?, ?, ?, ?, ?, ?, ?, ?)";
+                dbBus.exec(sql, url, driver, username, password, tablename, field_order_number, field_customer_code, active);
             }
 
             // --------------------------------------------

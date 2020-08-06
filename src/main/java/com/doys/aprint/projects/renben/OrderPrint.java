@@ -90,4 +90,30 @@ public class OrderPrint extends BaseController {
             }
         }
     }
+
+    @RequestMapping("/getLabelByCustomer")
+    private RestResult getLabelByCustomer() {
+        String sql;
+        String customerCode = in("customerCode");
+
+        SqlRowSet rsLabel;
+        // ------------------------------------------------
+        try {
+            if (customerCode.equals("")) {
+                sql = "SELECT id, code, name FROM base_label ORDER BY code, name";
+                rsLabel = dbBus.getRowSet(sql);
+            }
+            else {
+                sql = "SELECT label.id, label.code, label.name FROM base_label label "
+                    + "INNER JOIN cfg_label_customer cfg ON label.id = cfg.label_id "
+                    + "INNER JOIN base_customer c ON cfg.customer_id = c.id "
+                    + "WHERE c.code = ? ORDER BY label.code, label.name";
+                rsLabel = dbBus.getRowSet(sql, customerCode);
+            }
+            ok("dtbLabel", rsLabel);
+        } catch (Exception e) {
+            return ResultErr(e);
+        }
+        return ResultOk();
+    }
 }

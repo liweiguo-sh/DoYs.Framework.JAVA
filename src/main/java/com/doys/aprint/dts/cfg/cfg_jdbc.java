@@ -24,8 +24,10 @@ public class cfg_jdbc extends BASE_ENTITY {
 
     @EntityFieldAnnotation(length = "30")
     public String tablename;
-    @EntityFieldAnnotation(length = "30")
-    public String fieldname;
+    @EntityFieldAnnotation(length = "30", text = "订单单号字段")
+    public String field_order_number;
+    @EntityFieldAnnotation(length = "30", text = "客户代码字段")
+    public String field_customer_code;
 
     @EntityFieldAnnotation(text = "启用标志", type = EntityFieldType.TINYINT)
     public int flag_active = 0;
