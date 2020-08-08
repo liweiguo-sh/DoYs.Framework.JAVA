@@ -178,9 +178,9 @@ public class DataTable {
 
                 _arrCols[iCol][1] = Integer.toString(rsmd.getColumnType(iCol));
                 _arrCols[iCol][2] = rsmd.getColumnTypeName(iCol);
-                if (_arrCols[iCol][2].equalsIgnoreCase("int") || _arrCols[iCol][2].equalsIgnoreCase("INTEGER") || _arrCols[iCol][2].equalsIgnoreCase("tinyint")
-                    || _arrCols[iCol][2].equalsIgnoreCase("smallint") || _arrCols[iCol][2].equalsIgnoreCase("numeric")
-                    || _arrCols[iCol][2].equalsIgnoreCase("decimal") || _arrCols[iCol][2].equalsIgnoreCase("NUMBER")) {
+                if (_arrCols[iCol][2].equalsIgnoreCase("int") || _arrCols[iCol][2].equalsIgnoreCase("INTEGER")
+                    || _arrCols[iCol][2].equalsIgnoreCase("bigint") || _arrCols[iCol][2].equalsIgnoreCase("tinyint") || _arrCols[iCol][2].equalsIgnoreCase("smallint")
+                    || _arrCols[iCol][2].equalsIgnoreCase("numeric") || _arrCols[iCol][2].equalsIgnoreCase("decimal") || _arrCols[iCol][2].equalsIgnoreCase("NUMBER")) {
                     _arrCols[iCol][0] = "number";
                 }
                 else if (_arrCols[iCol][2].equalsIgnoreCase("varchar") || _arrCols[iCol][2].equalsIgnoreCase("nvarchar")
@@ -197,7 +197,7 @@ public class DataTable {
                     _arrCols[iCol][0] = "bit";
                 }
                 else {
-                    System.out.println("DataTable.InitDataTable, " + _arrCols[iCol][2]);
+                    System.err.println("DataTable.InitDataTable, " + _arrCols[iCol][2]);
                     _arrCols[iCol][0] = "";
                 }
             }

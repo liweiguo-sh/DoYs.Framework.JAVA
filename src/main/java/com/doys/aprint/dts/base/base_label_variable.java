@@ -14,9 +14,6 @@ public class base_label_variable {
     @EntityFieldAnnotation(text = "变量名称", not_null = true, length = "30")
     public String name;
 
-    @EntityFieldAnnotation(text = "隐藏变量", not_null = true, comment = "程序生成的变量，非用户手工定义")
-    public int hidden = 0;
-
     @EntityFieldAnnotation(type = EntityFieldType.TINYINT, text = "允许打印前修改")
     public int flag_manual_modify = 1;
 }

@@ -21,6 +21,9 @@ public class UtilDataSet {
                 if (i > 1) {
                     builder.append(Const.CHAR1);
                 }
+                String name = metaData.getColumnLabel(i).toLowerCase();
+                int nameLen = name.length();
+                
                 builder.append("name" + Const.CHAR3 + metaData.getColumnLabel(i).toLowerCase());
                 // -- TODO：使用AS转换别名后, getColumnName方法在MySQL数据库中得到的是原始字段名称 --
                 // -- sbField.append("name" + Const.CHAR3 + rsmd.getColumnName(i).toLowerCase()); --

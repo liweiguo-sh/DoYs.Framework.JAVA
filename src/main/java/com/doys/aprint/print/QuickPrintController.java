@@ -1,5 +1,4 @@
 package com.doys.aprint.print;
-import com.doys.aprint.base.LabelTableService;
 import com.doys.aprint.task.TaskService;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.entity.RestResult;
@@ -48,7 +47,7 @@ public class QuickPrintController extends BaseController {
             rsLabel = dbBus.getRowSet(sql, labelId);
             ok("dtbLabel", rsLabel);
 
-            sql = "SELECT * FROM base_label_variable WHERE label_id = ? AND type <> 'fixed' AND hidden = 0 ORDER BY sequence, name";
+            sql = "SELECT * FROM base_label_variable WHERE label_id = ? AND type <> 'fixed' ORDER BY sequence, name";
             rsLabelVariable = dbBus.getRowSet(sql, labelId);
             ok("dtbLabelVariable", rsLabelVariable);
         } catch (Exception e) {
@@ -72,8 +71,6 @@ public class QuickPrintController extends BaseController {
         SqlRowSet rsTask, rsLabelVariable;
         // ------------------------------------------------
         try {
-            LabelTableService.dynamicAddLabelTableColumn(dbBus, labelId, variables);
-
             taskId = TaskService.createQuickPrintTask(dbBus, labelId, userPk);
             PrintService.generatePrintData(dbBus, labelId, qty, taskId, variables);
 
@@ -81,7 +78,7 @@ public class QuickPrintController extends BaseController {
             rsTask = dbBus.getRowSet(sql, taskId);
             ok("dtbTask", rsTask);
 
-            sql = "SELECT * FROM base_label_variable WHERE label_id = ? AND type <> 'fixed' AND hidden = 0 ORDER BY sequence, name";
+            sql = "SELECT * FROM base_label_variable WHERE label_id = ? AND type <> 'fixed' ORDER BY sequence, name";
             rsLabelVariable = dbBus.getRowSet(sql, labelId);
             ok("dtbLabelVariable", rsLabelVariable);
         } catch (Exception e) {

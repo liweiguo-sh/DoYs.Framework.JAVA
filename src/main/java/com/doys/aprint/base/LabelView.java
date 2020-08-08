@@ -1,7 +1,7 @@
 package com.doys.aprint.base;
+import com.doys.aprint.labels.LabelTableService;
 import com.doys.framework.core.view.BaseViewController;
 import com.doys.framework.upgrade.db.util.MySqlHelper;
-import com.doys.framework.util.UtilDate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -10,16 +10,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class LabelView extends BaseViewController {
     @Override
     protected boolean BeforeSave(boolean addnew, long id) {
-        String sql = "", strValue = "";
-        String strDate = UtilDate.getDateTimeString();
+        String sql;
         // ------------------------------------------------
 
         return true;
     }
     @Override
     protected boolean AfterSave(boolean addnew, long id) {
+        String tableName;
+        // ------------------------------------------------
         try {
-            LabelTableService.createLabelTable(dbBus, (int) id);
+            tableName = LabelTableService.getLabelXTableName(id);
+
+            if (!MySqlHelper.hasTable(dbBus, tableName)) {
+                LabelTableService.createLabelTable(dbBus, tableName);
+            }
+            LabelTableService.labelVariableToLabelColumn(dbBus, id);
         } catch (Exception e) {
             err(e);
             return false;

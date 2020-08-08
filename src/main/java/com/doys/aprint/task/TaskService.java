@@ -7,18 +7,19 @@ public class TaskService {
     public static int createQuickPrintTask(DBFactory dbBus, int labelId, String userPk) throws Exception {
         String taskPk;
 
-        ENTITY_RECORD et;
+        ENTITY_RECORD entity;
 
         // ------------------------------------------------
         taskPk = UtilString.getSN(dbBus, "task_pk", "", "T-{yy}{mm}{dd}-{5}");
 
-        et = new ENTITY_RECORD(dbBus, "core_task");
-        et.setValue("pk", taskPk)
+        entity = new ENTITY_RECORD(dbBus, "core_task");
+        entity
+            .setValue("pk", taskPk)
             .setValue("label_id", labelId)
             .setValue("bus_date", UtilDate.getDateStr())
             .setValue("creator", userPk);
-        et.Save();
+        entity.Save();
 
-        return (int) et.getId();
+        return (int) entity.getId();
     }
 }

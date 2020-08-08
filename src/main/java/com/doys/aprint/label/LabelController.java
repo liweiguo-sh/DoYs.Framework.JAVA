@@ -1,15 +1,10 @@
 package com.doys.aprint.label;
-import com.doys.aprint.base.LabelTableService;
-import com.doys.framework.config.Const;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.util.UtilString;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 @RestController
 @RequestMapping("/aprint/label")
 public class LabelController extends BaseController {
@@ -36,58 +31,6 @@ public class LabelController extends BaseController {
         } catch (Exception e) {
             return ResultErr(e);
         } finally {
-        }
-        return ResultOk();
-    }
-    @RequestMapping("/saveLabelContent")
-    private RestResult saveLabelContent() {
-        boolean blFind = false;
-        int id = inInt("id");
-
-        String sql;
-        String content = in("content");
-        String vars = in("vars");
-        String varName;
-
-        ArrayList<HashMap<String, Object>> listVars = new ArrayList<>();
-        SqlRowSet rs;
-        // ------------------------------------------------
-        try {
-            sql = "UPDATE base_label SET content = ?, vars = ? WHERE id = ?";
-            dbBus.exec(sql, content, vars, id);
-
-            // -- 添加新变量 -----------------------------------
-            String[] arrVars = vars.split(Const.CHAR3);
-            for (int i = 0; i < arrVars.length; i++) {
-                String[] arrVar = arrVars[i].split(Const.CHAR4);
-                String name = arrVar[0];
-                String value = (arrVar.length == 2 ? arrVar[1] : "");
-
-                HashMap<String, Object> map = new HashMap<>();
-                map.put("name", name);
-                map.put("value", value);
-                listVars.add(map);
-            }
-            LabelTableService.dynamicAddLabelTableColumn(dbBus, id, listVars);
-
-            // -- 删除无效的旧变量 --------------------------------
-            sql = "SELECT name FROM base_label_variable WHERE label_id = ?";
-            rs = dbBus.getRowSet(sql, id);
-            while (rs.next()) {
-                blFind = false;
-                varName = rs.getString("name");
-                for (HashMap<String, Object> map : listVars) {
-                    if (varName.equalsIgnoreCase((String) map.get("name"))) {
-                        blFind = true;
-                        break;
-                    }
-                }
-                if (!blFind) {
-                    LabelTableService.dynamicDelLabelTableColumn(dbBus, id, varName);
-                }
-            }
-        } catch (Exception e) {
-            return ResultErr(e);
         }
         return ResultOk();
     }

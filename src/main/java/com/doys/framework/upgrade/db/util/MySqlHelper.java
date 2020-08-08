@@ -1,4 +1,5 @@
 package com.doys.framework.upgrade.db.util;
+import com.doys.framework.core.ex.UnImplementException;
 import com.doys.framework.database.DBFactory;
 import com.doys.framework.upgrade.db.enum1.EntityIndexType;
 import com.doys.framework.upgrade.db.obj.EntityField;
@@ -150,6 +151,23 @@ public class MySqlHelper {
 
         System.out.println(sql);
         jdbcTemplate.execute(sql);
+    }
+    public static void updateColumnLength(DBFactory dbBus, String tableName, String columnName, String datatype, int columnLength) throws Exception {
+        String sql, sqlDatatype;
+        // ------------------------------------------------
+        if (datatype.equalsIgnoreCase("string")) {
+            datatype = "varchar";
+        }
+
+        if (datatype.equalsIgnoreCase("varchar")) {
+            sqlDatatype = "varchar(" + columnLength + ")";
+        }
+        else {
+            throw new UnImplementException();
+        }
+        // ------------------------------------------------
+        sql = "ALTER TABLE " + tableName + " MODIFY COLUMN " + columnName + " " + sqlDatatype;
+        dbBus.exec(sql);
     }
 
     // -- common --------------------------------------------------------------
