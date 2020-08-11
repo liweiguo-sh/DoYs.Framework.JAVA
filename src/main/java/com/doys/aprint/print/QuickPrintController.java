@@ -71,8 +71,8 @@ public class QuickPrintController extends BaseController {
         SqlRowSet rsTask, rsLabelVariable;
         // ------------------------------------------------
         try {
-            taskId = TaskService.createQuickPrintTask(dbBus, labelId, userPk);
-            PrintService.generatePrintData(dbBus, labelId, qty, taskId, variables);
+            taskId = TaskService.createTask(dbBus, labelId, userPk);
+            TaskService.generatePrintData(dbBus, labelId, qty, taskId, variables);
 
             sql = "SELECT * FROM core_task WHERE id = ?";
             rsTask = dbBus.getRowSet(sql, taskId);
@@ -91,7 +91,7 @@ public class QuickPrintController extends BaseController {
         int taskId = inInt("taskId");
         // ------------------------------------------------
         try {
-            PrintService.deleteTask(dbBus, taskId);
+            TaskService.deleteTask(dbBus, taskId);
         } catch (Exception e) {
             return ResultErr(e);
         }
@@ -107,7 +107,7 @@ public class QuickPrintController extends BaseController {
         SqlRowSet rsTaskData;
         // ------------------------------------------------
         try {
-            rsTaskData = PrintService.getTaskData(dbBus, labelId, taskId, rowNoFrom, rowNoTo);
+            rsTaskData = TaskService.getTaskData(dbBus, labelId, taskId, rowNoFrom, rowNoTo);
             ok("dtbTaskData", rsTaskData);
         } catch (Exception e) {
             return ResultErr(e);

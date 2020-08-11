@@ -22,7 +22,7 @@ public class BarTenderFileService {
 
         DataTable dtbVariable;
         // -- 1. 读取csv数据 ----------------------------------
-        list = UtilFile.readTextFile(dataFile, "utf-8", 2);
+        list = UtilFile.readTextFile(dataFile, "", 2);
         if (list.size() < 2) {
             throw new Exception("标签数据模板文件格式错误，请检查。");
         }

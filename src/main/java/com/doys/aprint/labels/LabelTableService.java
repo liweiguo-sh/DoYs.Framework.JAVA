@@ -13,6 +13,7 @@ import com.doys.framework.database.dtb.DataTable;
 import com.doys.framework.upgrade.db.enum1.EntityFieldType;
 import com.doys.framework.upgrade.db.obj.EntityField;
 import com.doys.framework.upgrade.db.util.MySqlHelper;
+
 public class LabelTableService extends BaseService {
     public static String getLabelXTableName(long labelId) {
         return "x_label_" + labelId;

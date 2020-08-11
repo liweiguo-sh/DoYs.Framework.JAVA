@@ -5,6 +5,7 @@ import com.doys.framework.util.UtilString;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 @RestController
 @RequestMapping("/aprint/label")
 public class LabelController extends BaseController {
@@ -31,6 +32,23 @@ public class LabelController extends BaseController {
         } catch (Exception e) {
             return ResultErr(e);
         } finally {
+        }
+        return ResultOk();
+    }
+    @RequestMapping("/getLabelVariable")
+    private RestResult getLabelVariable() {
+        int labelId = inInt("labelId");
+
+        String sql;
+
+        SqlRowSet rsLabelVariable;
+        // ------------------------------------------------
+        try {
+            sql = "SELECT * FROM base_label_variable WHERE label_id = ? AND type IN ('string', 'ref', 'date') ORDER BY name";
+            rsLabelVariable = dbBus.getRowSet(sql, labelId);
+            ok("dtbLabelVariable", rsLabelVariable);
+        } catch (Exception e) {
+            return ResultErr(e);
         }
         return ResultOk();
     }

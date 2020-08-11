@@ -233,7 +233,7 @@ public class BaseController extends BaseTop {
     protected void err(Exception e) {
         logger.error(e.getMessage());
         e.printStackTrace();
-        _err(e.getMessage());
+        _err(e.toString());
     }
     private void _err(String strErr) {
         RestError error = getRestError();

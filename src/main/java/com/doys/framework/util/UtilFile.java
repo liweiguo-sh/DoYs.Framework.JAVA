@@ -46,8 +46,9 @@ public class UtilFile {
         return list;
     }
 
+    // -- charset -------------------------------------------------------------
     public static String getTxtFileCharset(String filePathName) {
-        String charset = "utf-8";
+        String charset = "";
         String strStart = "";
 
         byte[] byt = new byte[10];
@@ -82,7 +83,7 @@ public class UtilFile {
 
         byte[] byt;
         // ------------------------------------------------
-        if (charset.equals("")) {
+        if (!charset.equals("")) {
             byt = text.getBytes();
             strStart = byteArrayToHex(byt);
             if (strStart.startsWith("EFBBBF")) {
@@ -103,6 +104,9 @@ public class UtilFile {
         // ------------------------------------------------
         if (charset.equalsIgnoreCase("utf-8")) {
             text = text.substring(1);
+        }
+        else if (charset.equalsIgnoreCase("GBK")) {
+            // -- do nothing --
         }
         else {
             throw new UnsupportedOperationException("removeBOM:  " + charset);
@@ -126,5 +130,4 @@ public class UtilFile {
         }
         return buf.toString().toUpperCase();
     }
-
 }

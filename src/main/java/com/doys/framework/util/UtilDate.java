@@ -1,13 +1,11 @@
 package com.doys.framework.util;
+import com.doys.framework.config.Const;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class UtilDate {
-    public static String dateFormat = "yyyy-MM-dd";                         // -- 默认日期格式 --
-    public static String timeFormat = "HH:mm:ss";                           // -- 默认时间格式 --
-    public static String datetimeFormat = "yyyy-MM-dd HH:mm:ss";            // -- 默认日期时间格式 --
-
     public static String getDateStr() {
         return getDateStr(null, null);
     }
@@ -16,7 +14,7 @@ public class UtilDate {
             date = LocalDate.now();
         }
         if (dtFormat == null || dtFormat.equals("")) {
-            dtFormat = dateFormat;
+            dtFormat = Const.dateFormat;
         }
         return date.format(DateTimeFormatter.ofPattern(dtFormat));
     }
@@ -29,12 +27,12 @@ public class UtilDate {
             dateTime = LocalDateTime.now();
         }
         if (dtFormat == null || dtFormat.equals("")) {
-            dtFormat = datetimeFormat;
+            dtFormat = Const.dateFormat;
         }
         return dateTime.format(DateTimeFormatter.ofPattern(dtFormat));
     }
     public static String getDateTimeString() {
-        return getDateTimeStr(null, "yyyy-MM-dd HH:mm:ss.SSS");
+        return getDateTimeStr(null, Const.datetimeFormat);
     }
 
     public static long getDateTimeDiff(LocalDateTime startTime) {
