@@ -8,6 +8,7 @@
 package com.doys.aprint.labels;
 import com.doys.framework.core.base.BaseService;
 import com.doys.framework.database.DBFactory;
+import com.doys.framework.database.ds.UtilDDS;
 import com.doys.framework.util.UtilFile;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -36,7 +37,7 @@ public class LabelFileService extends BaseService {
         File filePath, fileLabel;
         // -- name and path -------------------------------
         filename = UtilFile.getNewName(multipartFile.getOriginalFilename(), String.valueOf(labelId));
-        filepath = resRunPath + "/aprint/label_file/";
+        filepath = resRunPath + "/" + UtilDDS.getTenantId() + "/aprint/label_file/";
         filePath = new File(filepath);
         if (!filePath.exists()) {
             if (!filePath.mkdirs()) {
@@ -67,7 +68,7 @@ public class LabelFileService extends BaseService {
         File filePath, fileLabel;
         // -- name and path -------------------------------
         filename = UtilFile.getNewName(multipartFile.getOriginalFilename(), String.valueOf(labelId));
-        filepath = resRunPath + "/aprint/label_file/";
+        filepath = resRunPath + "/" + UtilDDS.getTenantId() + "/aprint/label_file/";
         filePath = new File(filepath);
         if (!filePath.exists()) {
             if (!filePath.mkdirs()) {
