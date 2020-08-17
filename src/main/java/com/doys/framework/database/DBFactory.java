@@ -6,7 +6,9 @@ import com.doys.framework.util.UtilDate;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.transaction.TransactionStatus;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
@@ -225,6 +227,17 @@ public class DBFactory extends JdbcTemplate {
     // -- public static method ------------------------------------------------
     public String replaceSQL(String sql) throws Exception {
         return sql;
+    }
+    public static void rollback(DataSourceTransactionManager dstm, TransactionStatus tStatus) {
+        try {
+            if (tStatus != null) {
+                if (!tStatus.isCompleted()) {
+                    dstm.rollback(tStatus);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // -- Check SQL injection -------------------------------------------------

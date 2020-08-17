@@ -2,7 +2,12 @@ package com.doys.aprint.print;
 import com.doys.aprint.task.TaskService;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.entity.RestResult;
+import com.doys.framework.database.DBFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,6 +16,11 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/aprint/quick_print")
 public class QuickPrintController extends BaseController {
+    @Autowired
+    DataSourceTransactionManager dstm;
+    @Autowired
+    TransactionDefinition tDef;
+    // ------------------------------------------------------------------------
     @RequestMapping("/getInitData")
     private RestResult getInitData() {
         String sql;
@@ -57,6 +67,7 @@ public class QuickPrintController extends BaseController {
         return ResultOk();
     }
 
+    // ------------------------------------------------------------------------
     @RequestMapping("/createTask")
     private RestResult createTask() {
         int taskId;
@@ -69,10 +80,16 @@ public class QuickPrintController extends BaseController {
 
         ArrayList<HashMap<String, Object>> variables = inArrayList("variables");
         SqlRowSet rsTask, rsLabelVariable;
+
+        TransactionStatus tStatus = null;
         // ------------------------------------------------
         try {
+            dstm.setDataSource(dbBus.getDataSource());
+            tStatus = dstm.getTransaction(tDef);
+
             taskId = TaskService.createTask(dbBus, labelId, userPk);
             TaskService.generatePrintData(dbBus, labelId, qty, taskId, variables);
+            dstm.commit(tStatus);
 
             sql = "SELECT * FROM core_task WHERE id = ?";
             rsTask = dbBus.getRowSet(sql, taskId);
@@ -82,6 +99,7 @@ public class QuickPrintController extends BaseController {
             rsLabelVariable = dbBus.getRowSet(sql, labelId);
             ok("dtbLabelVariable", rsLabelVariable);
         } catch (Exception e) {
+            DBFactory.rollback(dstm, tStatus);
             return ResultErr(e);
         }
         return ResultOk();

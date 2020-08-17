@@ -2,6 +2,7 @@ package com.doys.framework.core.base;
 import com.doys.framework.config.Const;
 import com.doys.framework.core.entity.RestError;
 import com.doys.framework.core.entity.RestResult;
+import com.doys.framework.core.ex.CommonException;
 import com.doys.framework.database.DBFactory;
 import com.doys.framework.util.UtilDataSet;
 import com.doys.framework.util.UtilEnv;
@@ -233,7 +234,12 @@ public class BaseController extends BaseTop {
     protected void err(Exception e) {
         logger.error(e.getMessage());
         e.printStackTrace();
-        _err(e.toString());
+        if (e.getClass().equals(CommonException.class)) {
+            _err(e.getMessage());
+        }
+        else {
+            _err(e.toString());
+        }
     }
     private void _err(String strErr) {
         RestError error = getRestError();

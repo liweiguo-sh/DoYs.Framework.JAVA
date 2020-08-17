@@ -7,6 +7,7 @@
  *****************************************************************************/
 package com.doys.aprint.task;
 import com.doys.framework.config.Const;
+import com.doys.framework.core.ex.CommonException;
 import com.doys.framework.database.DBFactory;
 import com.doys.framework.dts.base.ENTITY_RECORD;
 import com.doys.framework.util.UtilDate;
@@ -104,21 +105,21 @@ public class TaskService {
                 String paraKey = (String) variable.get("name");
                 if (paraKey.equalsIgnoreCase(name)) {
                     value = variable.get("value").toString();
+                    break;
                 }
             }
             // -- 2. 执行规则 --
             if (type.equalsIgnoreCase("seq")) {
-                long valueLong = Long.parseLong(value);
-                String valueString;
+                String seqFields = rsVariable.getString("seq_fields");
+                String prefixValue = getPrefixValue(seqFields, variables);
+                String[] sequences = getTaskSequences(dbBus, labelId, name, prefixValue, value, valueLen, qty);
                 for (int i = 0; i < qty; i++) {
-                    valueString = String.format("%0" + valueLen + "d", valueLong++);
-                    listInsert.get(i)[colIndex] = valueString;
+                    listInsert.get(i)[colIndex] = sequences[i];
                 }
 
                 // -- 3. 更新末次打印值 --
-                valueString = String.format("%0" + valueLen + "d", valueLong);
                 sqlUpdate = "UPDATE base_label_variable SET value = ? WHERE label_id = ? AND name = ?";
-                dbBus.exec(sqlUpdate, valueString, labelId, name);
+                dbBus.exec(sqlUpdate, sequences[qty], labelId, name);
             }
             else if (type.equalsIgnoreCase("date")) {
                 if (value.length() == 10) {
@@ -149,5 +150,74 @@ public class TaskService {
         builder.append("VALUES (" + builderValue.toString() + ")");
         sqlInsert = builder.toString();
         dbBus.batchUpdate(sqlInsert, listInsert);
+    }
+    private static String getPrefixValue(String seqFields, ArrayList<HashMap<String, Object>> variables) {
+        String[] arrField = seqFields.split(",");
+        for (int i = 0; i < arrField.length; i++) {
+            for (HashMap<String, Object> variable : variables) {
+                String paraKey = (String) variable.get("name");
+                if (paraKey.equalsIgnoreCase(arrField[i])) {
+                    arrField[i] = variable.get("value").toString();
+                    break;
+                }
+            }
+        }
+
+        String prefixValue = "";
+        for (int i = 0; i < arrField.length; i++) {
+            prefixValue += (i == 0 ? "" : Const.CHAR1) + arrField[i];
+        }
+        return prefixValue;
+    }
+    private static String[] getTaskSequences(DBFactory dbBus, int labelId, String varName, String prefixValue, String seqValue, int seqLen, int qty) throws Exception {
+        long seqId;
+
+        String sql;
+        String seqMin;
+        String[] sequences = new String[qty + 1];
+
+        SqlRowSet rsSeq;
+        // ------------------------------------------------
+        sql = "SELECT id, seq_value FROM core_seq WHERE label_id = ? AND var_name = ? AND prefix_value = ?";
+        rsSeq = dbBus.getRowSet(sql, labelId, varName, prefixValue);
+        if (rsSeq.next()) {
+            seqId = rsSeq.getLong("id");
+            seqMin = rsSeq.getString("seq_value");
+        }
+        else {
+            sql = "INSERT INTO core_seq (label_id, var_name, prefix_value, seq_value) VALUES (?, ?, ?, ?)";
+            dbBus.exec(sql, labelId, varName, prefixValue, "1");
+            seqId = dbBus.getLong("SELECT @@identity");
+            seqMin = "1";
+        }
+
+        if (seqValue.equals("")) {
+            seqValue = "1";
+        }
+        if (Integer.parseInt(seqValue) < Integer.parseInt(seqMin)) {
+            throw new Exception("序列初始值(" + seqValue + ")不能小于当前可用最小值(" + seqMin + ")，请检查。");
+        }
+
+        // -- 生成序列值 ---------------------------------------
+        int seqInt = Integer.parseInt(seqValue);
+        for (int i = 0; i <= qty; i++) {
+            seqValue = String.format("%0" + seqLen + "d", seqInt++);
+            sequences[i] = seqValue;
+            if (i == qty - 1) {
+                if (seqValue.length() > seqLen) {
+                    throw new CommonException("变量 [" + varName + "] 的值越界，请检查。");
+                }
+            }
+        }
+        if (seqValue.length() > seqLen) {
+            throw new Exception("序列越界，请检查。");
+        }
+
+        // -- 更新序列值 ---------------------------------------
+        sql = "UPDATE core_seq SET seq_value = ? WHERE id = ?";
+        dbBus.exec(sql, seqValue, seqId);
+
+        // -- 返回结果 ----------------------------------------
+        return sequences;
     }
 }
