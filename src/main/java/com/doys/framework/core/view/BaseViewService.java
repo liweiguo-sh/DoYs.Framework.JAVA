@@ -69,7 +69,7 @@ public class BaseViewService extends BaseService {
     public static SqlRowSet getViewData(DBFactory dbSys, SqlRowSet rsView, int pageNum, String sqlFilter, HashMap map) throws Exception {
         return getViewData(dbSys, rsView, pageNum, sqlFilter, map, null);
     }
-    public static SqlRowSet getViewData(DBFactory dbSys, SqlRowSet rsView, int pageNum, String sqlFilter, HashMap map, String sqlUserDefDS) throws Exception {
+    public static SqlRowSet getViewData(DBFactory dbBus, SqlRowSet rsView, int pageNum, String sqlFilter, HashMap map, String sqlUserDefDS) throws Exception {
         String sql = "";
         String sqlData, sqlOrderBy;
 
@@ -87,7 +87,7 @@ public class BaseViewService extends BaseService {
             if (!sqlFilter.equals("")) {
                 sql += "WHERE " + sqlFilter;
             }
-            long totalRows = dbSys.getInt(sql);
+            long totalRows = dbBus.getInt(sql);
             map.put("totalRows", totalRows);
             pageNum = 1;
         }
@@ -102,7 +102,7 @@ public class BaseViewService extends BaseService {
         }
         sql += "LIMIT " + Const.MAX_PAGE_ROWS * (pageNum - 1) + ", " + Const.MAX_PAGE_ROWS;
 
-        return dbSys.getRowSet(dbSys.replaceSQL(sql));
+        return dbBus.getRowSet(dbBus.replaceSQL(sql));
     }
     public static SqlRowSet getViewDataOne(DBFactory dbBus, String sqlDataSource, long id) throws Exception {
         // -- 获取一条视图数据 --

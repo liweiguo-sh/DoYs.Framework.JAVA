@@ -110,7 +110,7 @@ public class TaskService {
             }
             // -- 2. 执行规则 --
             if (type.equalsIgnoreCase("seq")) {
-                String seqFields = rsVariable.getString("seq_fields");
+                String seqFields = UtilString.KillNull(rsVariable.getString("seq_fields"));
                 String prefixValue = getPrefixValue(seqFields, variables);
                 String[] sequences = getTaskSequences(dbBus, labelId, name, prefixValue, value, valueLen, qty);
                 for (int i = 0; i < qty; i++) {
@@ -219,5 +219,60 @@ public class TaskService {
 
         // -- 返回结果 ----------------------------------------
         return sequences;
+    }
+
+    // -- import excel data ---------------------------------------------------
+    public static void importExcelData(DBFactory dbBus, int labelId, int taskId, String[][] data) throws Exception {
+        int columnCount, colIndex = 0;
+        int qty = data.length - 1;
+
+        String sql, sqlInsert;
+        String[] header = data[0];
+        StringBuilder builder = new StringBuilder();
+        StringBuilder builderField, builderValue;
+
+        ArrayList<Object[]> listInsert = new ArrayList<>(qty);
+        Object[] paraInsert;
+        SqlRowSet rsVariable;
+        // -- 1. 预处理 --
+        sql = "SELECT COUNT(1) FROM base_label_variable WHERE label_id = ?";
+        columnCount = dbBus.getInt(sql, 0, labelId);
+        for (int i = 0; i < qty; i++) {
+            paraInsert = new Object[columnCount + 2];
+            paraInsert[columnCount] = taskId;
+            paraInsert[columnCount + 1] = (i + 1);
+            listInsert.add(paraInsert);
+        }
+        builderField = new StringBuilder(columnCount + 1);
+        builderValue = new StringBuilder(columnCount + 1);
+
+        // -- 2. 导入数据 --
+        sql = "SELECT * FROM base_label_variable WHERE label_id = ? ORDER BY sequence, name";
+        rsVariable = dbBus.getRowSet(sql, labelId);
+        while (rsVariable.next()) {
+            String name = rsVariable.getString("name");
+            builderField.append(name).append(", ");
+            builderValue.append("?, ");
+            // -- 2. 执行规则 --
+            for (int iCol = 0; iCol < header.length; iCol++) {
+                if (UtilString.equals(name, header[iCol])) {
+                    for (int iRow = 0; iRow < qty; iRow++) {
+                        listInsert.get(iRow)[colIndex] = data[iRow + 1][iCol];
+                    }
+                    break;
+                }
+            }
+            colIndex++;
+        }
+
+        // -- 9 .批量插入数据 --
+        builderField.append("task_id, $row_no");
+        builderValue.append("?, ?");
+
+        builder.append("INSERT INTO x_label_" + labelId + " ");
+        builder.append("(" + builderField.toString() + ") ");
+        builder.append("VALUES (" + builderValue.toString() + ")");
+        sqlInsert = builder.toString();
+        dbBus.batchUpdate(sqlInsert, listInsert);
     }
 }

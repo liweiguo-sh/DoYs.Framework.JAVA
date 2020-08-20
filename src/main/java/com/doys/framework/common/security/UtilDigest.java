@@ -36,6 +36,9 @@ public class UtilDigest {
         String passwordMD5;
         // ------------------------------------------------
         try {
+            String a = "BFEBFBFF000806EA";
+            String b = MD5(a);
+
             passwordMD5 = passwordMD5(userPk, password);
             System.out.println(passwordMD5);
         } catch (Exception e) {

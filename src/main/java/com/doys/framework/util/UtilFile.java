@@ -5,6 +5,12 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class UtilFile {
+    // ------------------------------------------------------------------------
+    private static int fileSN = 1;
+    synchronized public static String getFileSN() {
+        return String.valueOf(fileSN++);
+    }
+    // ------------------------------------------------------------------------
     public static String getNewName(String originalName, String replaceName) {
         String extName = getExtName(originalName);
         if (extName.equals("")) {
