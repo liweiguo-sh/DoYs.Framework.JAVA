@@ -23,6 +23,7 @@ public class ViewService extends BaseService {
         DataTable dtbField = null;
         DataTable dtbView_Field = null;
         DataTable.DataRow dr = null;
+        DBFactory dbExec;
         // -- 1.刷新基础表 ---------------------------------
         sql = "SELECT database_pk, table_pk, table_name, sql_data_source FROM sys_view WHERE pk = ?";
         rs = dbSys.getRowSet(sql, viewPk);
@@ -32,15 +33,17 @@ public class ViewService extends BaseService {
             tableName = rs.getString("table_name");
             sqlViewDS = rs.getString("sql_data_source");
             if (databasePk.equalsIgnoreCase("sys")) {
-                dbBus = null;
-                dbBus = dbSys;
+                dbExec = dbSys;
+            }
+            else {
+                dbExec = dbBus;
             }
         }
         else {
             throw new Exception("视图 " + viewPk + " 不存在。");
         }
 
-        DBSchema dbs = new DBSchema(dbSys, dbBus);
+        DBSchema dbs = new DBSchema(dbSys);
         if (!dbs.refreshDBStruct(databasePk, tableName)) {
             throw new Exception("刷新基础表失败，请检查。");
         }

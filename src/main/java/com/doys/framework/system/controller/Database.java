@@ -24,7 +24,7 @@ public class Database extends BaseController {
         String para1 = req.get("para1");
         // ------------------------------------------------
         try {
-            DBSchema schema = new DBSchema(dbSys, dbBus);
+            DBSchema schema = new DBSchema(dbSys);
             schema.refreshDBStruct("prefix", "");
         } catch (Exception e) {
             return ResultErr(e);

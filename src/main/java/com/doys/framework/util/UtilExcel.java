@@ -53,6 +53,11 @@ public class UtilExcel {
             row = sheet.getRow(iRow);
             for (int iCol = 0; iCol < columnCount; iCol++) {
                 cell = row.getCell(iCol);
+                if (cell == null) {
+                    data[iRow][iCol] = "";
+                    continue;
+                }
+                // ----------------------------------------
                 cellType = cell.getCellType();
                 if (cellType == CellType.NUMERIC) {
                     cellValue = String.valueOf(cell.getNumericCellValue());

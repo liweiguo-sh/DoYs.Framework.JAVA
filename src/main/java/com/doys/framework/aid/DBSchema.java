@@ -14,9 +14,9 @@ import com.doys.framework.util.UtilDataSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 public class DBSchema {
-    private DBFactory dbSys, dbBus;
+    private DBFactory dbSys;
     // ------------------------------------------------------------------------
-    public DBSchema(DBFactory _dbSys, DBFactory _dbBus) {
+    public DBSchema(DBFactory _dbSys) {
         dbSys = _dbSys;
     }
     public boolean refreshDBStruct(String databasePk, String tableName) throws Exception {
@@ -25,36 +25,29 @@ public class DBSchema {
 
         SqlRowSet rs = null;
         // ------------------------------------------------
-        try {
-            tableName = tableName.toLowerCase();
-            sql = "SELECT * FROM sys_database WHERE pk = ?";
-            rs = dbSys.getRowSet(sql, new Object[] { databasePk });
-            if (rs.next()) {
-                databaseType = rs.getString("type");
-                databaseName = rs.getString("name");
-                if (databasePk.equalsIgnoreCase("sys")) {
-                    dbBus = null;
-                    dbBus = dbSys;
-                }
-                else {
-                    databaseName += UtilDDS.getTenantId();
-                }
+        tableName = tableName.toLowerCase();
+        sql = "SELECT * FROM sys_database WHERE pk = ?";
+        rs = dbSys.getRowSet(sql, new Object[] { databasePk });
+        if (rs.next()) {
+            databaseType = rs.getString("type");
+            databaseName = rs.getString("name");
+            if (databasePk.equalsIgnoreCase("sys")) {
             }
             else {
-                throw new Exception("没有找到逻辑数据库名称为 " + databasePk + " 的记录, 请检查.");
+                databaseName += UtilDDS.getTenantId();
             }
+        }
+        else {
+            throw new Exception("没有找到逻辑数据库名称为 " + databasePk + " 的记录, 请检查.");
+        }
 
-            if (databaseType.equalsIgnoreCase("MySQL")) {
-                if (refreshDBStruct_MySQL_Tables(databasePk, databaseName, tableName) == false) {
-                    return false;
-                }
+        if (databaseType.equalsIgnoreCase("MySQL")) {
+            if (refreshDBStruct_MySQL_Tables(databasePk, databaseName, tableName) == false) {
+                return false;
             }
-            else {
-                throw new Exception("框架暂不支持 " + databaseType + " 数据库。");
-            }
-        } catch (Exception e) {
-            throw e;
-        } finally {
+        }
+        else {
+            throw new Exception("框架暂不支持 " + databaseType + " 数据库。");
         }
         return true;
     }

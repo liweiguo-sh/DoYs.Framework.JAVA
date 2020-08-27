@@ -10,7 +10,6 @@ import com.doys.framework.config.Const;
 import com.doys.framework.core.ex.CommonException;
 import com.doys.framework.database.DBFactory;
 import com.doys.framework.dts.base.ENTITY_RECORD;
-import com.doys.framework.util.UtilDate;
 import com.doys.framework.util.UtilString;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
@@ -26,13 +25,12 @@ public class TaskService {
         ENTITY_RECORD entity;
 
         // ------------------------------------------------
-        taskPk = UtilString.getSN(dbBus, "task_pk", "", "T-{yy}{mm}{dd}-{5}");
+        taskPk = UtilString.getSN(dbBus, "task_pk", "", "T-{yy}{MM}{dd}-{5}");
 
         entity = new ENTITY_RECORD(dbBus, "core_task");
         entity
             .setValue("pk", taskPk)
             .setValue("label_id", labelId)
-            .setValue("bus_date", UtilDate.getDateStr())
             .setValue("creator", userPk);
         entity.Save();
 

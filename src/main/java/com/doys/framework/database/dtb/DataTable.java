@@ -531,7 +531,8 @@ public class DataTable {
             }
         }
         else {
-            int newCapacity = _arrRows.length - 1;
+            //int newCapacity = _arrRows.length - 1         // -- 旧 --
+            int newCapacity = _nRowCount - 1;               // -- 新 --
             String[][] arrOld = _arrRows;
             _arrRows = new String[newCapacity][_nColCount + 1 + 1];
             if (rowIndex > 0) {
