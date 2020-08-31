@@ -1,7 +1,5 @@
 package com.doys.framework.util;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 
 public class UtilFile {
@@ -135,5 +133,68 @@ public class UtilFile {
             buf.append(Integer.toHexString(i));
         }
         return buf.toString().toUpperCase();
+    }
+
+    // -- path ----------------------------------------------------------------
+    public static boolean checkPath(String strTarget) throws Exception {
+        return checkPath(strTarget, true);
+    }
+    public static boolean checkPath(String strTarget, boolean autoCreate) throws Exception {
+        boolean blResult = false;
+        int nIndex = 0;
+
+        String strPath = "";
+        File file = null;
+        // ------------------------------------------------
+        file = new File(strTarget);
+        if (file.isDirectory()) {
+            return true;
+        }
+        if (!autoCreate) {
+            return false;
+        }
+        // ------------------------------------------------
+
+        strTarget = strTarget.replaceAll("\\\\", "/");
+        if (!strTarget.endsWith("/")) {
+            strTarget += "/";
+        }
+        // ------------------------------------------------
+        nIndex = strTarget.indexOf("/");
+        while (nIndex > 0) {
+            strPath = strTarget.substring(0, nIndex + 1);
+            file = new File(strPath);
+            if (file.isDirectory()) {
+                nIndex = strTarget.indexOf("/", nIndex + 1);
+            }
+            else {
+                blResult = file.mkdir();
+                if (blResult == false) {
+                    throw new Exception("路径创建失败。" + strPath);
+                }
+                nIndex = strTarget.indexOf("/", nIndex + 1);
+            }
+        }
+        // ------------------------------------------------
+        return true;
+    }
+
+    // -- write file ----------------------------------------------------------
+    public static void writeFile(String path, ArrayList<String> list) throws Exception {
+        writeFile(path, list, "\r\n");
+    }
+    public static void writeFile(String path, ArrayList<String> list, String appendRN) throws Exception {
+        int nRows = list.size();
+
+        FileOutputStream fos = new FileOutputStream(path);
+        OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+        // ------------------------------------------------
+        if (nRows > 0) {
+            for (int i = 0; i < nRows - 1; i++) {
+                osw.write(list.get(i) + appendRN);
+            }
+            osw.write(list.get(nRows - 1));
+        }
+        osw.flush();
     }
 }

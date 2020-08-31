@@ -25,7 +25,7 @@ public class UtilYml {
 
     @Value("${global.resTempPath}")
     private String _mResTempPath;
-    private static String resTempPath;
+    public static String resTempPath;
     // -- init ----------------------------------------------------------------
     @PostConstruct
     private void initYmlProperty() {
