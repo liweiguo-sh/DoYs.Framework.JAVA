@@ -148,6 +148,9 @@ public class TaskService {
         builder.append("VALUES (" + builderValue.toString() + ")");
         sqlInsert = builder.toString();
         dbBus.batchUpdate(sqlInsert, listInsert);
+
+        sql = "UPDATE core_task SET qty = ? WHERE id = ?";
+        dbBus.exec(sql, qty, taskId);
     }
     private static String getPrefixValue(String seqFields, ArrayList<HashMap<String, Object>> variables) {
         String[] arrField = seqFields.split(",");

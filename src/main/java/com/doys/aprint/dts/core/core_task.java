@@ -18,6 +18,9 @@ public class core_task extends BASE_ENTITY_CRUD {
     @EntityFieldAnnotation(text = "日期", default_value = "CURRENT_TIMESTAMP")
     public Date bus_date;
 
+    @EntityFieldAnnotation(text = "打印数量")
+    public int qty;
+
     @EntityFieldAnnotation(text = "备注", length = "100")
     public String remark;
 }
