@@ -112,9 +112,9 @@ public class BaseViewService extends BaseService {
 
     // -- ViewForm ------------------------------------------------------------
     public static SqlRowSet getViewBaseField(DBFactory dbSys, String viewPk, String tablePk) throws Exception {
-        String sql = "SELECT table_pk, name, text, data_source_type, data_source "
+        String sql = "SELECT table_pk, name, text, datatype, data_source_type, data_source "
             + "FROM sys_view_field "
-            + "WHERE view_pk = ? AND table_pk = ?";
+            + "WHERE view_pk = ? AND table_pk = ? ORDER BY name";
         return dbSys.getRowSet(sql, viewPk, tablePk);
     }
     public static HashMap<String, SqlRowSet> getViewDS(DBFactory dbBus, SqlRowSet rsViewField) throws Exception {

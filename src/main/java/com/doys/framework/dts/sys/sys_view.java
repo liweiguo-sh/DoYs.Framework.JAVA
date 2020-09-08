@@ -27,6 +27,8 @@ public class sys_view extends BASE_ENTITY_AUTO {
     public int show_detail = 1;
     @EntityFieldAnnotation(text = "显示选择列", type = EntityFieldType.TINYINT)
     public int show_select = 0;
+    @EntityFieldAnnotation(text = "显示单选列", type = EntityFieldType.TINYINT)
+    public int show_single = 0;
     @EntityFieldAnnotation(text = "显示删除列", type = EntityFieldType.TINYINT)
     public int show_delete = 0;
 }

@@ -3,6 +3,7 @@ import com.doys.aprint.labels.LabelTableService;
 import com.doys.framework.config.Const;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.entity.RestResult;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,7 +24,7 @@ public class MasoFileController extends BaseController {
         ArrayList<HashMap<String, Object>> listVars = new ArrayList<>();
         // ------------------------------------------------
         try {
-            sql = "UPDATE base_label SET content = ?, vars = ? WHERE id = ?";
+            sql = "UPDATE base_label SET content = ?, vars = ?, mdate = now() WHERE id = ?";
             dbBus.exec(sql, content, vars, labelId);
 
             // -- 1. 解析标签变量 -------------------------------
@@ -47,6 +48,26 @@ public class MasoFileController extends BaseController {
 
             // -- 3. 更新标签数据表结构 --
             LabelTableService.labelVariableToLabelColumn(dbBus, labelId);
+        } catch (Exception e) {
+            return ResultErr(e);
+        }
+        return ResultOk();
+    }
+
+    @RequestMapping("/getLabelContent")
+    private RestResult getLabelContent() {
+        String code = in("code");
+        String version = in("version");
+
+        String sql;
+
+        SqlRowSet rsLabel;
+        // ------------------------------------------------
+        try {
+            sql = "SELECT content, mdate FROM base_label WHERE code = ? AND version = ?";
+            rsLabel = dbBus.getRowSet(sql, code, version);
+
+            ok("dtbLabel", rsLabel);
         } catch (Exception e) {
             return ResultErr(e);
         }

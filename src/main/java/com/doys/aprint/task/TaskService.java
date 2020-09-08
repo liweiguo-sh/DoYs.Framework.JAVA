@@ -34,7 +34,7 @@ public class TaskService {
             .setValue("creator", userPk);
         entity.Save();
 
-        return (int) entity.getId();
+        return Integer.parseInt(entity.getId());
     }
     public static void deleteTask(DBFactory dbBus, int taskId) throws Exception {
         int labelId;

@@ -2,25 +2,25 @@ package com.doys.framework.dts.base;
 import com.doys.framework.database.DBFactory;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class ENTITY_RECORD {
-    private long id = 0;
-
+    private String id = "";
     private String tableName;
 
     private HashMap<String, Object> map;
-
-    protected DBFactory dbSys;
+    protected DBFactory dbBus;
     // ------------------------------------------------------------------------
-    public ENTITY_RECORD(DBFactory dbSys, String tableName) throws Exception {
-        _ENTITY_RECORD(dbSys, tableName, 0);
+    public ENTITY_RECORD(DBFactory dbBus, String tableName) throws Exception {
+        _ENTITY_RECORD(dbBus, tableName, "");
     }
-    public ENTITY_RECORD(DBFactory dbSys, String tableName, long id) throws Exception {
-        _ENTITY_RECORD(dbSys, tableName, id);
+    public ENTITY_RECORD(DBFactory dbBus, String tableName, String id) throws Exception {
+        _ENTITY_RECORD(dbBus, tableName, id);
     }
-    private void _ENTITY_RECORD(DBFactory dbSys, String tableName, long id) throws Exception {
-        this.dbSys = dbSys;
-        this.tableName = dbSys.replaceSQL(tableName);
+    private void _ENTITY_RECORD(DBFactory dbBus, String tableName, String id) throws Exception {
+        this.dbBus = dbBus;
+        this.tableName = tableName;
+        this.id = id;
 
         this.map = new HashMap<>();
     }
@@ -36,8 +36,8 @@ public class ENTITY_RECORD {
         }
         return this;
     }
-    public long getId() throws Exception {
-        if (id > 0) {
+    public String getId() throws Exception {
+        if (!id.equals("")) {
             return id;
         }
         else {
@@ -45,15 +45,16 @@ public class ENTITY_RECORD {
         }
     }
 
-    public long Save() throws Exception {
-        if (this.id == 0) {
+    // ------------------------------------------------------------------------
+    public String Save() throws Exception {
+        if (this.id.equals("")) {
             return this.Insert();
         }
         else {
             return this.Update();
         }
     }
-    private long Insert() throws Exception {
+    private String Insert() throws Exception {
         int nColIndex = 0;
         int columnCount = this.map.size();
         long idInsert = 0;
@@ -83,13 +84,40 @@ public class ENTITY_RECORD {
         sql = builder.toString();
 
         // -- 9. 插入数据，返回id --------------------------------
-        dbSys.exec(sql, args);
-        idInsert = dbSys.getLong("SELECT @@identity");
+        dbBus.exec(sql, args);
+        if (this.id.equals("")) {
+            idInsert = dbBus.getLong("SELECT @@identity");
+            this.id = String.valueOf(idInsert);
+        }
 
-        this.id = idInsert;
-        return idInsert;
+        return this.id;
     }
-    private long Update() throws Exception {
-        return -1;
+    private String Update() throws Exception {
+        int nColIndex = 0;
+        int columnCount = this.map.size();
+
+        String sql, key, idNew = "";
+        Object[] args = new Object[columnCount + 1];
+
+        StringBuilder builder = new StringBuilder();
+        // -- 1. 生成sql ------------------------------------
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            key = entry.getKey();
+            if (key.equalsIgnoreCase("id")) {
+                idNew = (String) entry.getValue();
+            }
+            builder.append(", " + entry.getKey() + " = ?");
+            args[nColIndex++] = entry.getValue();
+        }
+        builder.append(" WHERE id = ?");
+        args[nColIndex++] = this.id;
+
+        sql = "UPDATE " + this.tableName + " SET " + builder.toString().substring(1);
+        // -- 9. 更新数据，返回id --------------------------------
+        dbBus.exec(sql, args);
+        if (!idNew.equals("")) {
+            this.id = idNew;
+        }
+        return this.id;
     }
 }

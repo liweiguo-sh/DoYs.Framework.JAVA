@@ -102,19 +102,19 @@ public class MenuView extends BaseViewController {
         SqlRowSet rsChild;
         // -- 0. 更新1级节点自身 ---------------------------------
         sql = "UPDATE sys_menu SET sequences = LPAD(sequence, 3, 0) WHERE pk = ?";
-        dbBus.exec(sql, pkL1);
+        dbSys.exec(sql, pkL1);
 
         // -- 1. 批量更新下级节点 ---------------------------------
         sql = "SELECT LPAD(sequence, 3, 0) sequences FROM sys_system WHERE pk = ?";
-        sequences = dbBus.getValue(sql, "", pkL1);
+        sequences = dbSys.getValue(sql, "", pkL1);
 
         sql = "UPDATE sys_menu SET sequences = CONCAT('" + sequences + "', '_', LPAD(sequence, 3, 0)) "
             + "WHERE LEFT(pk, ?) = ? AND LENGTH(pk) = ?";
-        dbBus.exec(sql, pkL1.length(), pkL1, pkL1.length() + 3);
+        dbSys.exec(sql, pkL1.length(), pkL1, pkL1.length() + 3);
 
         // -- 2. 递归下级节点 -----------------------------------
         sql = "SELECT pk FROM sys_menu WHERE LEFT(pk, ?) = ? AND LENGTH(pk) = ?";
-        rsChild = dbBus.getRowSet(sql, pkL1.length(), pkL1, pkL1.length() + 3);
+        rsChild = dbSys.getRowSet(sql, pkL1.length(), pkL1, pkL1.length() + 3);
         while (rsChild.next()) {
             updateChildren(rsChild.getString("pk"));
         }
@@ -126,15 +126,15 @@ public class MenuView extends BaseViewController {
         SqlRowSet rsChild;
         // -- 1. 批量更新下级节点 ---------------------------------
         sql = "SELECT sequences FROM sys_menu WHERE pk = ?";
-        sequences = dbBus.getValue(sql, "", pk);
+        sequences = dbSys.getValue(sql, "", pk);
 
         sql = "UPDATE sys_menu SET sequences = CONCAT('" + sequences + "', '_', LPAD(sequence, 3, 0)) "
             + "WHERE LEFT(pk, ?) = ? AND LENGTH(pk) = ?";
-        dbBus.exec(sql, pk.length(), pk, pk.length() + 3);
+        dbSys.exec(sql, pk.length(), pk, pk.length() + 3);
 
         // -- 2. 递归下级节点 -----------------------------------
         sql = "SELECT pk FROM sys_menu WHERE LEFT(pk, ?) = ? AND LENGTH(pk) = ?";
-        rsChild = dbBus.getRowSet(sql, pk.length(), pk, pk.length() + 3);
+        rsChild = dbSys.getRowSet(sql, pk.length(), pk, pk.length() + 3);
         while (rsChild.next()) {
             updateChildren(rsChild.getString("pk"));
         }
