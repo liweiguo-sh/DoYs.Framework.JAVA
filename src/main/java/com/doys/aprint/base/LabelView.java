@@ -12,7 +12,14 @@ public class LabelView extends BaseViewController {
     protected boolean BeforeSave(boolean addnew, long id) {
         String sql;
         // ------------------------------------------------
-
+        try {
+            if (addnew) {
+                this.setFormValue("flag_disabled", "0");
+            }
+        } catch (Exception e) {
+            err(e);
+            return false;
+        }
         return true;
     }
     @Override

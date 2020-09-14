@@ -169,8 +169,22 @@ public class BaseViewService extends BaseService {
                     if (!form.containsKey(columnName)) {
                         form.put(columnName, (String) session.getAttribute("userPk"));
                     }
-                    else
+                    else {
                         form.replace(columnName, (String) session.getAttribute("userPk"));
+                    }
+                }
+                else if (columnName.equalsIgnoreCase("cdate")) {
+                    continue;
+                }
+                else if (columnName.equalsIgnoreCase("astatus")) {
+                    if (!form.containsKey(columnName)) {
+                        continue;
+                    }
+                    else {
+                        if (form.get(columnName).toString().equals("")) {
+                            form.replace(columnName, "0");
+                        }
+                    }
                 }
                 else {
                     if (!form.containsKey(columnName)) {
