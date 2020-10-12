@@ -46,6 +46,10 @@ public class base_label_variable extends BASE_ENTITY_CRUD {
     @EntityFieldAnnotation(type = EntityFieldType.TINYINT, text = "允许打印前修改")
     public int flag_manual_modify = 1;
 
+    // -- JavaScript --------------------------------------
+    @EntityFieldAnnotation(text = "变量值输入后脚本", type = EntityFieldType.TEXT)
+    public String js_after_input = "";
+
     // -- 其它 ----------------------------------------------
     @EntityFieldAnnotation(text = "序号", default_value = "900")
     public int sequence = 1;

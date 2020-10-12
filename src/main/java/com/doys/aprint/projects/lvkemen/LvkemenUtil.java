@@ -5,8 +5,8 @@ import java.util.Calendar;
 public class LvkemenUtil {
     public static String appKey = "527210429188633158";
     public static String appId = "BAD3BB37E0D7A96485CC870850F9A894";
-
     public static String urlQuery = "https://area13-win.pospal.cn:443/pospal-api2/openapi/v1/productOpenApi/";
+
     public static String urlQueryProductCategoryPages = urlQuery + "queryProductCategoryPages";
     public static String urlQueryProductPages = urlQuery + "queryProductPages";
     public static String urlQueryProductImagesByProductUid = urlQuery + "queryProductImagesByProductUid";
