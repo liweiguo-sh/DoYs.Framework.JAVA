@@ -32,9 +32,14 @@ public class DBSchema {
             databaseType = rs.getString("type");
             databaseName = rs.getString("name");
             if (databasePk.equalsIgnoreCase("sys")) {
+                // -- 系统库 --
+            }
+            else if (databasePk.equalsIgnoreCase("prefix")) {
+                // -- 租户业务库 --
+                databaseName += UtilDDS.getTenantId();
             }
             else {
-                databaseName += UtilDDS.getTenantId();
+                // -- 常规业务库 --
             }
         }
         else {

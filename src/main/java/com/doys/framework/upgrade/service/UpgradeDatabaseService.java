@@ -66,7 +66,7 @@ public class UpgradeDatabaseService extends BaseService {
                 upgradeTable(dbSys, databaseName, entityTable);
             }
             else {
-                sql = "SELECT id FROM sys_tenant";
+                sql = "SELECT id FROM sys_tenant WHERE id >= 100";
                 SqlRowSet rsTenant = dbSys.getRowSet(sql);
                 while (rsTenant.next()) {
                     int tenantId = rsTenant.getInt("id");

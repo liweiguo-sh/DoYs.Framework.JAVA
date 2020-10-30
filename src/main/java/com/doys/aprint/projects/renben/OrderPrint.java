@@ -39,7 +39,7 @@ public class OrderPrint extends BaseController {
     private void getOrderFromOracle(String orderNumber) throws Exception {
         String sql;
         String url, driverClassName, username, password;
-        String tablename, fieldname;
+        String tablename, fieldOrderNumber, fieldCustomerCode;
 
         Connection conn = null;
         Statement stmt = null;
@@ -56,18 +56,22 @@ public class OrderPrint extends BaseController {
             username = rsJdbc.getString("username");
             password = rsJdbc.getString("password");
             tablename = rsJdbc.getString("tablename");
-            fieldname = rsJdbc.getString("fieldname");
+            fieldOrderNumber = rsJdbc.getString("field_order_number");
+            fieldCustomerCode = rsJdbc.getString("field_customer_code");
+
+            // -- System.err.println("fieldCustomerCode = " + fieldCustomerCode);
 
             // -- 打开订单数据库连接 --
             Class.forName(driverClassName);
             conn = DriverManager.getConnection(url, username, password);
 
             // -- 取订单数据 --
-            sql = "SELECT * FROM " + tablename + " WHERE " + fieldname + " = '" + orderNumber + "'";
+            sql = "SELECT * FROM " + tablename + " WHERE " + fieldOrderNumber + " = '" + orderNumber + "'";
             stmt = conn.createStatement();
             rsOrder = stmt.executeQuery(sql);
 
             ok("dtbOrder", rsOrder);
+            ok("fieldCustomerCode", fieldCustomerCode);
         } catch (SQLException e) {
             e.printStackTrace();
             if (e.getErrorCode() == 17002) {

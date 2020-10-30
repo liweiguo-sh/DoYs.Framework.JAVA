@@ -41,6 +41,8 @@ public class BaseViewController extends BaseController {
         SqlRowSet rsView, rsViewField, rsFlowNode, rsTree, rsTreeLevel;
         // ------------------------------------------------
         try {
+            this.BeforeInit();
+
             rsView = BaseViewService.getView(dbSys, viewPk);
             ok("dtbView", rsView);
             rsView.beforeFirst();
@@ -406,6 +408,9 @@ public class BaseViewController extends BaseController {
     }
 
     // -- sub class override --------------------------------------------------
+    protected void BeforeInit() throws Exception {
+    }
+
     protected boolean BeforeSave(boolean addnew, long id) throws Exception {
         return true;
     }
