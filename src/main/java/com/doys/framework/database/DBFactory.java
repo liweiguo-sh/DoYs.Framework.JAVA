@@ -198,14 +198,20 @@ public class DBFactory extends JdbcTemplate {
     }
     private String getSqlLog(int result, LocalDateTime startTime, String sql, Object... args) {
         long interval = UtilDate.getDateTimeDiff(startTime);
-
+        String paraString;
         if (args != null) {
             for (int i = 0; i < args.length; i++) {
                 if (args[i] == null) {
                     sql = sql.replaceFirst("\\?", "null");
                 }
                 else {
-                    sql = sql.replaceFirst("\\?", "'" + args[i].toString() + "'");
+                    paraString = args[i].toString();
+                    if (paraString.length() <= 100) {
+                        sql = sql.replaceFirst("\\?", "'" + paraString + "'");
+                    }
+                    else {
+                        sql = sql.replaceFirst("\\?", "'{%" + i + ", length=" + paraString.length() + "}'");
+                    }
                 }
             }
         }

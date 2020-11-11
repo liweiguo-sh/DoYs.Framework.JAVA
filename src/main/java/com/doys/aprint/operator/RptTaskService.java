@@ -64,6 +64,6 @@ public class RptTaskService extends BaseService {
         sql = "INSERT INTO rpt_task_month "
             + "SELECT tenant_id, DATE_FORMAT(task_date, '%Y-%m') period, SUM(qty_task) qty_task, SUM(qty_print) qty_print "
             + "FROM rpt_task_day WHERE task_date >= ? GROUP BY tenant_id, period";
-        dbSys.exec(sql, lastDate);
+        dbSys.exec(sql, lastPeriod + "-01");
     }
 }
