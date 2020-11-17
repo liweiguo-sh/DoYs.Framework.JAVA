@@ -77,4 +77,36 @@ public class LabelFileService extends BaseService {
 
         return ret;
     }
+
+    public static String[] saveLabelVariableImage(DBFactory dbBus, MultipartFile multipartFile, int labelVariableId) throws Exception {
+        String[] ret = new String[2];
+
+        String sql;
+        String filepath, filename, pathname;
+
+        File filePath, fileLabel;
+        // -- name and path -------------------------------
+        filename = UtilFile.getNewName(multipartFile.getOriginalFilename(), String.valueOf(labelVariableId));
+        filepath = UtilYml.getRunPath() + "/aprint/label_variable_image/";
+        filePath = new File(filepath);
+        if (!filePath.exists()) {
+            if (!filePath.mkdirs()) {
+                throw new Exception("创建标签变量图片目录失败，请检查。");
+            }
+        }
+        pathname = filepath + filename;
+
+        // -- save label file -----------------------------
+        fileLabel = new File(pathname);
+        multipartFile.transferTo(fileLabel);
+
+        // -- save filename -------------------------------
+        sql = "UPDATE base_label_variable SET value = ? WHERE id = ?";
+        dbBus.exec(sql, filename, labelVariableId);
+        // ------------------------------------------------
+        ret[0] = filename;
+        ret[1] = pathname;
+
+        return ret;
+    }
 }
