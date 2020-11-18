@@ -50,16 +50,14 @@ public class QuickPrintController extends BaseController {
     private RestResult getLabelAndLabelVariableById() {
         int labelId = inInt("labelId");
         String sql;
-        SqlRowSet rsLabel, rsLabelVariable;
+        SqlRowSet rsLabel;
         // ------------------------------------------------
         try {
             sql = "SELECT * FROM base_label WHERE id = ?";
             rsLabel = dbBus.getRowSet(sql, labelId);
             ok("dtbLabel", rsLabel);
 
-            sql = "SELECT * FROM base_label_variable WHERE label_id = ? AND type <> 'fixed' ORDER BY sequence, name";
-            rsLabelVariable = dbBus.getRowSet(sql, labelId);
-            ok("dtbLabelVariable", rsLabelVariable);
+            ok("dtbLabelVariable", QuickPrintService.getLabelVariable(dbBus, labelId));
         } catch (Exception e) {
             return ResultErr(e);
         } finally {
@@ -79,7 +77,7 @@ public class QuickPrintController extends BaseController {
         String userPk = this.ssValue("userPk");
 
         ArrayList<HashMap<String, Object>> variables = inArrayList("variables");
-        SqlRowSet rsTask, rsLabelVariable;
+        SqlRowSet rsTask;
 
         TransactionStatus tStatus = null;
         // ------------------------------------------------
@@ -95,9 +93,7 @@ public class QuickPrintController extends BaseController {
             rsTask = dbBus.getRowSet(sql, taskId);
             ok("dtbTask", rsTask);
 
-            sql = "SELECT * FROM base_label_variable WHERE label_id = ? AND type <> 'fixed' ORDER BY sequence, name";
-            rsLabelVariable = dbBus.getRowSet(sql, labelId);
-            ok("dtbLabelVariable", rsLabelVariable);
+            ok("dtbLabelVariable", QuickPrintService.getLabelVariable(dbBus, labelId));
         } catch (Exception e) {
             DBFactory.rollback(dstm, tStatus);
             return ResultErr(e);

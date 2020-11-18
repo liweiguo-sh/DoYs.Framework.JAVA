@@ -1,6 +1,7 @@
 package com.doys.aprint.label;
 import com.doys.aprint.labels.LabelFileService;
 import com.doys.aprint.labels.LabelTableService;
+import com.doys.aprint.print.QuickPrintService;
 import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.entity.RestResult;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -17,16 +18,14 @@ public class DLabelController extends BaseController {
         int labelId = inInt("labelId");
 
         String sql;
-        SqlRowSet rsLabel, rsLabelVariable;
+        SqlRowSet rsLabel;
         // ------------------------------------------------
         try {
-            sql = "SELECT content FROM base_label WHERE id = ?";
+            sql = "SELECT id, width, height, content FROM base_label WHERE id = ?";
             rsLabel = dbBus.getRowSet(sql, labelId);
             ok("dtbLabel", rsLabel);
 
-            sql = "SELECT type, name, value FROM base_label_variable WHERE label_id = ?";
-            rsLabelVariable = dbBus.getRowSet(sql, labelId);
-            ok("dtbLabelVariable", rsLabelVariable);
+            ok("dtbLabelVariable", QuickPrintService.getLabelVariable(dbBus, labelId));
         } catch (Exception e) {
             return ResultErr(e);
         }
