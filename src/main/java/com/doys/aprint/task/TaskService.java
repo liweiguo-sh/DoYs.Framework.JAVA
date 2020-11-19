@@ -98,7 +98,7 @@ public class TaskService {
 
             builderField.append(name).append(", ");
             builderValue.append("?, ");
-            // -- 1. 合并客户端变量值 --
+            // -- 2.1. 合并客户端变量值 --
             for (HashMap<String, Object> variable : variables) {
                 String paraKey = (String) variable.get("name");
                 if (paraKey.equalsIgnoreCase(name)) {
@@ -106,7 +106,7 @@ public class TaskService {
                     break;
                 }
             }
-            // -- 2. 执行规则 --
+            // -- 2.2. 执行规则 --
             if (type.equalsIgnoreCase("seq")) {
                 String seqFields = UtilString.KillNull(rsVariable.getString("seq_fields"));
                 String prefixValue = getPrefixValue(seqFields, variables);
@@ -115,7 +115,7 @@ public class TaskService {
                     listInsert.get(i)[colIndex] = sequences[i];
                 }
 
-                // -- 3. 更新末次打印值 --
+                // -- 2.3. 更新末次打印值 --
                 sqlUpdate = "UPDATE base_label_variable SET value = ? WHERE label_id = ? AND name = ?";
                 dbBus.exec(sqlUpdate, sequences[qty], labelId, name);
             }
@@ -139,7 +139,7 @@ public class TaskService {
             colIndex++;
         }
 
-        // -- 9 .批量插入数据 --
+        // -- 3 .批量插入数据 --
         builderField.append("task_id, $row_no");
         builderValue.append("?, ?");
 
@@ -149,6 +149,7 @@ public class TaskService {
         sqlInsert = builder.toString();
         dbBus.batchUpdate(sqlInsert, listInsert);
 
+        // -- 4 .跟新任务单数量 --
         sql = "UPDATE core_task SET qty = ? WHERE id = ?";
         dbBus.exec(sql, qty, taskId);
     }
@@ -266,7 +267,7 @@ public class TaskService {
             colIndex++;
         }
 
-        // -- 9 .批量插入数据 --
+        // -- 3. 批量插入数据 --
         builderField.append("task_id, $row_no");
         builderValue.append("?, ?");
 
@@ -275,5 +276,9 @@ public class TaskService {
         builder.append("VALUES (" + builderValue.toString() + ")");
         sqlInsert = builder.toString();
         dbBus.batchUpdate(sqlInsert, listInsert);
+
+        // -- 4 .跟新任务单数量 --
+        sql = "UPDATE core_task SET qty = ? WHERE id = ?";
+        dbBus.exec(sql, qty, taskId);
     }
 }

@@ -19,6 +19,9 @@ public class ProductView extends BaseViewController {
         sql = "DELETE FROM base_product_pn_para WHERE product_id = ?";
         dbBus.exec(sql, id);
 
+        sql = "UPDATE base_label SET product_id = 0 WHERE product_id = ?";
+        dbBus.exec(sql, id);
+
         return true;
     }
 }

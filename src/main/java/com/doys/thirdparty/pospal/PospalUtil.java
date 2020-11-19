@@ -1,8 +1,8 @@
-package com.doys.aprint.projects.lvkemen;
+package com.doys.thirdparty.pospal;
 import java.security.MessageDigest;
 import java.util.Calendar;
 
-public class LvkemenUtil {
+public class PospalUtil {
     public static String appKey = "527210429188633158";
     public static String appId = "BAD3BB37E0D7A96485CC870850F9A894";
     public static String urlQuery = "https://area13-win.pospal.cn:443/pospal-api2/openapi/v1/productOpenApi/";
