@@ -1,8 +1,8 @@
-package com.doys.thirdparty.hualala.util;
-public class ApiConst_LvKeMen {
+package com.doys.aprint.projects.lvkemen;
+public class LvkemenConst {
     public static boolean TESTING = false;  // -- ture：测试环境, false: 线上(生产)环境 --
 
-    public static Long APP_KEY = 1980L;
+    public static long APP_KEY = 1980L;
     public static String APP_SECRET = "pdXTmaIEdErZ62HS";
 
     public static long GROUP_ID = 295490L;

@@ -199,11 +199,11 @@ public class BaseController extends BaseTop {
     }
 
     // -- ok, err -------------------------------------------------------------
-    protected void ok(String key, long value) throws Exception {
-        _ok(key, value);
+    protected void ok(String key, long val) throws Exception {
+        _ok(key, String.valueOf(val));
     }
-    protected void ok(String key, String value) throws Exception {
-        _ok(key, value);
+    protected void ok(String key, String val) throws Exception {
+        _ok(key, val);
     }
     protected void ok(String key, SqlRowSet rowSet) throws Exception {
         if (rowSet == null) {
@@ -223,7 +223,19 @@ public class BaseController extends BaseTop {
             _ok(key, UtilResultSet.getRowSetString(rs));
         }
     }
-    private void _ok(String key, Object value) throws Exception {
+    protected void ok(String key, Object obj) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+
+        if (obj == null) {
+            _ok(key, "");
+        }
+        else {
+            key = key + Const.CHAR1 + "json";
+            String listString = mapper.writeValueAsString(obj);
+            _ok(key, listString);
+        }
+    }
+    private void _ok(String key, String value) throws Exception {
         RestResult result = getRestResult();
         result.put(key, value);
     }

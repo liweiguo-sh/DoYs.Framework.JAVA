@@ -60,7 +60,6 @@ public class QuickPrintController extends BaseController {
             ok("dtbLabelVariable", QuickPrintService.getLabelVariable(dbBus, labelId));
         } catch (Exception e) {
             return ResultErr(e);
-        } finally {
         }
         return ResultOk();
     }

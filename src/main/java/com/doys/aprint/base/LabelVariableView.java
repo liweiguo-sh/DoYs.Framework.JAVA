@@ -1,6 +1,5 @@
 package com.doys.aprint.base;
 import com.doys.aprint.labels.LabelTableService;
-import com.doys.framework.core.ex.UnexpectedException;
 import com.doys.framework.core.view.BaseViewController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +32,7 @@ public class LabelVariableView extends BaseViewController {
 
     @Override
     protected boolean BeforeDelete(long id) throws Exception {
-        throw new UnexpectedException();
+        //throw new UnexpectedException();
+        return true;
     }
 }

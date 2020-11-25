@@ -28,10 +28,10 @@ public class HttpClientUtil {
     private static final Log logger = LogFactory.getLog(HttpClientUtil.class);
     private static final int DEFAULT_TIMEOUT = 60000;
 
-    public static String senderPost(String url, Map<String, String> params, Long groupID, Long shopID, String traceID) throws IOException {
+    public static String sendPost(String url, Map<String, String> params, Long groupID, Long shopID, String traceID) throws Exception {
         CloseableHttpClient httpClient = createDefault();
         CloseableHttpResponse response = null;
-        String result = null;
+        String result;
         try {
             HttpPost httpPost = new HttpPost(url);
             RequestConfig requestConfig = RequestConfig
@@ -55,7 +55,7 @@ public class HttpClientUtil {
             UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(basicNameValuePairs, Consts.UTF_8);
             httpPost.setEntity(urlEncodedFormEntity);
             // 获取当前时间戳
-            Long now = System.currentTimeMillis();
+            long now = System.currentTimeMillis();
             response = httpClient.execute(httpPost);
             StatusLine statusLine = response.getStatusLine();
             Date date = new Date();
@@ -77,8 +77,6 @@ public class HttpClientUtil {
             result = EntityUtils.toString(entity, Consts.UTF_8);
             logger.info(String.format("response data: %s", result));
             return result;
-        } catch (IOException e) {
-            throw e;
         } finally {
             try {
                 if (response != null) {
