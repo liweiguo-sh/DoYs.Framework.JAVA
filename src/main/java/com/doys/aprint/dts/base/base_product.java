@@ -11,7 +11,7 @@ public class base_product extends BASE_ENTITY_AUTO {
     @EntityFieldAnnotation(length = "20", comment = "第三方系统的唯一标识, 一般用于接口")
     public String ref_uk;
 
-    @EntityFieldAnnotation(text = "客户ID", not_null = true, default_value = "0", comment = "默认客户ID")
+    @EntityFieldAnnotation(text = "客户ID", default_value = "0", comment = "默认客户ID")
     public int customer_id;
 
     @EntityFieldAnnotation(text = "产品代码", length = "20")
