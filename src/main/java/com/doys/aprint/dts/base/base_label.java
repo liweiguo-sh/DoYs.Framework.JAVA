@@ -14,9 +14,6 @@ public class base_label {
     String label_file_name;
 
     // -- JavaScript --------------------------------------
-    @EntityFieldAnnotation(text = "引用值变化后脚本", type = EntityFieldType.TEXT)
-    public String js_after_ref_change = "";
-
-    @EntityFieldAnnotation(text = "用户界面输入后脚本", type = EntityFieldType.TEXT)
-    public String js_after_input = "";
+    @EntityFieldAnnotation(text = "After Compute Script", type = EntityFieldType.TEXT, comment = "引用值变化或用户界面输入引起的变量改变")
+    public String js_after_compute = "";
 }

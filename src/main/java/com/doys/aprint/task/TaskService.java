@@ -64,7 +64,7 @@ public class TaskService {
     }
 
     // -- generate data -------------------------------------------------------
-    public static void generatePrintData(DBFactory dbBus, int labelId, int qty, int taskId, ArrayList<HashMap<String, Object>> variables) throws Exception {
+    public static void generatePrintData(DBFactory dbBus, int labelId, int qty, int taskId, HashMap<String, String> variables) throws Exception {
         int columnCount, colIndex = 0;
 
         String sql, sqlInsert, sqlUpdate;
@@ -99,13 +99,10 @@ public class TaskService {
             builderField.append(name).append(", ");
             builderValue.append("?, ");
             // -- 2.1. 合并客户端变量值 --
-            for (HashMap<String, Object> variable : variables) {
-                String paraKey = (String) variable.get("name");
-                if (paraKey.equalsIgnoreCase(name)) {
-                    value = variable.get("value").toString();
-                    break;
-                }
+            if (variables.containsKey(name)) {
+                value = variables.get(name);
             }
+
             // -- 2.2. 执行规则 --
             if (type.equalsIgnoreCase("seq")) {
                 String seqFields = UtilString.KillNull(rsVariable.getString("seq_fields"));
@@ -153,15 +150,11 @@ public class TaskService {
         sql = "UPDATE core_task SET qty = ? WHERE id = ?";
         dbBus.exec(sql, qty, taskId);
     }
-    private static String getPrefixValue(String seqFields, ArrayList<HashMap<String, Object>> variables) {
+    private static String getPrefixValue(String seqFields, HashMap<String, String> variables) {
         String[] arrField = seqFields.split(",");
         for (int i = 0; i < arrField.length; i++) {
-            for (HashMap<String, Object> variable : variables) {
-                String paraKey = (String) variable.get("name");
-                if (paraKey.equalsIgnoreCase(arrField[i])) {
-                    arrField[i] = variable.get("value").toString();
-                    break;
-                }
+            if (variables.containsKey(arrField[i])) {
+                arrField[i] = variables.get(arrField[i]);
             }
         }
 

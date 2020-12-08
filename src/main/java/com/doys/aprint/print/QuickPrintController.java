@@ -11,7 +11,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 @RestController
 @RequestMapping("/aprint/quick_print")
@@ -75,7 +74,7 @@ public class QuickPrintController extends BaseController {
         String sql;
         String userPk = this.ssValue("userPk");
 
-        ArrayList<HashMap<String, Object>> variables = inArrayList("variables");
+        HashMap<String, String> variables = inHashMap("variables");
         SqlRowSet rsTask;
 
         TransactionStatus tStatus = null;

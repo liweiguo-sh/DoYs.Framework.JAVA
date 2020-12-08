@@ -120,6 +120,13 @@ public class BaseController extends BaseTop {
         }
         return (HashMap<String, Object>) obj;
     }
+    protected HashMap<String, String> inHashMap(String parameterName) {
+        Object obj = _inObject(parameterName, null);
+        if (obj == null) {
+            return null;
+        }
+        return (HashMap<String, String>) obj;
+    }
     protected ArrayList<HashMap<String, Object>> inArrayList(String parameterName) {
         Object obj = _inObject(parameterName, null);
         if (obj == null) {
