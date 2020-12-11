@@ -30,6 +30,8 @@ public class OrderPrint extends BaseController {
                 sql = "SELECT * FROM T_ORDER WHERE order_number = ?";
                 rsOrder = dbBus.getRowSet(sql, orderNumber);
                 ok("dtbOrder", rsOrder);
+
+                ok("fieldCustomerCode", "customer_code");
             }
         } catch (Exception e) {
             return ResultErr(e);
