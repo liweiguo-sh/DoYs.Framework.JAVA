@@ -36,7 +36,9 @@ public class LvkemenController extends BaseController {
         // ------------------------------------------------
         try {
             listFood = LvKementHulala.getOpenFood(shopId);
-            LvKementHulala.saveFoods(dbBus, shopId, listFood);
+            if (listFood != null) {
+                LvKementHulala.saveFoods(dbBus, shopId, listFood);
+            }
 
             ok("foods", listFood);
         } catch (Exception e) {

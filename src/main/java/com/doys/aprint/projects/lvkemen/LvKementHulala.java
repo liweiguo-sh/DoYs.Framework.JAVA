@@ -46,8 +46,13 @@ public class LvKementHulala extends BaseService {
             throw new UnexpectedException(mapResponse.get("message").toString());
         }
 
+        Map<String, Object> mapData = (Map<String, Object>) mapResponse.get("data");
+        if (!mapData.containsKey("foodList")) {
+            return null;
+        }
+
         ArrayList<HashMap<String, String>> listReturn = new ArrayList<>();
-        ArrayList<Map<String, Object>> listFood = (ArrayList<Map<String, Object>>) ((Map<String, Object>) mapResponse.get("data")).get("foodList");
+        ArrayList<Map<String, Object>> listFood = (ArrayList<Map<String, Object>>) mapData.get("foodList");
         for (Map<String, Object> mapFood : listFood) {
             ArrayList<HashMap<String, String>> listUnit = (ArrayList<HashMap<String, String>>) mapFood.get("units");
             for (HashMap<String, String> mapUnit : listUnit) {
@@ -57,7 +62,12 @@ public class LvKementHulala extends BaseService {
                 mapList.put("unitKey", mapUnit.get("unitKey"));
                 mapList.put("foodCode", mapFood.get("foodCode").toString());
                 mapList.put("foodName", mapFood.get("foodName").toString());
-                mapList.put("foodAliasName", mapFood.get("foodAliasName").toString());
+                if (mapFood.containsKey("foodAliasName")) {
+                    mapList.put("foodAliasName", mapFood.get("foodAliasName").toString());
+                }
+                else {
+                    mapList.put("foodAliasName", " ");
+                }
                 mapList.put("foodMnemonicCode", mapFood.get("foodMnemonicCode").toString());
 
                 mapList.put("unit", mapUnit.get("unit"));
