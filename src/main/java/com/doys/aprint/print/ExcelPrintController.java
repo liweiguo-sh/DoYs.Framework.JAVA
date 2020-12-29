@@ -4,6 +4,7 @@ import com.doys.framework.core.base.BaseController;
 import com.doys.framework.core.entity.RestResult;
 import com.doys.framework.database.DBFactory;
 import com.doys.framework.util.UtilExcel;
+import com.doys.framework.util.UtilString;
 import com.doys.framework.util.UtilUploadTemp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -31,7 +32,7 @@ public class ExcelPrintController extends BaseController {
         String fileExcel;
         String userPk = this.ssValue("userPk");
 
-        String[][] data;
+        String[][] data, dataPreview;
 
         SqlRowSet rsTask;
         TransactionStatus tStatus = null;
@@ -42,6 +43,10 @@ public class ExcelPrintController extends BaseController {
 
             fileExcel = UtilUploadTemp.saveSingleFile(multipartFile);
             data = UtilExcel.excelToArray(fileExcel);
+            qty = data.length - 1;
+            if (qty <= 0) {
+                return ResultErr("导入文件没有数据，请检查。");
+            }
             taskId = TaskService.createTask(dbBus, labelId, userPk);
             TaskService.importExcelData(dbBus, labelId, taskId, data);
             dstm.commit(tStatus);
@@ -49,7 +54,15 @@ public class ExcelPrintController extends BaseController {
             sql = "SELECT * FROM core_task WHERE id = ?";
             rsTask = dbBus.getRowSet(sql, taskId);
             ok("dtbTask", rsTask);
-            ok("qty", data.length - 1);
+            ok("qty", qty);
+
+            // -- 返回excel预览数据 --
+            dataPreview = new String[3][];
+            dataPreview[0] = data[0];       // -- 表头 --
+            dataPreview[1] = data[1];       // -- 首行数据 --
+            dataPreview[2] = data[qty];     // -- 末行数据 --
+            ok("dataPreview", dataPreview);
+            ok("uploadFields", UtilString.arrayJoin(data[0], ","));     // -- 导入文件字段集合 --
         } catch (Exception e) {
             DBFactory.rollback(dstm, tStatus);
             return ResultErr(e);

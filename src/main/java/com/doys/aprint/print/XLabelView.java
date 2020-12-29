@@ -15,7 +15,8 @@ public class XLabelView extends BaseViewController {
         String sqlFixed, sqlDynamic;
         // ------------------------------------------------
         sql1 = "SELECT text, fixed, align, width, data_source_type, data_source, 1 id FROM aprint.sys_view_field WHERE view_pk = 'x_label' AND name = 'variable_xxx'";
-        sql2 = "SELECT 1 id, LOWER(name) name, sequence FROM base_label_variable WHERE label_id = " + labelId + " AND type <> 'fixed'";
+        sql2 = "SELECT 1 id, LOWER(name) name, sequence FROM base_label_variable "
+            + "WHERE label_id = " + labelId + " AND (flag_manual_modify = 1 OR (quote_from IS NOT NULL AND quote_from <> '')) AND type <> 'fixed'";
         sqlDynamic = "SELECT name, name text, fixed, align, width, data_source_type, data_source, sequence + 100 sequence FROM ("
             + sql1 + ") f INNER JOIN (" + sql2 + ") n ON f.id = n.id";
 

@@ -60,6 +60,26 @@ public class UtilString {
 
         return string1.equalsIgnoreCase(string2);
     }
+    public static String arrayJoin(String[] arrString, String symbol) throws Exception {
+        int len = arrString.length;
+
+        StringBuilder builder;
+        // ------------------------------------------------
+        if (len == 0) {
+            return "";
+        }
+        else if (len == 1) {
+            return arrString[0];
+        }
+        else {
+            builder = new StringBuilder(len + 1);
+            builder.append(arrString[0]);
+            for (int i = 1; i < len; i++) {
+                builder.append(symbol + arrString[i]);
+            }
+            return builder.toString();
+        }
+    }
 
     public static String getNewNodeKey(String currentMaxNodeKey, int nNodeLen) throws Exception {
         int nLenParent = currentMaxNodeKey.length() - nNodeLen;

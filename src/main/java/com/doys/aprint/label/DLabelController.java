@@ -21,7 +21,7 @@ public class DLabelController extends BaseController {
         SqlRowSet rsLabel;
         // ------------------------------------------------
         try {
-            sql = "SELECT id, width, height, content FROM base_label WHERE id = ?";
+            sql = "SELECT id, width, height, point, content FROM base_label WHERE id = ?";
             rsLabel = dbBus.getRowSet(sql, labelId);
             ok("dtbLabel", rsLabel);
 
