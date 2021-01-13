@@ -27,7 +27,7 @@ public class MasoFileService {
         dtbVariable = dbBus.getDataTable(sql, labelId);
         dtbVariable.Sort("name");
         for (HashMap<String, Object> map : listVars) {
-            varName = (String) map.get("name");
+            varName = ((String) map.get("name")).toLowerCase();
             varValue = map.get("value").toString();
 
             arrFind[0] = varName;

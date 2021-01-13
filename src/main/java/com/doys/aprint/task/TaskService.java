@@ -91,7 +91,7 @@ public class TaskService {
         sql = "SELECT * FROM base_label_variable WHERE label_id = ? ORDER BY sequence, name";
         rsVariable = dbBus.getRowSet(sql, labelId);
         while (rsVariable.next()) {
-            String name = rsVariable.getString("name");
+            String name = rsVariable.getString("name").toLowerCase();
             String type = rsVariable.getString("type");
             String value = rsVariable.getString("value");
             int valueLen = rsVariable.getInt("value_len");

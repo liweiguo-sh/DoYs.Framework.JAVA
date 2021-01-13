@@ -26,7 +26,7 @@ public class BarTenderFileService {
         if (list.size() < 2) {
             throw new Exception("标签数据模板文件格式错误，请检查。");
         }
-        headers = list.get(0).split(",");
+        headers = list.get(0).toLowerCase().split(",");
         values = list.get(1).split(",");
         if (headers.length != values.length) {
             throw new Exception("标签数据模板文件格式错误，请检查。");
