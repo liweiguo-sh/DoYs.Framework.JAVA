@@ -37,7 +37,7 @@ public class User extends BaseController {
     // ------------------------------------------------------------------------
     @PostMapping("/login")
     private RestResult login() {
-        int tenantId = 0;
+        int tenantId;
 
         String dbName = "";
         String userPk = in("userPk");
@@ -95,7 +95,7 @@ public class User extends BaseController {
             }
 
             // -- 3. 登录日志 --
-            logger.info("用户 " + userPk + " 成功登录系统");
+            logger.info("用户 " + tenantId + "\\" + userPk + " 成功登录系统");
         } catch (Exception e) {
             return ResultErr(e);
         }

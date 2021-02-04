@@ -5,7 +5,7 @@ import com.doys.framework.upgrade.db.enum1.EntityTableMatch;
 import java.util.ArrayList;
 
 public class EntityTable {
-    public String datbasePK = "";
+    public String databasePK = "";
     public String name = "";
     /**
      * 表中文名称
