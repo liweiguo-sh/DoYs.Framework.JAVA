@@ -1,6 +1,0 @@
-dts = database table structure
-
-parent:
-    供继承的基类一级通用类等
-sys:
-    系统库实体表
