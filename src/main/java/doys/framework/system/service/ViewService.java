@@ -110,6 +110,10 @@ public class ViewService extends BaseService {
         if (databasePk.equalsIgnoreCase("sys")) {
             rs = dbSys.getRowSet(sql);
         }
+        else if (databasePk.equalsIgnoreCase("prefix")) {
+            DBFactory dbPrefix = UtilTDS.getDBFactory(UtilTDS.getTenantId());
+            rs = dbPrefix.getRowSet(sql);
+        }
         else {
             DBFactory dbPrefix = UtilTDS.getDBFactory(UtilTDS.getTenantId());
             rs = dbPrefix.getRowSet(sql);

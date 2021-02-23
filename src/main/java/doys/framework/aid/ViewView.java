@@ -6,14 +6,14 @@
  * 菜单视图类
  *****************************************************************************/
 package doys.framework.aid;
-import doys.framework.core.view.BaseViewControllerTenant;
+import doys.framework.a2.ViewControllerSys;
 import doys.framework.system.service.ViewService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/framework/aid/view_view")
-public class ViewViewTenant extends BaseViewControllerTenant {
+public class ViewView extends ViewControllerSys {
     @Override
     protected boolean BeforeSave(boolean addnew, long id) throws Exception {
         String tablePk = in("table_pk");

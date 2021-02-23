@@ -1,11 +1,11 @@
 package ems.base;
-import doys.framework.core.view.BaseViewControllerTenant;
+import doys.framework.core.view.BaseViewController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/ems/base/room_view")
-public class RoomViewTenant extends BaseViewControllerTenant {
+public class RoomView extends BaseViewController {
     @Override
     protected boolean AfterSave(boolean addnew, long id) throws Exception {
         String sql;
@@ -14,11 +14,11 @@ public class RoomViewTenant extends BaseViewControllerTenant {
             sql = "UPDATE base_room r INNER JOIN base_floor f ON r.floor_id = f.id "
                 + "SET r.area_id = f.area_id, r.area_name = f.area_name, r.building_id = f.building_id, r.building_name = f.building_name, r.floor_name = f.name "
                 + "WHERE r.id = ?";
-            dbTenant.exec(sql, id);
+            dbBus.exec(sql, id);
         }
         else {
             sql = "UPDATE base_room SET fullname = CONCAT_WS(' \\\\ ', area_name, building_name, floor_name, name) WHERE id = ?";
-            dbTenant.exec(sql, id);
+            dbBus.exec(sql, id);
         }
         // ------------------------------------------------
         return true;
@@ -31,7 +31,7 @@ public class RoomViewTenant extends BaseViewControllerTenant {
         String sql;
         // ------------------------------------------------
         sql = "SELECT COUNT(1) FROM ..base_water_meter WHERE room_id = ?";
-        result = dbTenant.getInt(sql, 0, id);
+        result = dbBus.getInt(sql, 0, id);
         if (result > 0) {
             err("当前房间存在水表设备数据，不能删除。");
             return false;

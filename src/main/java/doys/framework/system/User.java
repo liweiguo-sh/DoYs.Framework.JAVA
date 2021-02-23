@@ -2,14 +2,13 @@
  * Copyright 2020-2021, doys-next.com
  * Author: David.Li
  * Create Date: 2020-04-10
- * Modify Date: 2021-02-15
+ * Modify Date: 2021-02-23
  * Description: 用户登录
  *****************************************************************************/
-package doys.framework.system.controller;
+package doys.framework.system;
 import doys.framework.common.image.ImageVerifyCode;
 import doys.framework.core.base.BaseControllerStd;
 import doys.framework.core.entity.RestResult;
-import doys.framework.system.service.UserService;
 import doys.framework.util.UtilDate;
 import doys.framework.util.UtilYml;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,7 +39,6 @@ public class User extends BaseControllerStd {
     private RestResult login() {
         int tenantId;
 
-        String dbName = "";
         String userPk = in("userPk");
         String password = in("password");
         String loginTime = in("loginTime");
@@ -52,14 +50,12 @@ public class User extends BaseControllerStd {
         try {
             // -- 0. read tenant infomation --
             tenantId = parseTenantId(in("tenantId"));
-            session().setAttribute("tenantId", tenantId);
-
             rsTenant = UserService.getTenant(dbSys, tenantId);
             if (rsTenant.next()) {
-                dbName = rsTenant.getString("database_name");
-                session().setAttribute("dbName", dbName);
+                session().setAttribute("tenantId", tenantId);
                 session().setAttribute("tenantName", rsTenant.getString("name"));
                 session().setAttribute("tenantShortName", rsTenant.getString("short_name"));
+                session().setAttribute("tenantExpDate", rsTenant.getString("exp_date"));
             }
             else {
                 return ResultErr("企业代码不正确，请检查。");

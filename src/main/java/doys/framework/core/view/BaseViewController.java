@@ -26,13 +26,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/core/base_view")
-public class BaseViewControllerTenant extends BaseController {
+public class BaseViewController extends BaseController {
     @Autowired
     protected DBFactory dbSys;
 
     @Autowired
     @Qualifier("tenantDBFactory")
-    protected DBFactory dbTenant;
+    protected DBFactory dbBus;
 
     @Autowired
     DataSourceTransactionManager dstm;
@@ -91,19 +91,12 @@ public class BaseViewControllerTenant extends BaseController {
         String nodeValue = in("nodeValue");
 
         SqlRowSet rsTree, rsTreeNode;
-        DBFactory dbExec;
         // ------------------------------------------------
         try {
             rsTree = BaseViewService.getTree(dbSys, treePk);
             rsTree.first();
-            if (rsTree.getString("database_pk").equalsIgnoreCase("sys")) {
-                dbExec = dbSys;
-            }
-            else {
-                dbExec = dbTenant;
-            }
 
-            rsTreeNode = BaseViewService.getTreeNode(dbSys, dbExec, treePk, nodeLevel, nodeValue);
+            rsTreeNode = BaseViewService.getTreeNode(dbSys, dbBus, treePk, nodeLevel, nodeValue);
             ok("dtbTreeNode", rsTreeNode);
         } catch (Exception e) {
             return ResultErr(e);
@@ -120,22 +113,15 @@ public class BaseViewControllerTenant extends BaseController {
         String sqlUserDefDS;
 
         SqlRowSet rsView, rsViewData;
-        DBFactory dbExec;
 
         HashMap<String, Long> mapRef = (pageNum == 0 ? new HashMap<>() : null);
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
-            if (rsView.getString("database_pk").equalsIgnoreCase("sys")) {
-                dbExec = dbSys;
-            }
-            else {
-                dbExec = dbTenant;
-            }
 
             sqlUserDefDS = getUseDefDataSource();
-            rsViewData = BaseViewService.getViewData(dbExec, rsView, pageNum, sqlFilter, mapRef, sqlUserDefDS);
+            rsViewData = BaseViewService.getViewData(dbBus, rsView, pageNum, sqlFilter, mapRef, sqlUserDefDS);
             ok("dtbViewData", rsViewData);
 
             if (pageNum == 0) {
@@ -154,22 +140,15 @@ public class BaseViewControllerTenant extends BaseController {
         String flowPks = req.get("flowPks");
 
         SqlRowSet rsView, rsViewField, rsFlowButton, rsViewButton;
-        DBFactory dbExec;
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
-            if (rsView.getString("database_pk").equalsIgnoreCase("sys")) {
-                dbExec = dbSys;
-            }
-            else {
-                dbExec = dbTenant;
-            }
-            //ok("dtbView", rsView);
+
             rsViewField = BaseViewService.getViewBaseField(dbSys, viewPk, rsView.getString("table_pk"));
             ok("dtbViewField", rsViewField);
 
-            HashMap<String, SqlRowSet> mapDS = BaseViewService.getViewDS(dbExec, rsViewField);
+            HashMap<String, SqlRowSet> mapDS = BaseViewService.getViewDS(dbBus, rsViewField);
             for (Map.Entry<String, SqlRowSet> entry : mapDS.entrySet()) {
                 ok("dtbCDS_" + entry.getKey(), entry.getValue());
             }
@@ -194,20 +173,13 @@ public class BaseViewControllerTenant extends BaseController {
         String tableName;
 
         SqlRowSet rsView, rsFormData;
-        DBFactory dbExec;
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
             tableName = rsView.getString("table_name");
-            if (rsView.getString("database_pk").equalsIgnoreCase("sys")) {
-                dbExec = dbSys;
-            }
-            else {
-                dbExec = dbTenant;
-            }
 
-            rsFormData = BaseViewService.getFormData(dbExec, tableName, id);
+            rsFormData = BaseViewService.getFormData(dbBus, tableName, id);
             ok("dtbFormData", rsFormData);
         } catch (Exception e) {
             return ResultErr(e);
@@ -228,7 +200,6 @@ public class BaseViewControllerTenant extends BaseController {
         SqlRowSet rsView, rsFormData, rsViewData;
 
         TransactionStatus tStatus = null;
-        DBFactory dbExec;
         // ------------------------------------------------
         try {
             // -- 1. pretreatment --
@@ -236,25 +207,19 @@ public class BaseViewControllerTenant extends BaseController {
             rsView.first();
             tableName = rsView.getString("table_name");
             sqlDataSource = rsView.getString("sql_data_source");
-            if (rsView.getString("database_pk").equalsIgnoreCase("sys")) {
-                dbExec = dbSys;
-            }
-            else {
-                dbExec = dbTenant;
-            }
 
             // -- 2.1 beforeSave --
-            dstm.setDataSource(dbExec.getDataSource());
+            dstm.setDataSource(dbBus.getDataSource());
             tStatus = dstm.getTransaction(tDef);
             if (!BeforeSave(blAddnew, id)) {
                 return ResultErr();
             }
             // -- 3.2. save --
             if (blAddnew) {
-                id = BaseViewService.insert(dbExec, tableName, form, this.session());
+                id = BaseViewService.insert(dbBus, tableName, form, this.session());
             }
             else {
-                BaseViewService.update(dbSys, dbExec, tableName, form, this.session());
+                BaseViewService.update(dbSys, dbBus, tableName, form, this.session());
             }
             // -- 2.3 afterSave --
             if (!AfterSave(blAddnew, id)) {
@@ -263,9 +228,9 @@ public class BaseViewControllerTenant extends BaseController {
             dstm.commit(tStatus);
 
             // -- 9. 返回当前行更新后的基础表数据和视图数据 --
-            rsFormData = BaseViewService.getFormData(dbExec, tableName, id);
+            rsFormData = BaseViewService.getFormData(dbBus, tableName, id);
             ok("dtbFormData", rsFormData);
-            rsViewData = BaseViewService.getViewDataOne(dbExec, sqlDataSource, id);
+            rsViewData = BaseViewService.getViewDataOne(dbBus, sqlDataSource, id);
             ok("dtbViewData", rsViewData);
         } catch (Exception e) {
             return ResultErr(e);
@@ -284,27 +249,20 @@ public class BaseViewControllerTenant extends BaseController {
 
         SqlRowSet rsView, rsFormData;
         TransactionStatus tStatus = null;
-        DBFactory dbExec;
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
             tableName = rsView.getString("table_name");
-            if (rsView.getString("database_pk").equalsIgnoreCase("sys")) {
-                dbExec = dbSys;
-            }
-            else {
-                dbExec = dbTenant;
-            }
 
             // -- 2.1 beforeDelete --
-            dstm.setDataSource(dbExec.getDataSource());
+            dstm.setDataSource(dbBus.getDataSource());
             tStatus = dstm.getTransaction(tDef);
             if (!BeforeDelete(id)) {
                 return ResultErr();
             }
             // -- 2.2 delete --
-            BaseViewService.delete(dbExec, tableName, id);
+            BaseViewService.delete(dbBus, tableName, id);
             // -- 2.3 afterDelete --
             if (!AfterDelete(id)) {
                 return ResultErr();
@@ -312,7 +270,7 @@ public class BaseViewControllerTenant extends BaseController {
             dstm.commit(tStatus);
 
             if (idNext > 0) {
-                rsFormData = BaseViewService.getFormData(dbExec, tableName, idNext);
+                rsFormData = BaseViewService.getFormData(dbBus, tableName, idNext);
                 ok("dtbFormData", rsFormData);
             }
         } catch (Exception e) {
@@ -335,30 +293,23 @@ public class BaseViewControllerTenant extends BaseController {
 
         SqlRowSet rsView, rsFlowButton, rsFormData;
         TransactionStatus tStatus = null;
-        DBFactory dbExec;
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
             rsView.first();
             tableName = rsView.getString("table_name");
-            if (rsView.getString("database_pk").equalsIgnoreCase("sys")) {
-                dbExec = dbSys;
-            }
-            else {
-                dbExec = dbTenant;
-            }
 
             rsFlowButton = BaseViewService.getFlowButton(dbSys, flowPk, buttonPk);
             rsFlowButton.next();
 
             // -- 2.1 beforeSave --
-            dstm.setDataSource(dbExec.getDataSource());
+            dstm.setDataSource(dbBus.getDataSource());
             tStatus = dstm.getTransaction(tDef);
             if (!BeforeFlowClick(id, rsFlowButton)) {
                 return ResultErr();
             }
             // -- 2.2 doFlow --
-            BaseViewService.doFlow(dbExec, tableName, id, rsFlowButton, ssValue("userPk"));
+            BaseViewService.doFlow(dbBus, tableName, id, rsFlowButton, ssValue("userPk"));
             // -- 2.3 afterDoFlow --
             if (!AfterFlowClick(id, rsFlowButton)) {
                 return ResultErr();
@@ -369,7 +320,7 @@ public class BaseViewControllerTenant extends BaseController {
             if (idNext == 0) {
                 idNext = id;
             }
-            rsFormData = BaseViewService.getFormData(dbTenant, tableName, idNext);
+            rsFormData = BaseViewService.getFormData(dbBus, tableName, idNext);
             ok("dtbFormData", rsFormData);
         } catch (Exception e) {
             return ResultErr(e);
@@ -387,7 +338,7 @@ public class BaseViewControllerTenant extends BaseController {
         TransactionStatus tStatus = null;
         // ------------------------------------------------
         try {
-            dstm.setDataSource(dbTenant.getDataSource());
+            dstm.setDataSource(dbBus.getDataSource());
             tStatus = dstm.getTransaction(tDef);
 
             if (!ButtonClick(id, null, buttonName)) {

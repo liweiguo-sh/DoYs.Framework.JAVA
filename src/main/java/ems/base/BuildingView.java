@@ -1,26 +1,29 @@
 package ems.base;
-import doys.framework.core.view.BaseViewControllerTenant;
+import doys.framework.core.view.BaseViewController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/ems/base/floor_view")
-public class FloorViewTenant extends BaseViewControllerTenant {
+@RequestMapping("/ems/base/building_view")
+public class BuildingView extends BaseViewController {
     @Override
     protected boolean AfterSave(boolean addnew, long id) throws Exception {
         String sql;
         String name = in("name");
         // ------------------------------------------------
         if (addnew) {
-            sql = "UPDATE base_floor f INNER JOIN ..base_building b ON f.building_id = b.id "
-                + "SET f.area_id = b.area_id, f.area_name = b.area_name, f.building_name = b.name WHERE f.id = ?";
-            dbTenant.exec(sql, id);
+            sql = "UPDATE base_building b INNER JOIN base_area a ON b.area_id = a.id "
+                + "SET b.area_name = a.name WHERE b.id = ?";
+            dbBus.exec(sql, id);
         }
         else {
-            sql = "UPDATE base_room SET floor_name = ? WHERE floor_id = ?";
-            dbTenant.exec(sql, name, id);
+            sql = "UPDATE base_floor SET building_name = ? WHERE building_id = ?";
+            dbBus.exec(sql, name, id);
 
-            RoomService.updateFullname(dbTenant);
+            sql = "UPDATE base_room SET building_name = ? WHERE building_id = ?";
+            dbBus.exec(sql, name, id);
+
+            RoomService.updateFullname(dbBus);
         }
         // ------------------------------------------------
         return true;
@@ -32,10 +35,10 @@ public class FloorViewTenant extends BaseViewControllerTenant {
 
         String sql;
         // ------------------------------------------------
-        sql = "SELECT COUNT(1) FROM base_room WHERE floor_id = ?";
-        result = dbTenant.getInt(sql, 0, id);
+        sql = "SELECT COUNT(1) FROM base_floor WHERE building_id = ?";
+        result = dbBus.getInt(sql, 0, id);
         if (result > 0) {
-            err("当前楼层存在下级房间数据，不能删除。");
+            err("当前建筑存在下级楼层数据，不能删除。");
             return false;
         }
         // ------------------------------------------------

@@ -8,8 +8,7 @@ public class TenantDataSource extends AbstractRoutingDataSource {
     @Override
     protected DataSource determineTargetDataSource() {
         try {
-            int tenantId = UtilTDS.getTenantId();
-            this.tenantId = tenantId;
+            this.tenantId = UtilTDS.getTenantId();
             return UtilTDS.getDatasource(tenantId);
         } catch (Exception e) {
             e.printStackTrace();

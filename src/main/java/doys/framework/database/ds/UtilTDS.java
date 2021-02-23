@@ -3,8 +3,8 @@
  * @author David.Li
  * @version 1.0
  * @create_date 2020-07-07
- * @create_date 2021-02-08
- * 动态数据源工具类
+ * @create_date 2021-02-23
+ * TDS(Tenant Data Source)商户动态数据源工具类
  *****************************************************************************/
 package doys.framework.database.ds;
 import com.zaxxer.hikari.HikariConfig;
@@ -19,6 +19,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,6 +39,7 @@ public class UtilTDS {
     private static String driveClassName;
     private static int maximumPoolSize;
 
+    private static String sysDbName, prefixDbName;
     private static DBFactory dbSys;
     private static ConcurrentHashMap<String, DataSource> mapDS = new ConcurrentHashMap<>();
     // -- init ----------------------------------------------------------------
@@ -71,19 +73,20 @@ public class UtilTDS {
     private static void createDataSource(String dataSourceName) throws Exception {
         int tenantId = UtilTDS.getTenantId();
 
-        String sql, _username, _password;
+        String sql, dbname, _username, _password;
         String urlDynamic = url;
 
         SqlRowSet rs;
         // ------------------------------------------------
-        sql = "SELECT ip, port, username, password, db.name database_name, t.name "
-            + "FROM sys_tenant t INNER JOIN sys_database db ON t.database_pk = db.pk INNER JOIN sys_instance inst ON db.instance_pk = inst.pk "
+        dbname = dbSys.getValue("SELECT name FROM sys_database WHERE pk = 'prefix'") + tenantId;
+        sql = "SELECT ip, port, username, password "
+            + "FROM sys_tenant t INNER JOIN sys_instance inst ON t.instance_pk = inst.pk "
             + "WHERE t.id = ?";
         rs = dbSys.getRowSet(sql, tenantId);
         if (rs.next()) {
             urlDynamic = urlDynamic.replaceAll("\\{ip}", rs.getString("ip"));
             urlDynamic = urlDynamic.replaceAll("\\{port}", rs.getString("port"));
-            urlDynamic = urlDynamic.replaceAll("\\{database}", rs.getString("database_name"));
+            urlDynamic = urlDynamic.replaceAll("\\{database}", dbname);
 
             _username = rs.getString("username");
             _password = rs.getString("password");
@@ -112,25 +115,36 @@ public class UtilTDS {
     }
 
     // -- Tenant --------------------------------------------------------------
+    public static HttpSession getSession() throws Exception {
+        HttpSession ss;
+        try {
+            ss = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession();
+            return ss;
+        } catch (NullPointerException e) {
+            throw new SessionTimeoutException();
+        }
+    }
     public static int getTenantId() throws Exception {
         try {
-            return (int) ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession().getAttribute("tenantId");
+            return (int) getSession().getAttribute("tenantId");
         } catch (NullPointerException e) {
             throw new SessionTimeoutException();
         }
     }
     public static String getTenantDbName() throws Exception {
-        // -- 租户的 sys_database.pk 必须和 sys_database.name 相同 --
         int tenantId = UtilTDS.getTenantId();
 
-        String sql = "SELECT db.name database_name "
-            + "FROM sys_tenant t INNER JOIN sys_database db ON t.database_pk = db.pk INNER JOIN sys_instance inst ON db.instance_pk = inst.pk "
-            + "WHERE t.id = ?";
+        if (prefixDbName == null || prefixDbName.equals("")) {
+            prefixDbName = dbSys.getValue("SELECT name FROM sys_database WHERE pk = 'prefix'");
+        }
 
-        return dbSys.getValue(sql, "", tenantId);
+        return prefixDbName + tenantId;
     }
     public static String getSysDbName(DBFactory dbSys) throws Exception {
-        return dbSys.getValue("SELECT name FROM sys_database WHERE pk = 'sys'");
+        if (sysDbName == null || sysDbName.equals("")) {
+            sysDbName = dbSys.getValue("SELECT name FROM sys_database WHERE pk = 'sys'");
+        }
+        return sysDbName;
     }
 
     // -- DBFactory -----------------------------------------------------------

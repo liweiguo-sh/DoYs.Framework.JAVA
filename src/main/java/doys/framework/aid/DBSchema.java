@@ -19,37 +19,37 @@ public class DBSchema {
     public DBSchema(DBFactory _dbSys) {
         dbSys = _dbSys;
     }
-    public boolean refreshDBStruct(String databaseType, String tableName) throws Exception {
-        String sql;
-        String databasePk, databaseName, databasePhysicalType;
+    public boolean refreshDBStruct(String databasePk, String tableName) throws Exception {
+        String sql = "";
+        String databaseName = "", databaseType = "";
 
-        SqlRowSet rs;
+        SqlRowSet rs = null;
         // ------------------------------------------------
         tableName = tableName.toLowerCase();
-
-        if (databaseType.equalsIgnoreCase("prefix")) {
-            databasePk = UtilTDS.getTenantDbName();
-        }
-        else {
-            databasePk = databaseType;
-        }
-        sql = "SELECT db.type, db.name, inst.type database_physical_type FROM sys_database db INNER JOIN sys_instance inst ON db.instance_pk = inst.pk WHERE db.pk = ?";
-        rs = dbSys.getRowSet(sql, databasePk);
+        sql = "SELECT * FROM sys_database WHERE pk = ?";
+        rs = dbSys.getRowSet(sql, new Object[] { databasePk });
         if (rs.next()) {
+            databaseType = rs.getString("db_type");
             databaseName = rs.getString("name");
-            databasePhysicalType = rs.getString("database_physical_type");
+            if (databasePk.equalsIgnoreCase("sys")) {
+            }
+            else {
+                databaseName += UtilTDS.getTenantId();
+            }
         }
         else {
             throw new Exception("没有找到逻辑数据库名称为 " + databasePk + " 的记录, 请检查.");
         }
 
-        // ------------------------------------------------
-        if (databasePhysicalType.equalsIgnoreCase("MySQL")) {
-            return refreshDBStruct_MySQL_Tables(databaseType, databaseName, tableName);
+        if (databaseType.equalsIgnoreCase("MySQL")) {
+            if (refreshDBStruct_MySQL_Tables(databasePk, databaseName, tableName) == false) {
+                return false;
+            }
         }
         else {
-            throw new Exception("框架暂不支持 " + databasePhysicalType + " 数据库。");
+            throw new Exception("框架暂不支持 " + databaseType + " 数据库。");
         }
+        return true;
     }
 
     // -- MySQL ---------------------------------------------------------------

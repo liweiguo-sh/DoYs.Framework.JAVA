@@ -1,4 +1,4 @@
-package example.controller;
+package doys.framework.example;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 @RestController
-@RequestMapping("/example/barcode")
+@RequestMapping("/framework/example/barcode")
 public class BarcodeController extends BaseControllerStd {
     @RequestMapping("/getBarcode")
     private RestResult getBarcode() {

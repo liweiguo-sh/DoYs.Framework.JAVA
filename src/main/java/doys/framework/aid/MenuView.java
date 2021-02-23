@@ -7,7 +7,7 @@
  * 菜单视图类
  *****************************************************************************/
 package doys.framework.aid;
-import doys.framework.core.view.BaseViewControllerTenant;
+import doys.framework.a2.ViewControllerSys;
 import doys.framework.util.UtilString;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/framework/aid/menu_view")
-public class MenuViewTenant extends BaseViewControllerTenant {
+public class MenuView extends ViewControllerSys {
     @Override
     protected boolean BeforeSave(boolean addnew, long id) throws Exception {
         int len;

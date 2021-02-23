@@ -1,29 +1,26 @@
 package ems.base;
-import doys.framework.core.view.BaseViewControllerTenant;
+import doys.framework.core.view.BaseViewController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/ems/base/area_view")
-public class AreaViewTenant extends BaseViewControllerTenant {
+@RequestMapping("/ems/base/floor_view")
+public class FloorView extends BaseViewController {
     @Override
     protected boolean AfterSave(boolean addnew, long id) throws Exception {
         String sql;
         String name = in("name");
         // ------------------------------------------------
         if (addnew) {
+            sql = "UPDATE base_floor f INNER JOIN ..base_building b ON f.building_id = b.id "
+                + "SET f.area_id = b.area_id, f.area_name = b.area_name, f.building_name = b.name WHERE f.id = ?";
+            dbBus.exec(sql, id);
         }
         else {
-            sql = "UPDATE base_building SET area_name = ? WHERE area_id = ?";
-            dbTenant.exec(sql, name, id);
+            sql = "UPDATE base_room SET floor_name = ? WHERE floor_id = ?";
+            dbBus.exec(sql, name, id);
 
-            sql = "UPDATE base_floor SET area_name = ? WHERE area_id = ?";
-            dbTenant.exec(sql, name, id);
-
-            sql = "UPDATE base_room SET area_name = ? WHERE area_id = ?";
-            dbTenant.exec(sql, name, id);
-
-            RoomService.updateFullname(dbTenant);
+            RoomService.updateFullname(dbBus);
         }
         // ------------------------------------------------
         return true;
@@ -35,10 +32,10 @@ public class AreaViewTenant extends BaseViewControllerTenant {
 
         String sql;
         // ------------------------------------------------
-        sql = "SELECT COUNT(1) FROM base_building WHERE area_id = ?";
-        result = dbTenant.getInt(sql, 0, id);
+        sql = "SELECT COUNT(1) FROM base_room WHERE floor_id = ?";
+        result = dbBus.getInt(sql, 0, id);
         if (result > 0) {
-            err("当前区域存在下级建筑数据，不能删除。");
+            err("当前楼层存在下级房间数据，不能删除。");
             return false;
         }
         // ------------------------------------------------

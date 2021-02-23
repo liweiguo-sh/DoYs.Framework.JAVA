@@ -1,4 +1,4 @@
-package doys.framework.system.service;
+package doys.framework.system;
 import doys.framework.a0.Const;
 import doys.framework.common.security.UtilDigest;
 import doys.framework.core.base.BaseService;
@@ -6,10 +6,9 @@ import doys.framework.database.DBFactory;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 public class UserService extends BaseService {
-    public static SqlRowSet getTenant(DBFactory jtSys, int tenantId) throws Exception {
-        String sql = "SELECT t.name, t.short_name, db.name database_name "
-            + "FROM sys_tenant t INNER JOIN sys_database db ON t.database_pk = db.pk WHERE t.id = ?";
-        return jtSys.getRowSet(sql, tenantId);
+    public static SqlRowSet getTenant(DBFactory dbBus, int tenantId) throws Exception {
+        String sql = "SELECT * FROM sys_tenant WHERE id = ?";
+        return dbBus.getRowSet(sql, tenantId);
     }
 
     public static boolean verifyUser(DBFactory dbBus, String userPk, String passwordClient, String loginTime, String supperPassword) throws Exception {

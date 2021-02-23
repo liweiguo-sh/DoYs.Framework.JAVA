@@ -2,7 +2,7 @@ package doys.framework.aid;
 import doys.framework.core.base.BaseControllerStd;
 import doys.framework.core.entity.RestResult;
 import doys.framework.database.ds.UtilTDS;
-import doys.framework.system.service.UserService;
+import doys.framework.system.UserService;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
