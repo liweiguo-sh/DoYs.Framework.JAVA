@@ -349,6 +349,7 @@ public class BaseViewControllerTenant extends BaseController {
             }
 
             rsFlowButton = BaseViewService.getFlowButton(dbSys, flowPk, buttonPk);
+            rsFlowButton.next();
 
             // -- 2.1 beforeSave --
             dstm.setDataSource(dbExec.getDataSource());
@@ -357,7 +358,7 @@ public class BaseViewControllerTenant extends BaseController {
                 return ResultErr();
             }
             // -- 2.2 doFlow --
-            BaseViewService.doFlow(dbExec, tableName, id, rsFlowButton);
+            BaseViewService.doFlow(dbExec, tableName, id, rsFlowButton, ssValue("userPk"));
             // -- 2.3 afterDoFlow --
             if (!AfterFlowClick(id, rsFlowButton)) {
                 return ResultErr();
@@ -431,10 +432,10 @@ public class BaseViewControllerTenant extends BaseController {
     protected boolean AfterDelete(long id) throws Exception {
         return true;
     }
-    protected boolean BeforeFlowClick(long id, SqlRowSet rsFlowButton) {
+    protected boolean BeforeFlowClick(long id, SqlRowSet rsFlowButton) throws Exception {
         return true;
     }
-    protected boolean AfterFlowClick(long id, SqlRowSet rsFlowButton) {
+    protected boolean AfterFlowClick(long id, SqlRowSet rsFlowButton) throws Exception {
         return true;
     }
 

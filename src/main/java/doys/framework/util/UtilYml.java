@@ -26,6 +26,13 @@ public class UtilYml {
     @Value("${global.resTempPath}")
     private String _mResTempPath;
     public static String resTempPath;
+
+    @Value("${upgrade-database.mysql-db-backup:}")                          // -- 默认值为空的写法，可以在yml中不配置 --
+    private String _mysql_db_backup;
+    public static String mysql_db_backup;
+    @Value("${upgrade-database.mysql-db-restore:}")
+    private String _mysql_db_restore;
+    public static String mysql_db_restore;
     // -- init ----------------------------------------------------------------
     @PostConstruct
     private void initYmlProperty() {
@@ -33,6 +40,9 @@ public class UtilYml {
 
         resRunPath = _mResRunPath;
         resTempPath = _mResTempPath;
+
+        mysql_db_backup = _mysql_db_backup;
+        mysql_db_restore = _mysql_db_restore;
     }
 
     // -- public method 1 -----------------------------------------------------

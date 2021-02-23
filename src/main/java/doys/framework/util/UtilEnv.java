@@ -32,4 +32,14 @@ public class UtilEnv {
         }
         return null;
     }
+
+    public static boolean execDosCommand(String dosCommandString) throws Exception {
+        Process proc = Runtime.getRuntime().exec("cmd /c " + dosCommandString);
+
+        if (proc.waitFor() != 0) {
+            System.err.println("exit value = " + proc.exitValue());
+            return false;
+        }
+        return true;
+    }
 }

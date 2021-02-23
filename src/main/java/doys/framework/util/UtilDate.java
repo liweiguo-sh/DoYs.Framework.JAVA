@@ -28,7 +28,7 @@ public class UtilDate {
             dateTime = LocalDateTime.now();
         }
         if (dtFormat == null || dtFormat.equals("")) {
-            dtFormat = Const.dateFormat;
+            dtFormat = Const.datetimeFormat;
         }
         return dateTime.format(DateTimeFormatter.ofPattern(dtFormat));
     }

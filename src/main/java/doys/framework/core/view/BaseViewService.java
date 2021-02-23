@@ -311,7 +311,7 @@ public class BaseViewService extends BaseService {
         return true;
     }
 
-    public static boolean doFlow(DBFactory dbBus, String tableName, long id, SqlRowSet rsFlowButton) throws Exception {
+    public static boolean doFlow(DBFactory dbBus, String tableName, long id, SqlRowSet rsFlowButton, String userPk) throws Exception {
         String sql = "";
         String sqlAssert, sqlAction;
         //-------------------------------------------------
@@ -319,12 +319,12 @@ public class BaseViewService extends BaseService {
         sqlAssert = UtilString.KillNull(rsFlowButton.getString("assert_sql"));
         sqlAction = rsFlowButton.getString("action_do");
 
-        sql = "UPDATE " + tableName + " SET " + sqlAction + " WHERE id = " + id;
+        sql = "UPDATE " + tableName + " SET " + sqlAction + ", auditor = ?, adate = now() WHERE id = " + id;
         if (!sqlAssert.equals("")) {
             sql += " AND " + sqlAssert;
         }
 
-        int result = dbBus.exec(sql);
+        int result = dbBus.exec(sql, userPk);
         if (result == 0) {
             throw new Exception("数据状态已变更，不符合操作条件，请刷新视图页面。");
         }
