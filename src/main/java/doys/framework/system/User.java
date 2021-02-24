@@ -68,7 +68,7 @@ public class User extends BaseControllerStd {
                     return ResultErr("会话已超时，请刷新登录页面。");
                 }
                 else {
-                    if (!verifyCode.equals(verifyCodeSession)) {
+                    if (!verifyCode.equalsIgnoreCase(verifyCodeSession)) {
                         return ResultErr("验证码错误，请检查。");
                     }
                 }
