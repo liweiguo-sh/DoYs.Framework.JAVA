@@ -6,6 +6,7 @@
         <module>../apo</module>
         <module>../aprint</module>
         <module>../spc</module>
+        <module>../fdxyy</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
