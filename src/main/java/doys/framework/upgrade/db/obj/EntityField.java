@@ -104,6 +104,14 @@ public class EntityField {
         else if (type == EntityFieldType.FLOAT || type == EntityFieldType.DOUBLE) {
             sb.append(type + " (" + length + ")");
         }
+        else if (type == EntityFieldType.DECIMAL) {
+            if (length.equals("")) {
+                sb.append("decimal (10,2)");
+            }
+            else {
+                sb.append("decimal (" + length + ")");
+            }
+        }
         else if (type == EntityFieldType.DATETIME || type == EntityFieldType.DATE || type == EntityFieldType.TIME) {
             sb.append(type);
         }
@@ -126,7 +134,8 @@ public class EntityField {
                     sb.append(" DEFAULT '" + default_value + "'");
                 }
             }
-            else if (type == EntityFieldType.INT || type == EntityFieldType.LONG || type == EntityFieldType.TINYINT) {
+            else if (type == EntityFieldType.INT || type == EntityFieldType.LONG || type == EntityFieldType.TINYINT
+                || type == EntityFieldType.FLOAT || type == EntityFieldType.DOUBLE || type == EntityFieldType.DECIMAL) {
                 sb.append(" DEFAULT " + default_value);
             }
             else if (type == EntityFieldType.DATETIME || type == EntityFieldType.DATE || type == EntityFieldType.TIME) {

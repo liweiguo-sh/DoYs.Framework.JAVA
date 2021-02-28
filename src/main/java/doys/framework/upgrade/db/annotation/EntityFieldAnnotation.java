@@ -35,7 +35,7 @@ public @interface EntityFieldAnnotation {
     boolean auto() default false;
 
     /**
-     * 字段长度，仅对String类型有效
+     * 字段长度，适用于string、float、double。float、double示例：length = "10,3"
      */
     String length() default "";
 

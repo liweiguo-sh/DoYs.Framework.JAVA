@@ -12,25 +12,38 @@ public class DataTypeConvert {
 
         if (filedType == EntityFieldType.STRING) {
             columnType = "varchar";
-        } else if (filedType == EntityFieldType.INT) {
+        }
+        else if (filedType == EntityFieldType.INT) {
             columnType = "int";
-        } else if (filedType == EntityFieldType.TINYINT) {
+        }
+        else if (filedType == EntityFieldType.TINYINT) {
             columnType = "tinyint";
-        } else if (filedType == EntityFieldType.LONG) {
+        }
+        else if (filedType == EntityFieldType.LONG) {
             columnType = "bigint";
-        } else if (filedType == EntityFieldType.FLOAT) {
+        }
+        else if (filedType == EntityFieldType.FLOAT) {
             columnType = "float";
-        } else if (filedType == EntityFieldType.DOUBLE) {
+        }
+        else if (filedType == EntityFieldType.DOUBLE) {
             columnType = "double";
-        } else if (filedType == EntityFieldType.DATETIME) {
+        }
+        else if (filedType == EntityFieldType.DECIMAL) {
+            columnType = "decimal";
+        }
+        else if (filedType == EntityFieldType.DATETIME) {
             columnType = "datetime";
-        } else if (filedType == EntityFieldType.DATE) {
+        }
+        else if (filedType == EntityFieldType.DATE) {
             columnType = "date";
-        } else if (filedType == EntityFieldType.TIME) {
+        }
+        else if (filedType == EntityFieldType.TIME) {
             columnType = "time";
-        } else if (filedType == EntityFieldType.TEXT) {
+        }
+        else if (filedType == EntityFieldType.TEXT) {
             columnType = "text";
-        } else {
+        }
+        else {
             throw new Exception("unknown entity field type " + filedType + ", please complete the code.");
         }
         return columnType;

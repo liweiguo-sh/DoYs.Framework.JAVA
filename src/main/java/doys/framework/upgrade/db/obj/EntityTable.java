@@ -76,6 +76,9 @@ public class EntityTable {
                 else if (cd.type == EntityFieldType.FLOAT || cd.type == EntityFieldType.DOUBLE) {
                     sb.append(cd.type + "(" + cd.length + ")");
                 }
+                else if (cd.type == EntityFieldType.DECIMAL) {
+                    sb.append(cd.type + "(" + cd.length + ")");
+                }
                 else if (cd.type == EntityFieldType.DATETIME || cd.type == EntityFieldType.DATE || cd.type == EntityFieldType.TIME) {
                     sb.append(cd.type);
                 }

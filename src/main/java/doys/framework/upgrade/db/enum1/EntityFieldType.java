@@ -11,12 +11,10 @@ public enum EntityFieldType {
      * int
      */
     INT,
-
     /**
      * boolean, tinyint
      */
     TINYINT,
-
     /**
      * bigint
      */
@@ -26,22 +24,24 @@ public enum EntityFieldType {
      * float
      */
     FLOAT,
-
     /**
      * double
      */
     DOUBLE,
 
     /**
+     * decimal
+     */
+    DECIMAL,
+
+    /**
      * java.util.Date, java.sql.Timestamp
      */
     DATETIME,
-
     /**
      * java.sql.Date
      */
     DATE,
-
     /**
      * java.sql.Time
      */
