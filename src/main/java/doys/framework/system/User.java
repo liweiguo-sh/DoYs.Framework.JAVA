@@ -107,7 +107,7 @@ public class User extends BaseControllerStd {
         String physicalPath, virtualPath, path;
         // ------------------------------------------------
         try {
-            path = "/0/login/checkcode/";
+            path = "0/login/checkcode/";
             virtualPath = UtilYml.getTempRootVPath() + path;
             physicalPath = UtilYml.getTempRootPath() + path;
 
