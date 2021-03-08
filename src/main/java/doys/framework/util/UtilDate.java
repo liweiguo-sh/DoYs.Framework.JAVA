@@ -1,5 +1,4 @@
 package doys.framework.util;
-
 import doys.framework.a0.Const;
 
 import java.time.LocalDate;
@@ -7,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class UtilDate {
+    // -- get string from date/time/datetime ----------------------------------
     public static String getDateStr() {
         return getDateStr(null, null);
     }
@@ -23,6 +23,9 @@ public class UtilDate {
     public static String getDateTimeStr() {
         return getDateTimeStr(null, null);
     }
+    public static String getDateTimeStr(LocalDateTime dateTime) {
+        return getDateTimeStr(dateTime, null);
+    }
     public static String getDateTimeStr(LocalDateTime dateTime, String dtFormat) {
         if (dateTime == null) {
             dateTime = LocalDateTime.now();
@@ -36,6 +39,12 @@ public class UtilDate {
         return getDateTimeStr(null, Const.datetimeFormat);
     }
 
+    // -- get date/time/datetime from string ----------------------------------
+    public static LocalDateTime getDateTime(String strDateTime) {
+        return LocalDateTime.parse(strDateTime, DateTimeFormatter.ofPattern(Const.datetimeFormat));
+    }
+
+    // -- get diff between date/time/datetime ---------------------------------
     public static long getDateTimeDiff(LocalDateTime startTime) {
         return getDateTimeDiff(startTime, LocalDateTime.now());
     }
