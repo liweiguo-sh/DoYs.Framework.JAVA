@@ -12,13 +12,13 @@ public class BASE_ENTITY_CRUD_A extends BASE_ENTITY_AUTO {
 
     @EntityFieldAnnotation(length = "20")
     public String modifier;
-    @EntityFieldAnnotation(type = EntityFieldType.DATETIME, default_value = "CURRENT_TIMESTAMP")
+    @EntityFieldAnnotation(type = EntityFieldType.DATETIME)
     public Date mdate;
 
     @EntityFieldAnnotation(default_value = "0")
     public int astatus;
     @EntityFieldAnnotation(length = "20")
     public String auditor;
-    @EntityFieldAnnotation(type = EntityFieldType.DATETIME, default_value = "CURRENT_TIMESTAMP")
+    @EntityFieldAnnotation(type = EntityFieldType.DATETIME)
     public Date adate;
 }

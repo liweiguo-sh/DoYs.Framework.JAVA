@@ -12,6 +12,6 @@ public class BASE_ENTITY_CRUD extends BASE_ENTITY_AUTO {
 
     @EntityFieldAnnotation(length = "20")
     public String modifier;
-    @EntityFieldAnnotation(type = EntityFieldType.DATETIME, default_value = "CURRENT_TIMESTAMP")
+    @EntityFieldAnnotation(type = EntityFieldType.DATETIME)
     public Date mdate;
 }
