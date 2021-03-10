@@ -121,4 +121,31 @@ public class UtilDataSet {
 
         return nWidth;
     }
+
+    // -- sql -----------------------------------------------------------------
+    public static String getSelectSql(SqlRowSet rowSet, String excludeFields) throws Exception {
+        int columnCount, fieldCount;
+
+        String fieldName;
+        String[] fields = excludeFields.replaceAll(" ", "").split(",");
+        StringBuilder builder = new StringBuilder();
+
+        SqlRowSetMetaData rsmd = rowSet.getMetaData();
+        // ------------------------------------------------
+        fieldCount = fields.length;
+        columnCount = rsmd.getColumnCount();
+        for (int i = 1; i <= columnCount; i++) {
+            fieldName = rsmd.getColumnLabel(i);
+            for (int j = 0; j < fieldCount; j++) {
+                if (fieldName.equalsIgnoreCase(fields[j])) {
+                    fieldName = "";
+                    break;
+                }
+            }
+            if (fieldName.equals("")) continue;
+
+            builder.append(",").append(fieldName);
+        }
+        return builder.toString().substring(1);
+    }
 }
