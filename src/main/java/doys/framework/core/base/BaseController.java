@@ -245,11 +245,11 @@ public class BaseController extends BaseTop {
     }
     protected void err(Exception e) {
         logger.error(e.getMessage());
-        e.printStackTrace();
         if (e.getClass().equals(CommonException.class)) {
             _err(e.getMessage());
         }
         else {
+            e.printStackTrace();
             _err(e.toString());
         }
     }
