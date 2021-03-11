@@ -1,4 +1,5 @@
 package doys.framework.database;
+import doys.framework.core.ex.CommonException;
 import doys.framework.core.ex.SessionTimeoutException;
 import doys.framework.database.ds.UtilTDS;
 import doys.framework.database.dtb.DataTable;
@@ -47,7 +48,7 @@ public class DBFactory extends JdbcTemplate {
         String valueString = _getValue(sql, null, args);
         if (valueString == null) {
             if (defaultValue == NULL_NUMBER) {
-                throw new Exception("记录不存在，请检查。");
+                throw new CommonException("记录不存在，请检查。");
             }
             else {
                 return defaultValue;
@@ -69,7 +70,7 @@ public class DBFactory extends JdbcTemplate {
         String valueString = _getValue(sql, null, args);
         if (valueString == null) {
             if (defaultValue == NULL_NUMBER) {
-                throw new Exception("记录不存在，请检查。");
+                throw new CommonException("记录不存在，请检查。");
             }
             else {
                 return defaultValue;
@@ -160,7 +161,7 @@ public class DBFactory extends JdbcTemplate {
             writeSqlInfo(result, startTime, sql, args);
         } catch (DuplicateKeyException e) {
             writeSqlErr(-1, startTime, sql, args);
-            throw new Exception("录入数据冲突，关键信息重复，请检查。");
+            throw new CommonException("录入数据冲突，关键信息重复，请检查。");
         } catch (Exception e) {
             writeSqlErr(-1, startTime, sql, args);
             throw e;

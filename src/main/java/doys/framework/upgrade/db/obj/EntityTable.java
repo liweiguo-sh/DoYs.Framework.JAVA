@@ -1,4 +1,5 @@
 package doys.framework.upgrade.db.obj;
+import doys.framework.core.ex.CommonException;
 import doys.framework.upgrade.db.enum1.EntityFieldType;
 import doys.framework.upgrade.db.enum1.EntityTableMatch;
 
@@ -86,7 +87,7 @@ public class EntityTable {
                     sb.append("text");
                 }
                 else {
-                    throw new Exception("待补充代码");
+                    throw new CommonException("待补充代码");
                 }
                 if (cd.auto) {
                     autoColName = cd.name;

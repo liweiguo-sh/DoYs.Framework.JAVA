@@ -8,6 +8,7 @@
 package doys.framework.system.mock;
 import doys.framework.core.base.BaseControllerStd;
 import doys.framework.core.entity.RestResult;
+import doys.framework.core.ex.CommonException;
 import doys.framework.util.UtilDate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,7 +43,7 @@ public class MockController extends BaseControllerStd {
             sql = "SELECT * FROM " + tableName;
             rs = dbTenant.getRowSet(sql);
             if (rs.next()) {
-                throw new Exception("表中已存在数据，不允许生成模拟数据。");
+                throw new CommonException("表中已存在数据，不允许生成模拟数据。");
             }
 
             sql = "SELECT name, text, type, length FROM sys_field WHERE table_pk = ? AND flag_identity = 0";

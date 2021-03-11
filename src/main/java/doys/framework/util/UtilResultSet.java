@@ -1,6 +1,7 @@
 package doys.framework.util;
 
 import doys.framework.a0.Const;
+import doys.framework.core.ex.CommonException;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -78,7 +79,7 @@ public class UtilResultSet {
             fieldType = "boolean";
         }
         else {
-            throw new Exception("com.xznext.Const.getFileType, Unknown dataType " + dataType);
+            throw new CommonException("com.xznext.Const.getFileType, Unknown dataType " + dataType);
         }
         return fieldType;
     }

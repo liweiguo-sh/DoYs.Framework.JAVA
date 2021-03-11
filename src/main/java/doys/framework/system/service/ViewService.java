@@ -1,6 +1,7 @@
 package doys.framework.system.service;
 import doys.framework.aid.DBSchema;
 import doys.framework.core.base.BaseService;
+import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
 import doys.framework.database.ds.UtilTDS;
 import doys.framework.database.dtb.DataTable;
@@ -40,12 +41,12 @@ public class ViewService extends BaseService {
             }
         }
         else {
-            throw new Exception("视图 " + viewPk + " 不存在。");
+            throw new CommonException("视图 " + viewPk + " 不存在。");
         }
 
         DBSchema dbs = new DBSchema(dbSys);
         if (!dbs.refreshDBStruct(databasePk, tableName)) {
-            throw new Exception("刷新基础表失败，请检查。");
+            throw new CommonException("刷新基础表失败，请检查。");
         }
 
         // -- 2.表ST_FIELD字段信息更新到表ST_VIEW_FIELD --------
@@ -188,7 +189,7 @@ public class ViewService extends BaseService {
         // -- 5.提交保存 ----------------------------------
         nResult = dtbView_Field.Update(dbSys, "sys_view_field", "id");
         if (nResult < 0) {
-            throw new Exception("意外错误。");
+            throw new CommonException("意外错误。");
         }
     }
 }

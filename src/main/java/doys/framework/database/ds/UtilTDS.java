@@ -9,6 +9,7 @@
 package doys.framework.database.ds;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import doys.framework.core.ex.CommonException;
 import doys.framework.core.ex.SessionTimeoutException;
 import doys.framework.database.DBFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +93,7 @@ public class UtilTDS {
             _password = rs.getString("password");
         }
         else {
-            throw new Exception("未找到租户(tenantId = " + tenantId + ")数据库，请检查。");
+            throw new CommonException("未找到租户(tenantId = " + tenantId + ")数据库，请检查。");
         }
         // ------------------------------------------------
         HikariConfig hikariConfig = new HikariConfig();

@@ -7,6 +7,7 @@
  * 解析数据库字段信息到表 ST_TALBE/ST_FIELD/ST_INDEX中, 只追加, 不删除
  */
 package doys.framework.aid;
+import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
 import doys.framework.database.ds.UtilTDS;
 import doys.framework.database.dtb.DataTable;
@@ -38,7 +39,7 @@ public class DBSchema {
             }
         }
         else {
-            throw new Exception("没有找到逻辑数据库名称为 " + databasePk + " 的记录, 请检查.");
+            throw new CommonException("没有找到逻辑数据库名称为 " + databasePk + " 的记录, 请检查.");
         }
 
         if (databaseType.equalsIgnoreCase("MySQL")) {
@@ -47,7 +48,7 @@ public class DBSchema {
             }
         }
         else {
-            throw new Exception("框架暂不支持 " + databaseType + " 数据库。");
+            throw new CommonException("框架暂不支持 " + databaseType + " 数据库。");
         }
         return true;
     }
@@ -105,7 +106,7 @@ public class DBSchema {
             }
             nResult = dtb.Update(dbSys, "sys_table", "pk");
             if (nResult < 0) {
-                throw new Exception("refreshDBStruct_MySQL_Table 遇到错误，请检查。");
+                throw new CommonException("refreshDBStruct_MySQL_Table 遇到错误，请检查。");
             }
             // -- 3. 刷新数据表字段 ------------------------------
             if (refreshDBStruct_MySQL_Fields(databaseType, databaseName, tableName) == false) {
@@ -219,7 +220,7 @@ public class DBSchema {
             }
             nResult = dtb.Update(dbSys, "sys_field", "pk");
             if (nResult < 0) {
-                throw new Exception("刷新数据库字段过程中遇到意外错误.");
+                throw new CommonException("刷新数据库字段过程中遇到意外错误.");
             }
         } catch (Exception e) {
             throw e;

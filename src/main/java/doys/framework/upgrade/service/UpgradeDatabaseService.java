@@ -1,6 +1,7 @@
 package doys.framework.upgrade.service;
 import doys.framework.common.io.ScanFile;
 import doys.framework.core.base.BaseService;
+import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
 import doys.framework.database.ds.UtilTDS;
 import doys.framework.database.ds.UtilTDS2;
@@ -378,12 +379,12 @@ public class UpgradeDatabaseService extends BaseService {
             if ((columnType.equals("datetime") || columnType.equals("date") || columnType.equals("time"))
                 && (entityField.type != EntityFieldType.DATETIME && entityField.type != EntityFieldType.DATE && entityField.type != EntityFieldType.TIME)) {
                 // -- 2.1 日期转为其它类型 --
-                throw new Exception("不允许从类型 " + columnType + " 转换为类型 " + entityField.type);
+                throw new CommonException("不允许从类型 " + columnType + " 转换为类型 " + entityField.type);
             }
             if ((entityField.type == EntityFieldType.DATETIME || entityField.type == EntityFieldType.DATE || entityField.type == EntityFieldType.TIME)
                 && (!columnType.equals("datetime") && !columnType.equals("date") && !columnType.equals("time"))) {
                 // -- 2.2 其它转为日期类型 --
-                throw new Exception("不允许从类型 " + columnType + " 转换为类型 " + entityField.type);
+                throw new CommonException("不允许从类型 " + columnType + " 转换为类型 " + entityField.type);
             }
 
             // todo: 有数据情况尚未验证，存在数据，转换是否成功或损失精度？长度等等？

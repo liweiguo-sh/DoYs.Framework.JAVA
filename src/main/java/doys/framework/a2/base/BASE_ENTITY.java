@@ -1,4 +1,5 @@
 package doys.framework.a2.base;
+import doys.framework.core.ex.CommonException;
 import doys.framework.core.ex.UnImplementException;
 import doys.framework.database.DBFactory;
 
@@ -87,7 +88,7 @@ public class BASE_ENTITY {
         return this.id;
     }
     protected long getId() throws Exception {
-        throw new Exception("id field does not exist");
+        throw new CommonException("id field does not exist");
     }
 
     public long update() throws Exception {

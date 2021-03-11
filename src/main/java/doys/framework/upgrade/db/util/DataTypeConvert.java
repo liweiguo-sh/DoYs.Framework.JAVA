@@ -1,5 +1,6 @@
 package doys.framework.upgrade.db.util;
 
+import doys.framework.core.ex.CommonException;
 import doys.framework.upgrade.db.enum1.EntityFieldType;
 public class DataTypeConvert {
     /**
@@ -44,7 +45,7 @@ public class DataTypeConvert {
             columnType = "text";
         }
         else {
-            throw new Exception("unknown entity field type " + filedType + ", please complete the code.");
+            throw new CommonException("unknown entity field type " + filedType + ", please complete the code.");
         }
         return columnType;
     }

@@ -1,4 +1,6 @@
 package doys.framework.util;
+import doys.framework.core.ex.CommonException;
+
 import java.io.*;
 import java.util.ArrayList;
 
@@ -170,7 +172,7 @@ public class UtilFile {
             else {
                 blResult = file.mkdir();
                 if (blResult == false) {
-                    throw new Exception("路径创建失败。" + strPath);
+                    throw new CommonException("路径创建失败。" + strPath);
                 }
                 nIndex = strTarget.indexOf("/", nIndex + 1);
             }

@@ -1,5 +1,6 @@
 package doys.framework.util;
 import doys.framework.a0.Const;
+import doys.framework.core.ex.CommonException;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 public class UtilDataSet {
@@ -80,7 +81,7 @@ public class UtilDataSet {
             fieldType = "boolean";
         }
         else {
-            throw new Exception("com.xznext.Const.getFileType, Unknown dataType " + dataType);
+            throw new CommonException("com.xznext.Const.getFileType, Unknown dataType " + dataType);
         }
         return fieldType;
     }

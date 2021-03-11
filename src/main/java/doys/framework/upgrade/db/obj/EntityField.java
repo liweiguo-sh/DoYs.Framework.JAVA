@@ -1,5 +1,6 @@
 package doys.framework.upgrade.db.obj;
 
+import doys.framework.core.ex.CommonException;
 import doys.framework.upgrade.db.enum1.EntityFieldType;
 import doys.framework.upgrade.db.util.DataTypeConvert;
 
@@ -76,7 +77,7 @@ public class EntityField {
             columnType = EntityFieldType.DATE;
         }
         else {
-            throw new Exception("unknown columnType: " + type + ", please check it.");
+            throw new CommonException("unknown columnType: " + type + ", please check it.");
         }
 
         return columnType;
@@ -119,7 +120,7 @@ public class EntityField {
             sb.append("text");
         }
         else {
-            throw new Exception("debug here: getAddColumnSql 1");
+            throw new CommonException("debug here: getAddColumnSql 1");
         }
 
         if (not_null || auto) {
@@ -146,7 +147,7 @@ public class EntityField {
                 // do nothing
             }
             else {
-                throw new Exception("debug here: getAddColumnSql 2");
+                throw new CommonException("debug here: getAddColumnSql 2");
             }
         }
 

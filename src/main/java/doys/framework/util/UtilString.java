@@ -1,5 +1,6 @@
 package doys.framework.util;
 
+import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
 import doys.framework.database.ds.TenantDataSource;
 import doys.framework.database.ds.UtilTDS;
@@ -92,7 +93,7 @@ public class UtilString {
                 chArr[i] = '0';
                 if (i == 0) {
                     // -- 累加越界, 超过最大范围 --
-                    throw new Exception("累加越界, 超过最大值.");
+                    throw new CommonException("累加越界, 超过最大值.");
                 }
             }
             else {
@@ -149,7 +150,7 @@ public class UtilString {
 
                     rs = db.getRowSet(sql, scope, snKey);
                     if (!rs.next()) {
-                        throw new Exception("创建序列 " + snKey + " 遇到意外错误，请检查。");
+                        throw new CommonException("创建序列 " + snKey + " 遇到意外错误，请检查。");
                     }
                 }
                 else {
@@ -198,7 +199,7 @@ public class UtilString {
 
         // -- 4. 检查是否越界 -----------------------------------
         if (String.valueOf(nNewValue).length() > nLen) {
-            throw new Exception("序列号越界, 请检查.");
+            throw new CommonException("序列号越界, 请检查.");
         }
         return strNewSN;
     }

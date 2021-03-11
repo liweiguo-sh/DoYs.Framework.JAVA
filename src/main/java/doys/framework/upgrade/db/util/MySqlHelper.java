@@ -1,4 +1,5 @@
 package doys.framework.upgrade.db.util;
+import doys.framework.core.ex.CommonException;
 import doys.framework.core.ex.UnImplementException;
 import doys.framework.database.DBFactory;
 import doys.framework.upgrade.db.enum1.EntityIndexType;
@@ -81,7 +82,7 @@ public class MySqlHelper {
         // -- 2. 物理删除 --
         int nIdx = columnComment.indexOf(prefixMock);
         if (nIdx < 8) {
-            throw new Exception("注释不符合框架规范，已被人为改动，请检查。");
+            throw new CommonException("注释不符合框架规范，已被人为改动，请检查。");
         }
         String dtUpgradeStr = columnComment.substring(0, nIdx);
         LocalDate dtUpgrade = LocalDate.parse(dtUpgradeStr, formatter);
@@ -146,7 +147,7 @@ public class MySqlHelper {
             sql = "ALTER TABLE " + tableName + " ADD INDEX " + indexName + "(" + indexFields + ")";
         }
         else {
-            throw new Exception("unknown index type: " + indexType);
+            throw new CommonException("unknown index type: " + indexType);
         }
 
         System.out.println(sql);

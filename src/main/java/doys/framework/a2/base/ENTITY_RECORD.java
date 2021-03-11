@@ -1,5 +1,6 @@
 package doys.framework.a2.base;
 
+import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
 
 import java.util.HashMap;
@@ -42,7 +43,7 @@ public class ENTITY_RECORD {
             return id;
         }
         else {
-            throw new Exception("记录尚未保存。");
+            throw new CommonException("记录尚未保存。");
         }
     }
 

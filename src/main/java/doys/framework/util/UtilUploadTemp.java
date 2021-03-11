@@ -6,6 +6,7 @@
  * 临时文件上传类
  *****************************************************************************/
 package doys.framework.util;
+import doys.framework.core.ex.CommonException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -35,7 +36,7 @@ public class UtilUploadTemp {
         filePath = new File(filepath);
         if (!filePath.exists()) {
             if (!filePath.mkdirs()) {
-                throw new Exception("创建文件目录失败，请检查。");
+                throw new CommonException("创建文件目录失败，请检查。");
             }
         }
         pathname = filepath + filename;

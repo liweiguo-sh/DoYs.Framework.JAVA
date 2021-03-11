@@ -9,6 +9,7 @@
  */
 package doys.framework.database.dtb;
 import doys.framework.a0.Const;
+import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
 import doys.framework.util.UtilDataSet;
 import doys.framework.util.UtilString;
@@ -499,7 +500,7 @@ public class DataTable {
         if (_nRowCount - 1 < rowIndex || rowIndex < 0) {
             _arrRows[rowIndex][0] = "";
             try {
-                throw new Exception("下标越界.");
+                throw new CommonException("下标越界.");
             } catch (Exception e) {
                 return;
             }

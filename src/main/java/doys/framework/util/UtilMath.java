@@ -1,4 +1,6 @@
 package doys.framework.util;
+import doys.framework.core.ex.CommonException;
+
 import java.math.BigDecimal;
 public class UtilMath {
     // -- math 四则运算 -----------------------------------------------------------
@@ -20,7 +22,7 @@ public class UtilMath {
             numResult = new BigDecimal(strNum1).divide(new BigDecimal(strNum2));
         }
         else {
-            throw new Exception("未实现的运算符 " + symbol);
+            throw new CommonException("未实现的运算符 " + symbol);
         }
         // ------------------------------------------------
         strResult = numResult.toString();

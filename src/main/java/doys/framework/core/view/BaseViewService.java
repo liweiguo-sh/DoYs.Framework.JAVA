@@ -8,6 +8,7 @@
 package doys.framework.core.view;
 import doys.framework.a0.Const;
 import doys.framework.core.base.BaseService;
+import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
 import doys.framework.util.UtilDataSet;
 import doys.framework.util.UtilString;
@@ -298,7 +299,7 @@ public class BaseViewService extends BaseService {
 
         result = dbBus.exec(sql);
         if (result != 1) {
-            throw new Exception("当前记录已不存在，请刷新视图页面。");
+            throw new CommonException("当前记录已不存在，请刷新视图页面。");
         }
         return true;
     }
@@ -306,7 +307,7 @@ public class BaseViewService extends BaseService {
         String sql = "DELETE FROM " + tableName + " WHERE id = " + id;
         int result = dbBus.exec(sql);
         if (result == 0) {
-            throw new Exception("当前记录已不存在，请刷新视图页面。");
+            throw new CommonException("当前记录已不存在，请刷新视图页面。");
         }
         return true;
     }
@@ -326,7 +327,7 @@ public class BaseViewService extends BaseService {
 
         int result = dbBus.exec(sql, userPk);
         if (result == 0) {
-            throw new Exception("数据状态已变更，不符合操作条件，请刷新视图页面。");
+            throw new CommonException("数据状态已变更，不符合操作条件，请刷新视图页面。");
         }
         return true;
     }

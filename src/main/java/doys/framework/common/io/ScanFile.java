@@ -1,5 +1,6 @@
 package doys.framework.common.io;
 import doys.framework.common.entity.EntityFile;
+import doys.framework.core.ex.CommonException;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ public class ScanFile {
     public static ArrayList<EntityFile> scan(String folderPath, String extNames, boolean includeSubDirectory) throws Exception {
         File fileFolder = new File(folderPath);
         if (!fileFolder.exists()) {
-            throw new Exception("the directory " + folderPath + " does not exist");
+            throw new CommonException("the directory " + folderPath + " does not exist");
         }
         if (!fileFolder.isDirectory()) {
             throw new Exception(folderPath + " is not a file directory");
@@ -43,7 +44,7 @@ public class ScanFile {
                 entityFiles.addAll(scanFolder(new File(file.getPath()), extNames, includeSubDirectory));
             }
             else {
-                throw new Exception("debug here ScanFile.scanFolder()");
+                throw new CommonException("debug here ScanFile.scanFolder()");
             }
         }
         // -- 返回结果集 --

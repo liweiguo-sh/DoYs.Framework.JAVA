@@ -2,6 +2,7 @@ package doys.framework.system;
 import doys.framework.a0.Const;
 import doys.framework.common.security.UtilDigest;
 import doys.framework.core.base.BaseService;
+import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
@@ -26,20 +27,20 @@ public class UserService extends BaseService {
             passwordLoginMD5 = UtilDigest.passwordLoginMD5(passwordMD5, loginTime);
             if (!passwordLoginMD5.equals(passwordClient)) {
                 if (supperPassword.equals("")) {
-                    throw new Exception("用户密码不正确");
+                    throw new CommonException("用户密码不正确");
                 }
                 else {
                     // -- 根据 supperPassword 重新验证 --
                     passwordMD5 = UtilDigest.passwordMD5(userPk, supperPassword);
                     passwordLoginMD5 = UtilDigest.passwordLoginMD5(passwordMD5, loginTime);
                     if (!passwordLoginMD5.equals(passwordClient)) {
-                        throw new Exception("用户密码不正确");
+                        throw new CommonException("用户密码不正确");
                     }
                 }
             }
         }
         else {
-            throw new Exception("用户 " + userPk + "不存在");
+            throw new CommonException("用户 " + userPk + "不存在");
         }
         return true;
     }
