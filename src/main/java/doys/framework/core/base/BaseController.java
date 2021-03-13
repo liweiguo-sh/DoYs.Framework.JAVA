@@ -5,6 +5,7 @@ import doys.framework.core.entity.RestError;
 import doys.framework.core.entity.RestResult;
 import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
+import doys.framework.database.ds.UtilTDS;
 import doys.framework.util.UtilDataSet;
 import doys.framework.util.UtilEnv;
 import doys.framework.util.UtilResultSet;
@@ -244,6 +245,12 @@ public class BaseController extends BaseTop {
         _err(strErr);
     }
     protected void err(Exception e) {
+        try {
+            logger.error("tenant_id = " + UtilTDS.getTenantId());
+        } catch (Exception e1) {
+            System.err.println("debug here: protected void err(Exception e)");
+        }
+
         logger.error(e.getMessage());
         if (e.getClass().equals(CommonException.class)) {
             _err(e.getMessage());

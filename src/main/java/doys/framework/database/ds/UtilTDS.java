@@ -58,7 +58,7 @@ public class UtilTDS {
         String dataSourceName = getDataSourceName(tenantId);
 
         if (!mapDS.containsKey(dataSourceName)) {
-            createDataSource(dataSourceName);
+            createDataSource(dataSourceName, tenantId);
 
             if (!mapDS.containsKey(dataSourceName)) {
                 System.err.println("Failed to create dynamic data source, please check.");
@@ -71,9 +71,7 @@ public class UtilTDS {
     private static String getDataSourceName(int tenantId) {
         return "Hikari-dds-" + tenantId;
     }
-    private static void createDataSource(String dataSourceName) throws Exception {
-        int tenantId = UtilTDS.getTenantId();
-
+    private static void createDataSource(String dataSourceName, int tenantId) throws Exception {
         String sql, dbname, _username, _password;
         String urlDynamic = url;
 

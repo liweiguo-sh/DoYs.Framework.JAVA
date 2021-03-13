@@ -2,6 +2,7 @@ package doys.framework.util;
 import doys.framework.core.ex.CommonException;
 
 import java.io.*;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 
 public class UtilFile {
@@ -207,6 +208,15 @@ public class UtilFile {
         }
     }
 
+    public static String Combine(String path, String filename) {
+        if (path.endsWith("/") || path.endsWith("\\")) {
+            return path + filename;
+        }
+        else {
+            return path + "/" + filename;
+        }
+    }
+
     // -- write file ----------------------------------------------------------
     public static void writeFile(String path, ArrayList<String> list) throws Exception {
         writeFile(path, list, "\r\n");
@@ -224,5 +234,39 @@ public class UtilFile {
             osw.write(list.get(nRows - 1));
         }
         osw.flush();
+    }
+
+    // -- copy\delete file -----------------------------------------------------------
+    public static boolean copyFile(String fileSource, String fildDestination) throws Exception {
+        FileInputStream fisSrc;
+        FileOutputStream fosDst;
+        FileChannel srcChannel, dstChannel;
+        // ------------------------------------------------
+        if (!(new File(fileSource).exists())) return false;
+
+        checkPath(new File(fildDestination).getParent(), true);
+
+        fisSrc = new FileInputStream(fileSource);
+        fosDst = new FileOutputStream(fildDestination);
+
+        srcChannel = fisSrc.getChannel();
+        dstChannel = fosDst.getChannel();
+
+        dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
+        // ------------------------------------------------
+        srcChannel.close();
+        dstChannel.close();
+
+        fisSrc.close();
+        fosDst.close();
+        // ------------------------------------------------
+        return true;
+    }
+    public static boolean deleteFile(String fileDelete) throws Exception {
+        File file = new File(fileDelete);
+        if (file.exists()) {
+            return file.delete();
+        }
+        return false;
     }
 }
