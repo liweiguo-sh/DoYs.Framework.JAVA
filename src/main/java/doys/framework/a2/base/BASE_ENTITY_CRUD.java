@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Copyright (C), 2021, doys-next.com
+ * @author David.Li
+ * @version 1.0
+ * @create_date 2021-03-30
+ * 基础实体类(CRUD)
+ *****************************************************************************/
 package doys.framework.a2.base;
 import doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
 import doys.framework.upgrade.db.enum1.EntityFieldType;
