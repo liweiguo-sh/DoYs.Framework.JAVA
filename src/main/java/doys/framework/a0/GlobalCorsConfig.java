@@ -18,7 +18,6 @@ public class GlobalCorsConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
         // -- 1.1 允许任何域名使用 --
-        //corsConfiguration.addAllowedOrigin("*");
         corsConfiguration.addAllowedOrigin("*");
         // -- 1.2 允许跨域携带cookie --
         corsConfiguration.setAllowCredentials(true);
