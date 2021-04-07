@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
+import java.text.DecimalFormat;
 
 public class UtilExcel {
     public static String[][] excelToArray(String fileExcel) throws Exception {
@@ -50,6 +51,7 @@ public class UtilExcel {
         data = new String[rowCount + 1][columnCount];
 
         // -- 3. fill data --------------------------------
+        DecimalFormat df = new DecimalFormat("0");
         for (int iRow = 0; iRow <= rowCount; iRow++) {
             row = sheet.getRow(iRow);
             for (int iCol = 0; iCol < columnCount; iCol++) {
@@ -61,7 +63,7 @@ public class UtilExcel {
                 // ----------------------------------------
                 cellType = cell.getCellType();
                 if (cellType == CellType.NUMERIC) {
-                    cellValue = String.valueOf(cell.getNumericCellValue());
+                    cellValue = df.format(cell.getNumericCellValue());
                     if (cellValue.endsWith(".0")) {
                         cellValue = cellValue.substring(0, cellValue.length() - 2);
                     }
