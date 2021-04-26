@@ -173,6 +173,9 @@ public class UpgradeDatabaseService extends BaseService {
             if (entityField.type == EntityFieldType.STRING) {
                 entityField.length = "50";
             }
+            else if (entityField.type == EntityFieldType.DECIMAL) {
+                entityField.length = "10,2";
+            }
         }
 
         // -- 9. end --

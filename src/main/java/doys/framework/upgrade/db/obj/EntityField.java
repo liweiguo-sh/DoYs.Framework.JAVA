@@ -17,6 +17,11 @@ public class EntityField {
      * 是否自增量字段
      */
     public boolean auto = false;
+    /**
+     * 长度
+     * 字符型默认50
+     * decimal默认10,2
+     */
     public String length = "";
     /**
      * 不允许为空

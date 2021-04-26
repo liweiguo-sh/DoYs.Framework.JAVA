@@ -53,66 +53,66 @@ public class EntityTable {
         try {
             sb.append("CREATE TABLE `" + name + "` (");
             // -- 1. 字段部分 --
-            for (EntityField cd : entityFields) {
+            for (EntityField field : entityFields) {
                 if (isFirstField) {
                     isFirstField = false;
                 }
                 else {
                     sb.append(",");
                 }
-                sb.append("\n\t`" + cd.name + "` ");
+                sb.append("\n\t`" + field.name + "` ");
 
-                if (cd.type == EntityFieldType.INT) {
-                    sb.append(cd.type);
+                if (field.type == EntityFieldType.INT) {
+                    sb.append(field.type);
                 }
-                else if (cd.type == EntityFieldType.TINYINT) {
+                else if (field.type == EntityFieldType.TINYINT) {
                     sb.append("tinyint");
                 }
-                else if (cd.type == EntityFieldType.LONG) {
+                else if (field.type == EntityFieldType.LONG) {
                     sb.append("bigint");
                 }
-                else if (cd.type == EntityFieldType.STRING) {
-                    sb.append("varchar(" + cd.length + ")");
+                else if (field.type == EntityFieldType.STRING) {
+                    sb.append("varchar(" + field.length + ")");
                 }
-                else if (cd.type == EntityFieldType.FLOAT || cd.type == EntityFieldType.DOUBLE) {
-                    sb.append(cd.type + "(" + cd.length + ")");
+                else if (field.type == EntityFieldType.FLOAT || field.type == EntityFieldType.DOUBLE) {
+                    sb.append(field.type + "(" + field.length + ")");
                 }
-                else if (cd.type == EntityFieldType.DECIMAL) {
-                    sb.append(cd.type + "(" + cd.length + ")");
+                else if (field.type == EntityFieldType.DECIMAL) {
+                    sb.append(field.type + "(" + field.length + ")");
                 }
-                else if (cd.type == EntityFieldType.DATETIME || cd.type == EntityFieldType.DATE || cd.type == EntityFieldType.TIME) {
-                    sb.append(cd.type);
+                else if (field.type == EntityFieldType.DATETIME || field.type == EntityFieldType.DATE || field.type == EntityFieldType.TIME) {
+                    sb.append(field.type);
                 }
-                else if (cd.type == EntityFieldType.TEXT) {
+                else if (field.type == EntityFieldType.TEXT) {
                     sb.append("text");
                 }
                 else {
                     throw new CommonException("待补充代码");
                 }
-                if (cd.auto) {
-                    autoColName = cd.name;
+                if (field.auto) {
+                    autoColName = field.name;
                     sb.append(" AUTO_INCREMENT");
                 }
-                if (cd.auto || cd.not_null) {
+                if (field.auto || field.not_null) {
                     sb.append(" NOT NULL");
                 }
-                if (cd.default_value != null && !cd.default_value.equals("")) {
-                    if (cd.type == EntityFieldType.INT || cd.type == EntityFieldType.TINYINT || cd.type == EntityFieldType.LONG) {
-                        sb.append(" DEFAULT " + cd.default_value);
+                if (field.default_value != null && !field.default_value.equals("")) {
+                    if (field.type == EntityFieldType.INT || field.type == EntityFieldType.TINYINT || field.type == EntityFieldType.LONG) {
+                        sb.append(" DEFAULT " + field.default_value);
                     }
-                    else if (cd.type == EntityFieldType.DATETIME || cd.type == EntityFieldType.DATE || cd.type == EntityFieldType.TIME) {
-                        sb.append(" DEFAULT " + cd.default_value);
+                    else if (field.type == EntityFieldType.DATETIME || field.type == EntityFieldType.DATE || field.type == EntityFieldType.TIME) {
+                        sb.append(" DEFAULT " + field.default_value);
                     }
                     else {
-                        if (cd.default_value.equals("''")) {
+                        if (field.default_value.equals("''")) {
                             sb.append(" DEFAULT ''");
                         }
                         else {
-                            sb.append(" DEFAULT '" + cd.default_value + "'");
+                            sb.append(" DEFAULT '" + field.default_value + "'");
                         }
                     }
                 }
-                sb.append(" COMMENT '" + (cd.text.equals("") ? cd.name : cd.text) + "|" + cd.comment + "'");
+                sb.append(" COMMENT '" + (field.text.equals("") ? field.name : field.text) + "|" + field.comment + "'");
             }
 
             // -- 2. 索引部分 --
