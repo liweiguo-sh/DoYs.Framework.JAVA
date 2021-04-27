@@ -3,6 +3,9 @@ import doys.framework.a0.Const;
 import doys.framework.core.ex.CommonException;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 public class UtilDataSet {
     public static String getRowSetString(SqlRowSet rowSet) throws Exception {
         return getRsFieldString(rowSet) + Const.CHAR7 + getRsDataString(rowSet);
@@ -148,5 +151,34 @@ public class UtilDataSet {
             builder.append(",").append(fieldName);
         }
         return builder.toString().substring(1);
+    }
+
+    // -- convertTo -----------------------------------------------------------
+    public static ArrayList sqlRowSetToArrayList(SqlRowSet rsData) throws Exception {
+        int columnCount;
+
+        String columnName, dataType, columnType;
+
+        ArrayList<HashMap<String, Object>> list = new ArrayList<>();
+        SqlRowSetMetaData rsmd = rsData.getMetaData();
+        // ------------------------------------------------
+        columnCount = rsmd.getColumnCount();
+        while (rsData.next()) {
+            HashMap<String, Object> map = new HashMap<>();
+            for (int i = 1; i <= columnCount; i++) {
+                columnName = rsmd.getColumnLabel(i).toLowerCase();
+                dataType = rsmd.getColumnTypeName(i);
+                columnType = UtilDataSet.getFieldType(dataType);
+                if (columnType.equals("string")) {
+                    map.put(columnName, rsData.getString(i));
+                }
+                else {
+                    map.put(columnName, rsData.getString(i));
+                }
+            }
+            list.add(map);
+        }
+        // ------------------------------------------------
+        return list;
     }
 }
