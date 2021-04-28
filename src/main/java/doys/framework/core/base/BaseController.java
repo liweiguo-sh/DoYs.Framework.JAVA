@@ -4,6 +4,7 @@ import doys.framework.a0.Const;
 import doys.framework.core.entity.RestError;
 import doys.framework.core.entity.RestResult;
 import doys.framework.core.ex.CommonException;
+import doys.framework.core.ex.UnImplementException;
 import doys.framework.database.DBFactory;
 import doys.framework.database.ds.UtilTDS;
 import doys.framework.util.UtilDataSet;
@@ -252,7 +253,9 @@ public class BaseController extends BaseTop {
         }
 
         logger.error(e.getMessage());
-        if (e.getClass().equals(CommonException.class)) {
+
+        Class<? extends Exception> clz = e.getClass();
+        if (clz.equals(CommonException.class) || clz.equals(UnImplementException.class)) {
             _err(e.getMessage());
         }
         else {
