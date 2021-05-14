@@ -23,7 +23,7 @@ public class BaseViewService extends BaseService {
         return dbSys.getRowSet(sql, viewPk);
     }
     public static SqlRowSet getViewField(DBFactory dbSys, String viewPk) throws Exception {
-        String sql = "SELECT table_pk, name, text, fixed, flag_nullable, align, width, data_source_type, data_source, sequence "
+        String sql = "SELECT table_pk, name, text, fixed, flag_nullable, align, width, datatype, data_source_type, data_source, sequence "
             + "FROM sys_view_field "
             + "WHERE view_pk = ? AND sequence <> 0 "
             + "ORDER BY sequence";

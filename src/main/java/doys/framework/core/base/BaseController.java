@@ -4,6 +4,7 @@ import doys.framework.a0.Const;
 import doys.framework.core.entity.RestError;
 import doys.framework.core.entity.RestResult;
 import doys.framework.core.ex.CommonException;
+import doys.framework.core.ex.SessionTimeoutException;
 import doys.framework.core.ex.UnImplementException;
 import doys.framework.database.DBFactory;
 import doys.framework.database.ds.UtilTDS;
@@ -23,9 +24,13 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 
 public class BaseController extends BaseTop {
+    private static HashMap<String, HashMap<String, Object>> mapToken = new HashMap<>();
+
+    private ThreadLocal<HashMap<String, String>> tlHashMapHead = new ThreadLocal<>();
     private ThreadLocal<HashMap<String, Object>> tlHashMapIn = new ThreadLocal<>();
     private ThreadLocal<RestResult> tlRestResult = new ThreadLocal<>();
     private ThreadLocal<RestError> tlRestError = new ThreadLocal<>();
@@ -41,6 +46,26 @@ public class BaseController extends BaseTop {
         return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
     }
 
+    private HashMap<String, String> getHashMapHead() {
+        HashMap<String, String> hashMapHead = tlHashMapHead.get();
+        if (hashMapHead == null) {
+            String key, value;
+            try {
+                hashMapHead = new HashMap<>();
+                Enumeration headerNames = request().getHeaderNames();
+                while (headerNames.hasMoreElements()) {
+                    key = (String) headerNames.nextElement();
+                    value = request().getHeader(key);
+                    hashMapHead.put(key.toLowerCase(), value);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.error("读取解析Request.Heads数据遇到未知错误，请检查。");
+            }
+            tlHashMapHead.set(hashMapHead);
+        }
+        return hashMapHead;
+    }
     private HashMap<String, Object> getHashMapIn() {
         HashMap<String, Object> hashMapIn = tlHashMapIn.get();
         if (hashMapIn == null) {
@@ -52,14 +77,28 @@ public class BaseController extends BaseTop {
                 while ((strLine = bufReader.readLine()) != null) {
                     builder.append(strLine);
                 }
-
                 jsonString = builder.toString();
                 if (debug) {
                     logger.info("request => " + jsonString);
                 }
 
-                ObjectMapper mapper = new ObjectMapper();
-                hashMapIn = mapper.readValue(jsonString, HashMap.class);
+                // -- 1. 读取JSON数据 --
+                if (!jsonString.equals("")) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    hashMapIn = mapper.readValue(jsonString, HashMap.class);
+                }
+                else {
+                    hashMapIn = new HashMap<>();
+                }
+
+                // -- 2. 读取GET数据 --
+                String paraName = "", paraValue = "";
+                Enumeration<String> eu = request().getParameterNames();
+                while (eu.hasMoreElements()) {
+                    paraName = eu.nextElement();
+                    paraValue = request().getParameter(paraName);
+                    hashMapIn.put(paraName, paraValue);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 logger.error("读取解析Request数据遇到未知错误，请检查。");
@@ -91,6 +130,19 @@ public class BaseController extends BaseTop {
     }
 
     // -- public common method ------------------------------------------------
+    protected String getHead(String headName) {
+        return getHead(headName, "");
+    }
+    protected String getHead(String headName, String defaultValue) {
+        HashMap<String, String> map = this.getHashMapHead();
+
+        headName = headName.toLowerCase();
+        if (map.containsKey(headName)) {
+            return map.get(headName);
+        }
+        return defaultValue;
+    }
+
     protected String ssValue(String attrName) {
         return _getSessionValue(attrName, "").toString();
     }
@@ -138,7 +190,10 @@ public class BaseController extends BaseTop {
     }
     private int _inInt(String parameterName, int defaultValue) {
         Object parameterValue = _inObject(parameterName, defaultValue);
-        if (parameterValue instanceof Double) {
+        if (parameterValue instanceof Boolean) {
+            return ((Boolean) parameterValue) ? 1 : 0;
+        }
+        else if (parameterValue instanceof Double) {
             return ((Double) parameterValue).intValue();
         }
         else if (parameterValue instanceof Integer) {
@@ -232,7 +287,7 @@ public class BaseController extends BaseTop {
             _ok(key, "");
         }
         else {
-            key = key + Const.CHAR1 + "json";
+            //key = key + Const.CHAR1 + "json"; // -- 默认是json格式 --
             String listString = mapper.writeValueAsString(obj);
             _ok(key, listString);
         }
@@ -255,7 +310,8 @@ public class BaseController extends BaseTop {
         logger.error(e.getMessage());
 
         Class<? extends Exception> clz = e.getClass();
-        if (clz.equals(CommonException.class) || clz.equals(UnImplementException.class)) {
+        if (clz.equals(CommonException.class) || clz.equals(UnImplementException.class)
+            || clz.equals(SessionTimeoutException.class)) {
             _err(e.getMessage());
         }
         else {
@@ -312,5 +368,33 @@ public class BaseController extends BaseTop {
         for (String key : map.keySet()) {
             logger.info(String.format("%-15s", key) + "=>  " + map.get(key).toString());
         }
+    }
+
+    // -- Token ---------------------------------------------------------------
+    protected HashMap<String, Object> getToken(String token) {
+        return mapToken.getOrDefault(token, null);
+    }
+    private Object getTokenObject(String token, String key) {
+        HashMap<String, Object> map = getToken(token);
+        if (map == null || !map.containsKey(key)) {
+            return null;
+        }
+        return map.get(key);
+    }
+    protected void setTokenValue(String token, String key, Object object) {
+        HashMap<String, Object> map = getToken(token);
+        if (map == null) {
+            map = new HashMap<>();
+            mapToken.put(token, map);
+        }
+        map.put(key, object);
+    }
+
+    protected int getTokenInt(String token, String key, int defaultValue) {
+        Object value = getTokenObject(token, key);
+        if (value == null) {
+            return defaultValue;
+        }
+        return (int) value;
     }
 }
