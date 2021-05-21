@@ -64,6 +64,9 @@ public class BaseController extends BaseTop {
             }
             tlHashMapHead.set(hashMapHead);
         }
+        else {
+            logger.error("debug here");
+        }
         return hashMapHead;
     }
     private HashMap<String, Object> getHashMapIn() {
@@ -124,9 +127,10 @@ public class BaseController extends BaseTop {
         return error;
     }
     private void dispose() {
+        tlHashMapHead.remove();
+        tlHashMapIn.remove();
         tlRestResult.remove();
         tlRestError.remove();
-        tlHashMapIn.remove();
     }
 
     // -- public common method ------------------------------------------------
@@ -256,12 +260,6 @@ public class BaseController extends BaseTop {
     }
 
     // -- ok, err -------------------------------------------------------------
-    protected void ok(String key, long val) throws Exception {
-        _ok(key, String.valueOf(val));
-    }
-    protected void ok(String key, String val) throws Exception {
-        _ok(key, val);
-    }
     protected void ok(String key, SqlRowSet rowSet) throws Exception {
         if (rowSet == null) {
             _ok(key, "");
@@ -280,19 +278,10 @@ public class BaseController extends BaseTop {
             _ok(key, UtilResultSet.getRowSetString(rs));
         }
     }
-    protected void ok(String key, Object obj) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-
-        if (obj == null) {
-            _ok(key, "");
-        }
-        else {
-            //key = key + Const.CHAR1 + "json"; // -- 默认是json格式 --
-            String listString = mapper.writeValueAsString(obj);
-            _ok(key, listString);
-        }
+    protected void ok(String key, Object object) throws Exception {
+        _ok(key, object);
     }
-    private void _ok(String key, String value) throws Exception {
+    private void _ok(String key, Object value) throws Exception {
         RestResult result = getRestResult();
         result.put(key, value);
     }
@@ -371,17 +360,7 @@ public class BaseController extends BaseTop {
     }
 
     // -- Token ---------------------------------------------------------------
-    protected HashMap<String, Object> getToken(String token) {
-        return mapToken.getOrDefault(token, null);
-    }
-    private Object getTokenObject(String token, String key) {
-        HashMap<String, Object> map = getToken(token);
-        if (map == null || !map.containsKey(key)) {
-            return null;
-        }
-        return map.get(key);
-    }
-    protected void setTokenValue(String token, String key, Object object) {
+    public static void setTokenValue(String token, String key, Object object) {
         HashMap<String, Object> map = getToken(token);
         if (map == null) {
             map = new HashMap<>();
@@ -390,7 +369,17 @@ public class BaseController extends BaseTop {
         map.put(key, object);
     }
 
-    protected int getTokenInt(String token, String key, int defaultValue) {
+    public static HashMap<String, Object> getToken(String token) {
+        return mapToken.getOrDefault(token, null);
+    }
+    public static Object getTokenObject(String token, String key) {
+        HashMap<String, Object> map = getToken(token);
+        if (map == null || !map.containsKey(key)) {
+            return null;
+        }
+        return map.get(key);
+    }
+    public static int getTokenInt(String token, String key, int defaultValue) {
         Object value = getTokenObject(token, key);
         if (value == null) {
             return defaultValue;
