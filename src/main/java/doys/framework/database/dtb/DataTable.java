@@ -11,7 +11,7 @@ package doys.framework.database.dtb;
 import doys.framework.a0.Const;
 import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
-import doys.framework.util.UtilDataSet;
+import doys.framework.util.UtilRowSet;
 import doys.framework.util.UtilString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -764,7 +764,7 @@ public class DataTable {
                 this.columnName = rsmd.getColumnLabel(iCol);
                 this.DataTypeID = rsmd.getColumnType(iCol);
                 this.dataType = rsmd.getColumnTypeName(iCol);
-                this.columnType = UtilDataSet.getFieldType(this.dataType);
+                this.columnType = UtilRowSet.getFieldType(this.dataType);
 
                 ///if (rsmd.isAutoIncrement(iCol)) {
                 if (this.columnName.equalsIgnoreCase("id")) {

@@ -1,11 +1,13 @@
 /******************************************************************************
- * Copyright (C), 2020, doys-next.com
+ * Copyright (C), 2020-2021, doys-next.com
  * @author David.Li
  * @version 1.0
  * @create_date 2020-05-15
+ * @modify_date 2021-05-24
  * 通用视图控制类, 用于通用视图
  *****************************************************************************/
 package doys.framework.core.view;
+import doys.framework.a0.Const;
 import doys.framework.core.base.BaseController;
 import doys.framework.core.entity.RestResult;
 import doys.framework.database.DBFactory;
@@ -109,24 +111,55 @@ public class BaseViewController extends BaseController {
         int pageNum = inInt("pageNum");
 
         String viewPk = in("viewPk");
-        String sqlFilter = in("filter");
+        String sql, sqlFilter = in("filter");
+        String sqlData, sqlOrderBy;
         String sqlUserDefDS;
 
         SqlRowSet rsView, rsViewData;
-
-        HashMap<String, Long> mapRef = (pageNum == 0 ? new HashMap<>() : null);
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
-            rsView.first();
 
+            // -- 1. 处理自定义数据源 -----------------------------
             sqlUserDefDS = getUseDefDataSource();
-            rsViewData = BaseViewService.getViewData(dbBus, rsView, pageNum, sqlFilter, mapRef, sqlUserDefDS);
-            ok("dtbViewData", rsViewData);
-
-            if (pageNum == 0) {
-                ok("totalRows", mapRef.get("totalRows"));
+            if (sqlUserDefDS == null || sqlUserDefDS.equals("")) {
+                sqlData = rsView.getString("sql_data_source");
             }
+            else {
+                sqlData = sqlUserDefDS;
+            }
+            sqlOrderBy = rsView.getString("sql_orderby");
+
+            // -- 2. 取总记录行数 -----------------------------------
+            if (pageNum == 0) {
+                sql = "SELECT COUNT(1) FROM (" + sqlData + ") t ";
+                if (!sqlFilter.equals("")) {
+                    sql += "WHERE " + sqlFilter;
+                }
+
+                sql = BeforeReplace(sql);
+                sql = ReplaceSql(sql);
+                sql = AfterReplace(sql);
+                ok("totalRows", dbBus.getInt(sql));
+                pageNum = 1;
+            }
+
+            // -- 3. 取分页数据 ------------------------------------
+            sql = "SELECT * FROM (" + sqlData + ") t ";
+            if (!sqlFilter.equals("")) {
+                sql += "WHERE " + sqlFilter + " ";
+            }
+            if (!UtilString.KillNull(sqlOrderBy).equals("")) {
+                sql += "ORDER BY " + sqlOrderBy + " ";
+            }
+            sql += "LIMIT " + Const.MAX_PAGE_ROWS * (pageNum - 1) + ", " + Const.MAX_PAGE_ROWS;
+
+            // -- 4. 执行sql，读取数据 ---------------------------
+            sql = BeforeReplace(sql);
+            sql = ReplaceSql(sql);
+            sql = AfterReplace(sql);
+            rsViewData = dbBus.getRowSet(sql);
+            ok("dtbViewData", rsViewData);
         } catch (Exception e) {
             return ResultErr(e);
         }
@@ -143,7 +176,6 @@ public class BaseViewController extends BaseController {
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
-            rsView.first();
 
             rsViewField = BaseViewService.getViewBaseField(dbSys, viewPk, rsView.getString("table_pk"));
             ok("dtbViewField", rsViewField);
@@ -176,7 +208,6 @@ public class BaseViewController extends BaseController {
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
-            rsView.first();
             tableName = rsView.getString("table_name");
 
             rsFormData = BaseViewService.getFormData(dbBus, tableName, id);
@@ -194,7 +225,7 @@ public class BaseViewController extends BaseController {
         boolean blAddnew = (id == 0);
 
         String viewPk = in("viewPk");
-        String tableName, sqlDataSource;
+        String sql, tableName, sqlDataSource;
 
         HashMap<String, Object> form = inForm("form");
         SqlRowSet rsView, rsFormData, rsViewData;
@@ -204,7 +235,6 @@ public class BaseViewController extends BaseController {
         try {
             // -- 1. pretreatment --
             rsView = BaseViewService.getView(dbSys, viewPk);
-            rsView.first();
             tableName = rsView.getString("table_name");
             sqlDataSource = rsView.getString("sql_data_source");
 
@@ -230,8 +260,12 @@ public class BaseViewController extends BaseController {
             // -- 9. 返回当前行更新后的基础表数据和视图数据 --
             rsFormData = BaseViewService.getFormData(dbBus, tableName, id);
             ok("dtbFormData", rsFormData);
-            rsViewData = BaseViewService.getViewDataOne(dbBus, sqlDataSource, id);
-            ok("dtbViewData", rsViewData);
+
+            sql = "SELECT * FROM (" + sqlDataSource + ") t WHERE id = ?";
+            sql = BeforeReplace(sql);
+            sql = ReplaceSql(sql);
+            sql = AfterReplace(sql);
+            ok("dtbViewData", dbBus.getRowSet(sql, id));
         } catch (Exception e) {
             return ResultErr(e);
         } finally {
@@ -252,7 +286,6 @@ public class BaseViewController extends BaseController {
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
-            rsView.first();
             tableName = rsView.getString("table_name");
 
             // -- 2.1 beforeDelete --
@@ -296,7 +329,6 @@ public class BaseViewController extends BaseController {
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
-            rsView.first();
             tableName = rsView.getString("table_name");
 
             rsFlowButton = BaseViewService.getFlowButton(dbSys, flowPk, buttonPk);
@@ -398,6 +430,7 @@ public class BaseViewController extends BaseController {
         return sql;
     }
     private String ReplaceSql(String sql) {
+        sql = sql.replaceAll("%userPk%", ssValue("userPk"));
         return sql;
     }
     protected String AfterReplace(String sql) {

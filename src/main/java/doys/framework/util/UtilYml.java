@@ -1,20 +1,26 @@
 /******************************************************************************
- * Copyright (C), 2020, doys-next.com
+ * Copyright (C), 2020-2021, doys-next.com
  * @author David.Li
  * @version 1.0
  * @create_date 2020-07-07
- * @modify_date 2020-08-18
+ * @modify_date 2021-05-25
  * Yml文件读取工具类
  *****************************************************************************/
 package doys.framework.util;
 import doys.framework.database.ds.UtilTDS;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
 @Component
 public class UtilYml {
+    @Autowired
+    private Environment _environment;
+    private static Environment environment;
+
     @Value("${upgrade-database.delete-field.keep-days:31}")                 // -- 默认值写法, 避免配置文件未配置该项出错 --
     private String _deleteFieldKeepDays;
     private static String deleteFieldKeepDays;
@@ -36,6 +42,8 @@ public class UtilYml {
     // -- init ----------------------------------------------------------------
     @PostConstruct
     private void initYmlProperty() {
+        environment = _environment;
+
         deleteFieldKeepDays = _deleteFieldKeepDays;
 
         resRunPath = _mResRunPath;
@@ -46,6 +54,16 @@ public class UtilYml {
     }
 
     // -- public method 1 -----------------------------------------------------
+    public static String getValue(String key) throws Exception {
+        return environment.getProperty(key);
+    }
+    public static String getApiBase() throws Exception {
+        String ip = UtilYml.getValue("server.domain");
+        String port = UtilYml.getValue("server.port");
+        String path = UtilYml.getValue("server.servlet.context-path");
+        return "http://" + ip + ":" + port + path;
+    }
+
     public static int getInt(String key) throws Exception {
         String strValue = getString(key);
         if (strValue.equalsIgnoreCase("")) {

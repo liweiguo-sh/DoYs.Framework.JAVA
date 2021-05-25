@@ -11,7 +11,7 @@ import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
 import doys.framework.database.ds.UtilTDS;
 import doys.framework.database.dtb.DataTable;
-import doys.framework.util.UtilDataSet;
+import doys.framework.util.UtilRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 public class DBSchema {
@@ -173,7 +173,7 @@ public class DBSchema {
                 }
                 // -- 1、固定属性信息 --------
                 dataType = rs.getString("data_type").toLowerCase();
-                fieldType = UtilDataSet.getFieldType(dataType);
+                fieldType = UtilRowSet.getFieldType(dataType);
 
                 drRow.setDataCell("datatype", dataType);
                 drRow.setDataCell("type", fieldType);
@@ -199,7 +199,7 @@ public class DBSchema {
                     drRow.setDataCell("width", 90);
                 }
                 else {
-                    drRow.setDataCell("width", UtilDataSet.getColumnWidth(fieldType, drRow.DataCell("text"), Integer.parseInt(drRow.DataCell("len"))));
+                    drRow.setDataCell("width", UtilRowSet.getColumnWidth(fieldType, drRow.DataCell("text"), Integer.parseInt(drRow.DataCell("len"))));
                 }
 
                 if (fieldType.equalsIgnoreCase("number")) {

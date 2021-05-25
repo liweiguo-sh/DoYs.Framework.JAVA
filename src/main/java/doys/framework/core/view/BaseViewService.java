@@ -1,26 +1,31 @@
 /******************************************************************************
- * Copyright (C), 2020, doys-next.com
+ * Copyright (C), 2020-2021, doys-next.com
  * @author David.Li
  * @version 1.0
  * @create_date 2020-05-15
+ * @modify_date 2021-05-24
  * 通用视图服务基类, 用于通用视图
  *****************************************************************************/
 package doys.framework.core.view;
-import doys.framework.a0.Const;
 import doys.framework.core.base.BaseService;
 import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
-import doys.framework.util.UtilDataSet;
+import doys.framework.util.UtilRowSet;
 import doys.framework.util.UtilString;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
+
 public class BaseViewService extends BaseService {
     public static SqlRowSet getView(DBFactory dbSys, String viewPk) throws Exception {
         String sql = "SELECT * FROM sys_view WHERE pk = ?";
-        return dbSys.getRowSet(sql, viewPk);
+        SqlRowSet rsView = dbSys.getRowSet(sql, viewPk);
+
+        rsView.first();
+
+        return rsView;
     }
     public static SqlRowSet getViewField(DBFactory dbSys, String viewPk) throws Exception {
         String sql = "SELECT table_pk, name, text, fixed, flag_nullable, align, width, datatype, data_source_type, data_source, sequence "
@@ -65,50 +70,6 @@ public class BaseViewService extends BaseService {
 
         sql = sqlData.replaceAll("\\{node_value}", nodeValue);
         return dbBus.getRowSet(sql);
-    }
-
-    public static SqlRowSet getViewData(DBFactory dbSys, SqlRowSet rsView, int pageNum, String sqlFilter, HashMap map) throws Exception {
-        return getViewData(dbSys, rsView, pageNum, sqlFilter, map, null);
-    }
-    public static SqlRowSet getViewData(DBFactory dbBus, SqlRowSet rsView, int pageNum, String sqlFilter, HashMap map, String sqlUserDefDS) throws Exception {
-        String sql = "";
-        String sqlData, sqlOrderBy;
-
-        rsView.first();
-        if (sqlUserDefDS == null || sqlUserDefDS.equals("")) {
-            sqlData = rsView.getString("sql_data_source");
-        }
-        else {
-            sqlData = sqlUserDefDS;
-        }
-        sqlOrderBy = rsView.getString("sql_orderby");
-        // -- 1. 取总记录行数 -----------------------------------
-        if (pageNum == 0) {
-            sql = "SELECT COUNT(1) FROM (" + sqlData + ") t ";
-            if (!sqlFilter.equals("")) {
-                sql += "WHERE " + sqlFilter;
-            }
-            long totalRows = dbBus.getInt(sql);
-            map.put("totalRows", totalRows);
-            pageNum = 1;
-        }
-
-        // -- 2. 取分页数据 ------------------------------------
-        sql = "SELECT * FROM (" + sqlData + ") t ";
-        if (!sqlFilter.equals("")) {
-            sql += "WHERE " + sqlFilter + " ";
-        }
-        if (!UtilString.KillNull(sqlOrderBy).equals("")) {
-            sql += "ORDER BY " + sqlOrderBy + " ";
-        }
-        sql += "LIMIT " + Const.MAX_PAGE_ROWS * (pageNum - 1) + ", " + Const.MAX_PAGE_ROWS;
-
-        return dbBus.getRowSet(dbBus.replaceSQL(sql));
-    }
-    public static SqlRowSet getViewDataOne(DBFactory dbBus, String sqlDataSource, long id) throws Exception {
-        // -- 获取一条视图数据 --
-        String sql = "SELECT * FROM (" + sqlDataSource + ") t WHERE id = ?";
-        return dbBus.getRowSet(sql, id);
     }
 
     // -- ViewForm ------------------------------------------------------------
@@ -162,7 +123,7 @@ public class BaseViewService extends BaseService {
             sql = "SELECT * FROM " + tableName + " LIMIT 0";
             rsmd = dbBus.getRowSet(sql).getMetaData();
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                columnType = UtilDataSet.getFieldType(rsmd.getColumnTypeName(i));
+                columnType = UtilRowSet.getFieldType(rsmd.getColumnTypeName(i));
                 columnName = rsmd.getColumnName(i);
 
                 // -- 预处理 ---------------------------------
@@ -248,7 +209,7 @@ public class BaseViewService extends BaseService {
         sql = "SELECT * FROM " + tableName + " LIMIT 0";
         rsmd = dbBus.getRowSet(sql).getMetaData();
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-            columnType = UtilDataSet.getFieldType(rsmd.getColumnTypeName(i));
+            columnType = UtilRowSet.getFieldType(rsmd.getColumnTypeName(i));
             columnName = rsmd.getColumnName(i);
 
             // -- 预处理 ---------------------------------

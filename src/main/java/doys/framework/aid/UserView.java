@@ -33,7 +33,7 @@ public class UserView extends BaseViewController {
             this.setFormValue("name", pk);
         }
         if (password.length() != 32) {
-            password = UtilDigest.passwordMD5(pk, password);
+            password = UtilDigest.passwordMD5(pk.toLowerCase(), password);
             setFormValue("password", password);
         }
         // ------------------------------------------------

@@ -6,7 +6,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-public class UtilDataSet {
+public class UtilRowSet {
     public static String getRowSetString(SqlRowSet rowSet) throws Exception {
         return getRsFieldString(rowSet) + Const.CHAR7 + getRsDataString(rowSet);
     }
@@ -20,7 +20,7 @@ public class UtilDataSet {
             columnCount = metaData.getColumnCount();
             for (int i = 1; i <= columnCount; i++) {
                 String dataType = metaData.getColumnTypeName(i);
-                String columnType = UtilDataSet.getFieldType(dataType);
+                String columnType = UtilRowSet.getFieldType(dataType);
 
                 if (i > 1) {
                     builder.append(Const.CHAR1);
@@ -154,7 +154,7 @@ public class UtilDataSet {
     }
 
     // -- convertTo -----------------------------------------------------------
-    public static ArrayList sqlRowSetToArrayList(SqlRowSet rsData) throws Exception {
+    public static ArrayList toArrayList(SqlRowSet rsData) throws Exception {
         int columnCount;
 
         String columnName, dataType, columnType;
@@ -166,9 +166,9 @@ public class UtilDataSet {
         while (rsData.next()) {
             HashMap<String, Object> map = new HashMap<>();
             for (int i = 1; i <= columnCount; i++) {
-                columnName = rsmd.getColumnLabel(i).toLowerCase();
+                columnName = rsmd.getColumnLabel(i);
                 dataType = rsmd.getColumnTypeName(i);
-                columnType = UtilDataSet.getFieldType(dataType);
+                columnType = UtilRowSet.getFieldType(dataType);
                 if (columnType.equals("string")) {
                     map.put(columnName, rsData.getString(i));
                 }

@@ -8,9 +8,9 @@ import doys.framework.core.ex.SessionTimeoutException;
 import doys.framework.core.ex.UnImplementException;
 import doys.framework.database.DBFactory;
 import doys.framework.database.ds.UtilTDS;
-import doys.framework.util.UtilDataSet;
 import doys.framework.util.UtilEnv;
 import doys.framework.util.UtilResultSet;
+import doys.framework.util.UtilRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -266,7 +266,7 @@ public class BaseController extends BaseTop {
         }
         else {
             key = key + Const.CHAR1 + "datatable";
-            _ok(key, UtilDataSet.getRowSetString(rowSet));
+            _ok(key, UtilRowSet.getRowSetString(rowSet));
         }
     }
     protected void ok(String key, ResultSet rs) throws Exception {

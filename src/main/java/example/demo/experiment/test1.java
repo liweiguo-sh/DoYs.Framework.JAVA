@@ -1,28 +1,17 @@
 package example.demo.experiment;
 public class test1 {
     public static void main(String[] args) {
-        test1();
-        if (true) return;
+        System.out.println("start");
 
-        SmallBird bird1 = new SmallBird();
-        BigBird bird2 = new BigBird();
+        //a(b);
 
-        showHeight(bird1, 100);
-        showHeight(bird2, 200);
+        System.out.println("end");
     }
 
-    private static void showHeight(Fly bird, int height) {
-        bird.showFlyHeight(height);
-        System.out.println("abc");
+    private static void a() {
+
     }
-
-    private static void test1() {
-        BigBird bird = new BigBird();
-
-        System.out.println(bird.id);
-
-        //bird.id = 5;
-        System.out.println(bird.id);
+    private static void b() {
 
     }
 }

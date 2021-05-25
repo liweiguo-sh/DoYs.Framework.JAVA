@@ -5,7 +5,7 @@ import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
 import doys.framework.database.ds.UtilTDS;
 import doys.framework.database.dtb.DataTable;
-import doys.framework.util.UtilDataSet;
+import doys.framework.util.UtilRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
@@ -150,13 +150,13 @@ public class ViewService extends BaseService {
                 dr.setDataCell("title", fieldName);
             }
             dr.setDataCell("datatype", rsmd.getColumnTypeName(i));
-            dr.setDataCell("type", UtilDataSet.getFieldType(rsmd.getColumnTypeName(i)));
+            dr.setDataCell("type", UtilRowSet.getFieldType(rsmd.getColumnTypeName(i)));
             dr.setDataCell("len", rsmd.getColumnDisplaySize(i));
             dr.setDataCell("flag_pkey", "0");
             dr.setDataCell("flag_identity", "0");
             ///dr.setDataCell("field_nullable", rsmd.isNullable(i));
             if (dr.DataCell("width", true).equals("")) {
-                dr.setDataCell("width", UtilDataSet.getColumnWidth(dr.DataCell("type"), dr.DataCell("text"), Integer.parseInt(dr.DataCell("len"))));
+                dr.setDataCell("width", UtilRowSet.getColumnWidth(dr.DataCell("type"), dr.DataCell("text"), Integer.parseInt(dr.DataCell("len"))));
             }
 
             if (dr.DataCell("align") == null || dr.DataCell("align").equals("")) {

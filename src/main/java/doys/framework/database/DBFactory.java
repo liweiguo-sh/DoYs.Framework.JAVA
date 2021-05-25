@@ -102,28 +102,22 @@ public class DBFactory extends JdbcTemplate {
         Object objectReturn = null;
 
         SqlRowSet rs;
-        LocalDateTime startTime = LocalDateTime.now();
         // ------------------------------------------------
-        try {
-            sql = replaceSQL(sql);
-            if (args.length > 0) {
-                rs = this.getRowSet(sql, args);
-            }
-            else {
-                rs = this.getRowSet(sql);
-            }
+        if (args.length > 0) {
+            rs = this.getRowSet(sql, args);
+        }
+        else {
+            rs = this.getRowSet(sql);
+        }
 
-            if (rs.next()) {
-                objectReturn = rs.getObject(1);
-                if (objectReturn == null) {
-                    objectReturn = defaultValue;
-                }
-            }
-            else {
+        if (rs.next()) {
+            objectReturn = rs.getObject(1);
+            if (objectReturn == null) {
                 objectReturn = defaultValue;
             }
-        } catch (Exception e) {
-            throw e;
+        }
+        else {
+            objectReturn = defaultValue;
         }
         return objectReturn;
     }
@@ -134,7 +128,6 @@ public class DBFactory extends JdbcTemplate {
         SqlRowSet rowSet;
         // ------------------------------------------------
         try {
-            sql = replaceSQL(sql);
             rowSet = super.queryForRowSet(sql, args);
             writeSqlInfo(-9, startTime, sql, args);
 
@@ -156,7 +149,6 @@ public class DBFactory extends JdbcTemplate {
         LocalDateTime startTime = LocalDateTime.now();
         // ------------------------------------------------
         try {
-            sql = replaceSQL(sql);
             result = super.update(sql, args);
             writeSqlInfo(result, startTime, sql, args);
         } catch (DuplicateKeyException e) {
@@ -170,15 +162,12 @@ public class DBFactory extends JdbcTemplate {
     }
     public int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException {
         int[] result = null;
-        long nInterval;
 
         LocalDateTime startTime = LocalDateTime.now();
         // ------------------------------------------------
         try {
-            sql = replaceSQL(sql);
             result = super.batchUpdate(sql, batchArgs);
 
-            nInterval = UtilDate.getDateTimeDiff(startTime);
             writeSqlInfo(result.length, startTime, sql, new Object[] {});
         } catch (DataAccessException e) {
             writeSqlErr(-1, startTime, sql, new Object[] {});
@@ -232,9 +221,6 @@ public class DBFactory extends JdbcTemplate {
     }
 
     // -- public static method ------------------------------------------------
-    public String replaceSQL(String sql) throws Exception {
-        return sql;
-    }
     public static void rollback(DataSourceTransactionManager dstm, TransactionStatus tStatus) {
         try {
             if (tStatus != null) {
