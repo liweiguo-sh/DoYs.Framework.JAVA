@@ -1,4 +1,5 @@
 package doys.framework.util;
+import doys.framework.a1.structure.EntityFile;
 import doys.framework.core.ex.CommonException;
 
 import java.io.*;
@@ -217,6 +218,52 @@ public class UtilFile {
         }
     }
 
+    // -- scan directory and files --------------------------------------------
+    public static ArrayList<EntityFile> scan(String folderPath, String extNames, boolean includeSubDirectory) throws Exception {
+        File fileFolder = new File(folderPath);
+        if (!fileFolder.exists()) {
+            throw new CommonException("the directory " + folderPath + " does not exist");
+        }
+        if (!fileFolder.isDirectory()) {
+            throw new Exception(folderPath + " is not a file directory");
+        }
+
+        return scanFolder(fileFolder, extNames, includeSubDirectory);
+    }
+    private static ArrayList<EntityFile> scanFolder(File fileFolder, String extNames, boolean includeSubDirectory) throws Exception {
+        ArrayList<EntityFile> entityFiles = new ArrayList<>();
+        String[] arrExtName = extNames.replaceAll(" ", "").split(",");
+        File[] files = fileFolder.listFiles();
+        for (File file : files) {
+            if (file.isFile()) {
+                boolean matchExtName = true;
+                EntityFile entityFile = new EntityFile(file);
+                if (extNames != null && !extNames.equals("")) {
+                    matchExtName = false;
+                    for (String extname : arrExtName) {
+                        if (entityFile.extname.equalsIgnoreCase(extname)) {
+                            matchExtName = true;
+                            break;
+                        }
+                    }
+                }
+                if (!matchExtName) {
+                    continue;
+                }
+
+                entityFiles.add(entityFile);
+            }
+            else if (file.isDirectory()) {
+                entityFiles.addAll(scanFolder(new File(file.getPath()), extNames, includeSubDirectory));
+            }
+            else {
+                throw new CommonException("debug here ScanFile.scanFolder()");
+            }
+        }
+        // -- 返回结果集 --
+        return entityFiles;
+    }
+
     // -- write file ----------------------------------------------------------
     public static void writeFile(String path, ArrayList<String> list) throws Exception {
         writeFile(path, list, "\r\n");
@@ -262,6 +309,25 @@ public class UtilFile {
         // ------------------------------------------------
         return true;
     }
+    public static void copyDirectory(String dirSource, String dirDestination) throws Exception {
+        int len = dirSource.length();
+
+        String fullnameSource, fullnameDestination;
+        EntityFile entityFile;
+        ArrayList<EntityFile> listSourceFiles;
+
+        // ------------------------------------------------
+        UtilFile.checkPath(dirDestination, true);
+
+        listSourceFiles = scan(dirSource, "", true);
+        for (int i = 0; i < listSourceFiles.size(); i++) {
+            entityFile = listSourceFiles.get(i);
+            fullnameSource = entityFile.fullname;
+            fullnameDestination = dirDestination + fullnameSource.substring(len);
+            UtilFile.copyFile(fullnameSource, fullnameDestination);
+        }
+    }
+
     public static boolean deleteFile(String fileDelete) throws Exception {
         File file = new File(fileDelete);
         if (file.exists()) {

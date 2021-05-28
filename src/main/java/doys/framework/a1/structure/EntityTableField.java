@@ -1,4 +1,4 @@
-package doys.framework.common.entity;
+package doys.framework.a1.structure;
 public class EntityTableField {
     public String name;
     public String datatype = "varchar";

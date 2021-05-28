@@ -1,4 +1,4 @@
-package doys.framework.common.security;
+package doys.framework.util;
 import java.security.MessageDigest;
 
 public class UtilDigest {

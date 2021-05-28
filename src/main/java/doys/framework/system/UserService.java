@@ -1,9 +1,9 @@
 package doys.framework.system;
 import doys.framework.a0.Const;
-import doys.framework.common.security.UtilDigest;
 import doys.framework.core.base.BaseService;
 import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
+import doys.framework.util.UtilDigest;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 public class UserService extends BaseService {

@@ -1,6 +1,6 @@
 package doys.framework.aid;
-import doys.framework.common.security.UtilDigest;
 import doys.framework.core.view.BaseViewController;
+import doys.framework.util.UtilDigest;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

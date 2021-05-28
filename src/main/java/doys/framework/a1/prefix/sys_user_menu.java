@@ -1,3 +1,11 @@
+/******************************************************************************
+ * Copyright (C), 2020-2021, doys-next.com
+ * @author David.Li
+ * @version 1.0
+ * @create_date 2021-05-28
+ * 经过计算后的用户可访问菜单列表，根据user_pk直接获得可访问菜单列表(包括一级、二级等虚拟菜单)
+ * 通过重置 sys_user.flag_menu_overdue = 1可以触发用户登陆时重新计算可访问菜单列表
+ *****************************************************************************/
 package doys.framework.a1.prefix;
 import doys.framework.a2.base.BASE_ENTITY;
 import doys.framework.upgrade.db.annotation.EntityFieldAnnotation;

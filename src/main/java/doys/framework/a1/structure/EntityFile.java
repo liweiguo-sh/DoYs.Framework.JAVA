@@ -1,4 +1,4 @@
-package doys.framework.common.entity;
+package doys.framework.a1.structure;
 
 import java.io.File;
 
@@ -34,7 +34,8 @@ public class EntityFile {
         if (pos > 0) {
             name = filename.substring(0, pos);
             extname = filename.substring(pos + 1);
-        } else {
+        }
+        else {
             name = filename;
         }
         fullname = file.getPath();

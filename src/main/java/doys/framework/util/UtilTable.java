@@ -1,5 +1,5 @@
 package doys.framework.util;
-import doys.framework.common.entity.EntityTableField;
+import doys.framework.a1.structure.EntityTableField;
 import doys.framework.database.DBFactory;
 public class UtilTable {
     public static void addOrUpdateField(DBFactory dbSys, String databaseName, String tableName, EntityTableField entity) {
