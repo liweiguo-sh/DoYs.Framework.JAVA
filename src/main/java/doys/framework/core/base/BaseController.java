@@ -89,6 +89,7 @@ public class BaseController extends BaseTop {
                 if (!jsonString.equals("")) {
                     ObjectMapper mapper = new ObjectMapper();
                     hashMapIn = mapper.readValue(jsonString, HashMap.class);
+                    hashMapIn.put("__requestString__", jsonString);
                 }
                 else {
                     hashMapIn = new HashMap<>();
@@ -211,6 +212,12 @@ public class BaseController extends BaseTop {
     }
     protected String in(String parameterName, String defaultValue) {
         return (String) _inObject(parameterName, defaultValue);
+    }
+    protected Object inObject(String parameterName) {
+        return _inObject(parameterName, null);
+    }
+    protected String getRequestString() {
+        return in("__requestString__");
     }
     private String _inString(String parameter, String defaultValue) {
         Object obj = _inObject(parameter, defaultValue);
