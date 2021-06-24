@@ -74,7 +74,7 @@ public class UtilRowSet {
         else if (dataType.equals("int") || dataType.equals("integer") || dataType.equals("tinyint") || dataType.equals("smallint") || dataType.equals("bigint") || dataType.equals("number")) {
             fieldType = "number";
         }
-        else if (dataType.equals("numeric") || dataType.equals("decimal") || dataType.equals("float") || dataType.equals("real") || dataType.equals("money")) {
+        else if (dataType.equals("numeric") || dataType.equals("decimal") || dataType.equals("double") || dataType.equals("float") || dataType.equals("real") || dataType.equals("money")) {
             fieldType = "number";
         }
         else if (dataType.indexOf("date") >= 0 || dataType.indexOf("time") >= 0) {
