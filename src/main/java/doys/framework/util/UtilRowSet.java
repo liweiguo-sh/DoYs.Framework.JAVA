@@ -1,6 +1,7 @@
 package doys.framework.util;
 import doys.framework.a0.Const;
 import doys.framework.core.ex.CommonException;
+import doys.framework.core.ex.UnexpectedException;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
@@ -169,8 +170,20 @@ public class UtilRowSet {
                 columnName = rsmd.getColumnLabel(i);
                 dataType = rsmd.getColumnTypeName(i);
                 columnType = UtilRowSet.getFieldType(dataType);
-                if (columnType.equals("string")) {
-                    map.put(columnName, rsData.getString(i));
+                if (columnType.equals("number")) {
+                    if (dataType.equals("INT") || dataType.equals("TINYINT") || dataType.equals("BIGINT")) {
+                        map.put(columnName, rsData.getInt(i));
+                    }
+                    else if (dataType.equals("FLOAT")) {
+                        map.put(columnName, rsData.getFloat(i));
+                    }
+                    else if (dataType.equals("DOUBLE") || dataType.equals("DECIMAL")) {
+                        map.put(columnName, rsData.getDouble(i));
+                    }
+                    else {
+                        map.put(columnName, rsData.getFloat(i));
+                        throw new UnexpectedException("UtilRowSet.toArrayList::debug here");
+                    }
                 }
                 else {
                     map.put(columnName, rsData.getString(i));

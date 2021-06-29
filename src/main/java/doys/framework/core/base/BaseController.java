@@ -135,10 +135,17 @@ public class BaseController extends BaseTop {
     }
 
     // -- public common method ------------------------------------------------
-    protected String getHead(String headName) {
-        return getHead(headName, "");
+    protected int headInt(String headName) {
+        return headInt(headName, 0);
     }
-    protected String getHead(String headName, String defaultValue) {
+    protected int headInt(String headName, int defaultValue) {
+        String value = head(headName, String.valueOf(defaultValue));
+        return Integer.parseInt(value);
+    }
+    protected String head(String headName) {
+        return head(headName, "");
+    }
+    protected String head(String headName, String defaultValue) {
         HashMap<String, String> map = this.getHashMapHead();
 
         headName = headName.toLowerCase();
