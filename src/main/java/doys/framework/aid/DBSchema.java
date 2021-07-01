@@ -98,7 +98,7 @@ public class DBSchema {
                     dtb.setRowTag(nFind, "1");
                 }
             }
-            // -- 2. 删除不存在的表(禁用) --------------------------
+            // -- 2. 删除不存在的表(禁用，当前租户库没有，其它租户库可能有) ---------
             for (int i = dtb.getRowCount() - 1; i >= 0; i--) {
                 if (dtb.getRowTag(i).equals("")) {
                     // -- dtb.RemoveAt(i); --
@@ -215,7 +215,7 @@ public class DBSchema {
             // -- 3、删除不存在的字段(禁用) --------------------------
             for (int i = dtb.getRowCount() - 1; i >= 0; i--) {
                 if (dtb.getRowTag(i).equals("")) {
-                    // -- dtb.RemoveAt(i); --
+                    dtb.RemoveAt(i);
                 }
             }
             nResult = dtb.Update(dbSys, "sys_field", "pk");
