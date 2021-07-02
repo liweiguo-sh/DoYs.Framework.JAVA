@@ -6,6 +6,7 @@ import doys.framework.core.entity.RestResult;
 import doys.framework.core.ex.CommonException;
 import doys.framework.core.ex.SessionTimeoutException;
 import doys.framework.core.ex.UnImplementException;
+import doys.framework.core.ex.UnexpectedException;
 import doys.framework.database.DBFactory;
 import doys.framework.database.ds.UtilTDS;
 import doys.framework.util.UtilEnv;
@@ -313,7 +314,9 @@ public class BaseController extends BaseTop {
         logger.error(e.getMessage());
 
         Class<? extends Exception> clz = e.getClass();
-        if (clz.equals(CommonException.class) || clz.equals(UnImplementException.class)
+        if (clz.equals(CommonException.class)
+            || clz.equals(UnexpectedException.class)
+            || clz.equals(UnImplementException.class)
             || clz.equals(SessionTimeoutException.class)) {
             _err(e.getMessage());
         }
@@ -332,6 +335,11 @@ public class BaseController extends BaseTop {
         return _ResultOk();
     }
     private RestResult _ResultOk() {
+        RestError error = getRestError();
+        if (error.size() > 0) {
+            return _ResultErr();
+        }
+
         RestResult result = getRestResult();
         result.put(Const.ok, true);
 

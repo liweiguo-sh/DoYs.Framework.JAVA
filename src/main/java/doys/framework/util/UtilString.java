@@ -225,4 +225,13 @@ public class UtilString {
         }
         return strNewSN;
     }
+
+    public static String padLeft(int num, String pad, int len) {
+        String numStr = String.valueOf(num);
+
+        for (int i = numStr.length(); i < len; i++) {
+            numStr = pad + numStr;
+        }
+        return numStr;
+    }
 }

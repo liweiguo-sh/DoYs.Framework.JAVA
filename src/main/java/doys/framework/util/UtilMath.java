@@ -1,5 +1,6 @@
 package doys.framework.util;
 import doys.framework.core.ex.CommonException;
+import doys.framework.core.ex.UnexpectedException;
 
 import java.math.BigDecimal;
 public class UtilMath {
@@ -27,5 +28,21 @@ public class UtilMath {
         // ------------------------------------------------
         strResult = numResult.toString();
         return strResult;
+    }
+
+    public static int tenPower(int pow) throws UnexpectedException {
+        int result = 1;
+        if (pow == 0) {
+            return 1;
+        }
+        else if (pow > 0) {
+            for (int i = 0; i < pow; i++) {
+                result *= 10;
+            }
+        }
+        else {
+            throw new UnexpectedException();
+        }
+        return result;
     }
 }
