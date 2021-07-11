@@ -1,8 +1,8 @@
 /******************************************************************************
- * Copyright (C), 2020, doys-next.com
+ * Copyright (C), 2021, doys-next.com
  * @author David.Li
  * @version 1.0
- * @create_date 2020-08-08
+ * @create_date 2021-07-09
  * 服务类样例模板
  *****************************************************************************/
 package example.templet;
