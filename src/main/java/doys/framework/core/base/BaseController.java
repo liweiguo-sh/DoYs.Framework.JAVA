@@ -329,6 +329,17 @@ public class BaseController extends BaseTop {
         RestError error = getRestError();
         error.add(strErr);
     }
+    protected void code(String code) {
+        RestError error = getRestError();
+        error.code = code;
+        if (error.innerCode.equals("")) {
+            error.innerCode = code;
+        }
+    }
+    protected void innerCode(String innerCode) {
+        RestError error = getRestError();
+        error.innerCode = innerCode;
+    }
 
     // -- resultOk, resultErr -------------------------------------------------
     protected RestResult ResultOk() {
@@ -362,9 +373,15 @@ public class BaseController extends BaseTop {
         RestError error = getRestError();
         RestResult result = new RestResult();   // -- 重新初始化, 清空ok信息 --
 
+        String message = error.toString();
         // ------------------------------------------------
         result.put(Const.ok, false);
-        result.put("error", error.toString());
+        result.put("code", error.code);
+        result.put("error", message);
+
+        // ------------------------------------------------
+        logger.error("code = " + error.code + ", innerCode = " + error.innerCode);
+        logger.error(message);
 
         // ------------------------------------------------
         dispose();

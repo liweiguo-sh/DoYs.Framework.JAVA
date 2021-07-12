@@ -1,6 +1,6 @@
 package doys.framework.core.entity;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
-public class RestResult extends HashMap<String, Object> {
+public class RestResult extends LinkedHashMap<String, Object> {
 
 }
