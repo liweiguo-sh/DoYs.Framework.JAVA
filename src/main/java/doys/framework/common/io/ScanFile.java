@@ -1,5 +1,5 @@
 package doys.framework.common.io;
-import doys.framework.a1.structure.EntityFile;
+import doys.framework.a2.structure.EntityFile;
 import doys.framework.util.UtilFile;
 
 import java.util.ArrayList;

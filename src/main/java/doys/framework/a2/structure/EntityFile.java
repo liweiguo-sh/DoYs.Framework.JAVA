@@ -1,4 +1,4 @@
-package doys.framework.a1.structure;
+package doys.framework.a2.structure;
 
 import java.io.File;
 

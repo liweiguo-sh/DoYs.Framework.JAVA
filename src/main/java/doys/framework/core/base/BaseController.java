@@ -195,6 +195,22 @@ public class BaseController extends BaseTop {
         return (ArrayList<HashMap<String, Object>>) obj;
     }
 
+    protected boolean inBool(String parameterName, boolean defaultValue) {
+        Object parameterValue = _inObject(parameterName, defaultValue);
+        if (parameterValue instanceof Boolean) {
+            return ((Boolean) parameterValue);
+        }
+        else if (parameterValue instanceof Integer) {
+            return ((Integer) parameterValue) == 1;
+        }
+        else if (parameterValue instanceof String) {
+            return ((String) parameterValue).equalsIgnoreCase("true") || ((String) parameterValue).equalsIgnoreCase("1");
+        }
+        else {
+            return false;
+        }
+    }
+
     protected int inInt(String parameterName) {
         return _inInt(parameterName, 0);
     }
@@ -211,6 +227,11 @@ public class BaseController extends BaseTop {
         }
         else if (parameterValue instanceof Integer) {
             return (Integer) parameterValue;
+        }
+        else if (parameterValue instanceof String) {
+            if (parameterValue.equals("")) {
+                return defaultValue;
+            }
         }
         return Integer.parseInt((String) parameterValue);
     }

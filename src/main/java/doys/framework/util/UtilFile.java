@@ -1,5 +1,5 @@
 package doys.framework.util;
-import doys.framework.a1.structure.EntityFile;
+import doys.framework.a2.structure.EntityFile;
 import doys.framework.core.ex.CommonException;
 
 import java.io.*;
