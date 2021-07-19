@@ -187,12 +187,12 @@ public class BaseController extends BaseTop {
         }
         return (HashMap<String, String>) obj;
     }
-    protected ArrayList<HashMap<String, Object>> inArrayList(String parameterName) {
+    protected ArrayList<Object> inArrayList(String parameterName) {
         Object obj = _inObject(parameterName, null);
         if (obj == null) {
             return null;
         }
-        return (ArrayList<HashMap<String, Object>>) obj;
+        return (ArrayList<Object>) obj;
     }
 
     protected boolean inBool(String parameterName, boolean defaultValue) {

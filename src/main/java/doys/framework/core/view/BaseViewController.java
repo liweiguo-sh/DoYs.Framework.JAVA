@@ -128,7 +128,10 @@ public class BaseViewController extends BaseController {
             else {
                 sqlData = sqlUserDefDS;
             }
-            sqlOrderBy = rsView.getString("sql_orderby");
+            sqlOrderBy = getViewOrderBy();
+            if (sqlOrderBy.equals("")) {
+                sqlOrderBy = rsView.getString("sql_orderby");
+            }
 
             // -- 2. 取总记录行数 -----------------------------------
             if (pageNum == 0) {
@@ -443,5 +446,8 @@ public class BaseViewController extends BaseController {
     }
     protected String getUseDefDataSource() {
         return null;
+    }
+    protected String getViewOrderBy() {
+        return "";
     }
 }
