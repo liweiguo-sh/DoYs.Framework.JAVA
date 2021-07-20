@@ -31,4 +31,7 @@ public class sys_view extends BASE_ENTITY_AUTO {
     public int show_single = 0;
     @EntityFieldAnnotation(text = "显示删除列", type = EntityFieldType.TINYINT)
     public int show_delete = 0;
+
+    @EntityFieldAnnotation(text = "扩展列按钮集", length = "500", default_value = "", comment = "扩展列按钮集合，json格式")
+    public String button_columns;
 }
