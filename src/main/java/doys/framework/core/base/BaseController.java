@@ -159,6 +159,9 @@ public class BaseController extends BaseTop {
     protected String ssValue(String attrName) {
         return _getSessionValue(attrName, "").toString();
     }
+    protected int ssInt(String attrName) {
+        return (int) _getSessionValue(attrName, 0);
+    }
     protected boolean ssBoolean(String attrName) {
         return (boolean) _getSessionValue(attrName, false);
     }
