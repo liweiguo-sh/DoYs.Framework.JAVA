@@ -4,6 +4,11 @@ import doys.framework.core.ex.UnexpectedException;
 
 import java.math.BigDecimal;
 public class UtilMath {
+    private static long temporaryUniqueSequence = (new java.util.Date()).getTime();
+    synchronized public static String getTemporaryUniqueSequence() {
+        return String.valueOf(temporaryUniqueSequence++);
+    }
+
     // -- math 四则运算 -----------------------------------------------------------
     public static String BigDecimalFour(String strNum1, String strNum2, String symbol) throws Exception {
         String strResult = "";

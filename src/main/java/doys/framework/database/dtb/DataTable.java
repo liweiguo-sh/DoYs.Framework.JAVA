@@ -335,19 +335,19 @@ public class DataTable {
         return _SortStr;
     }
 
-    public void Sort(String sSortCols) {
+    public void Sort(String sSortCols) throws Exception {
         _Sort(sSortCols, false);
     }
-    public void Sort(String sSortCols, boolean bPreSorted) {
+    public void Sort(String sSortCols, boolean bPreSorted) throws Exception {
         _Sort(sSortCols, bPreSorted);
     }
-    private void _Sort(String sSortCols, boolean bPreSorted) {
-        int nColIndex = 0;
-        String colTypeName = "";
+    private void _Sort(String sSortCols, boolean bPreSorted) throws Exception {
+        int nColIndex;
+        String colTypeName;
         String[] arrSort;
         // ---------------------------------------------------------------------
         sSortCols = sSortCols.replaceAll(" ", "");
-        if (sSortCols == "") {
+        if (sSortCols.equals("")) {
             logger.error("未设置排序字段, 不能执行Find方法.");
             return;
         }
@@ -357,30 +357,26 @@ public class DataTable {
         // ---------------------------------------------------------------------
         for (int i = 0; i < arrSort.length; i++) {
             _arrSortCols[i][2] = arrSort[i];
-            try {
-                nColIndex = rs.findColumn(arrSort[i]);
-                _arrSortCols[i][0] = Integer.toString(nColIndex);
-                colTypeName = rsmd.getColumnTypeName(nColIndex);
-                if (colTypeName.compareToIgnoreCase("int") == 0 || colTypeName.equalsIgnoreCase("LONG")) {
-                    _arrSortCols[i][1] = "Int";
-                }
-                else if (colTypeName.equalsIgnoreCase("numeric") || colTypeName.equalsIgnoreCase("decimal") || colTypeName.equalsIgnoreCase("NUMBER")
-                    || colTypeName.equalsIgnoreCase("FLOAT") || colTypeName.equalsIgnoreCase("money") || colTypeName.equalsIgnoreCase("real")) {
-                    _arrSortCols[i][1] = "Numeric";
-                }
-                else if (colTypeName.equalsIgnoreCase("VARCHAR") || colTypeName.equalsIgnoreCase("VARCHAR2") || colTypeName.equalsIgnoreCase("NVARCHAR")
-                    || colTypeName.equalsIgnoreCase("NVARCHAR2") || colTypeName.equalsIgnoreCase("CHAR") || colTypeName.equalsIgnoreCase("NCHAR")) {
-                    _arrSortCols[i][1] = "String";
-                }
-                else if (colTypeName.equalsIgnoreCase("datetime")) {
-                    _arrSortCols[i][1] = "DateTime";
-                }
-                else {
-                    _arrSortCols[i][1] = "String";
-                    logger.error("未知的数据类型【" + colTypeName + "】，请检查。");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            nColIndex = rs.findColumn(arrSort[i]);
+            _arrSortCols[i][0] = Integer.toString(nColIndex);
+            colTypeName = rsmd.getColumnTypeName(nColIndex);
+            if (colTypeName.compareToIgnoreCase("int") == 0 || colTypeName.equalsIgnoreCase("LONG")) {
+                _arrSortCols[i][1] = "Int";
+            }
+            else if (colTypeName.equalsIgnoreCase("numeric") || colTypeName.equalsIgnoreCase("decimal") || colTypeName.equalsIgnoreCase("NUMBER")
+                || colTypeName.equalsIgnoreCase("FLOAT") || colTypeName.equalsIgnoreCase("money") || colTypeName.equalsIgnoreCase("real")) {
+                _arrSortCols[i][1] = "Numeric";
+            }
+            else if (colTypeName.equalsIgnoreCase("VARCHAR") || colTypeName.equalsIgnoreCase("VARCHAR2") || colTypeName.equalsIgnoreCase("NVARCHAR")
+                || colTypeName.equalsIgnoreCase("NVARCHAR2") || colTypeName.equalsIgnoreCase("CHAR") || colTypeName.equalsIgnoreCase("NCHAR")) {
+                _arrSortCols[i][1] = "String";
+            }
+            else if (colTypeName.equalsIgnoreCase("datetime")) {
+                _arrSortCols[i][1] = "DateTime";
+            }
+            else {
+                _arrSortCols[i][1] = "String";
+                logger.error("未知的数据类型【" + colTypeName + "】，请检查。");
             }
         }
         // ---------------------------------------------------------------------
@@ -390,7 +386,7 @@ public class DataTable {
         _Sorted = true;
     }
 
-    public int Find(String[] arrFind) {
+    public int Find(String[] arrFind) throws Exception {
         int nReturn, iRow;
         boolean blBreak = false;
         // --------------------------------------------------------------------
@@ -449,7 +445,7 @@ public class DataTable {
         DataRow drNew = new DataRow();
         return drNew;
     }
-    public void AddRow(DataRow row) {
+    public void AddRow(DataRow row) throws Exception {
         int nFind = 0, nInsertPos = _nRowCount;
         // ------------------------------------------------
         if (_Sorted) { // -- 如果已排序, 需要先查找新纪录的正确插入位置 --
