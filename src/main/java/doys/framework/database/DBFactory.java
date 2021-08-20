@@ -3,12 +3,14 @@ import doys.framework.core.ex.CommonException;
 import doys.framework.core.ex.SessionTimeoutException;
 import doys.framework.database.ds.UtilTDS;
 import doys.framework.database.dtb.DataTable;
+import doys.framework.database.trans.DoysTransationDefinition;
 import doys.framework.util.UtilDate;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 
 import javax.sql.DataSource;
@@ -25,7 +27,6 @@ public class DBFactory extends JdbcTemplate {
         setDataSource(dataSource);
         afterPropertiesSet();
     }
-
     // -- DataTable -----------------------------------------------------------
     public DataTable getDataTable(String sql) throws Exception {
         return new DataTable(this, sql);
@@ -221,7 +222,7 @@ public class DBFactory extends JdbcTemplate {
     }
 
     // -- public static method ------------------------------------------------
-    public static void rollback(DataSourceTransactionManager dstm, TransactionStatus tStatus) {
+    public static void rollbackOld(DataSourceTransactionManager dstm, TransactionStatus tStatus) {
         try {
             if (tStatus != null) {
                 if (!tStatus.isCompleted()) {
@@ -249,5 +250,65 @@ public class DBFactory extends JdbcTemplate {
         }
         // ------------------------------------------------
         return true;
+    }
+
+
+    // -- Transaction ---------------------------------------------------------
+    private ThreadLocal<DataSourceTransactionManager> tlDstm = new ThreadLocal<>();
+    private ThreadLocal<TransactionStatus> tlTs = new ThreadLocal<>();
+
+    private DataSourceTransactionManager getDataSourceTransactionManager() {
+        DataSourceTransactionManager dstm = tlDstm.get();
+        if (dstm == null) {
+            dstm = new DataSourceTransactionManager(this.getDataSource());
+            tlDstm.set(dstm);
+        }
+        return dstm;
+    }
+    private TransactionStatus getTransactionStatus() {
+        TransactionStatus transStatus = tlTs.get();
+        return transStatus;
+    }
+
+    public void beginTrans() {
+        beginTrans(DoysTransationDefinition.withDefault());
+    }
+    public void beginTrans(TransactionDefinition transDef) {
+        DataSourceTransactionManager dstm = getDataSourceTransactionManager();
+        TransactionStatus transStatus = dstm.getTransaction(transDef);
+        tlTs.set(transStatus);
+    }
+    public void commit() throws Exception {
+        DataSourceTransactionManager dstm = tlDstm.get();
+        if (dstm == null) {
+            throw new CommonException("Please invoke beginTrans() first(1).");
+        }
+        TransactionStatus transStatus = getTransactionStatus();
+        if (transStatus == null) {
+            throw new CommonException("Please invoke beginTrans() first(2).");
+        }
+
+        // -- 提交事务，重置TransactionStatus --
+        dstm.commit(transStatus);
+        tlTs.set(null);
+        clearTrans();
+    }
+    public void rollback() throws Exception {
+        DataSourceTransactionManager dstm = tlDstm.get();
+        if (dstm == null) {
+            throw new CommonException("Please invoke beginTrans() first(1).");
+        }
+        TransactionStatus transStatus = getTransactionStatus();
+        if (transStatus == null) {
+            throw new CommonException("Please invoke beginTrans() first(2).");
+        }
+
+        // -- 回滚事务 --
+        dstm.rollback(transStatus);
+        clearTrans();
+    }
+    private void clearTrans() {
+        tlDstm.remove();
+        tlTs.remove();
     }
 }
