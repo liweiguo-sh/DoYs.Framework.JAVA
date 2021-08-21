@@ -3,7 +3,7 @@
  * @author David.Li
  * @version 1.0
  * @create_date 2020-05-15
- * @modify_date 2021-05-24
+ * @modify_date 2021-08-21
  * 通用视图控制类, 用于通用视图
  *****************************************************************************/
 package doys.framework.core.view;
@@ -14,9 +14,7 @@ import doys.framework.database.DBFactory;
 import doys.framework.util.UtilString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,15 +29,9 @@ import java.util.Map;
 public class BaseViewController extends BaseController {
     @Autowired
     protected DBFactory dbSys;
-
     @Autowired
     @Qualifier("tenantDBFactory")
     protected DBFactory dbBus;
-
-    @Autowired
-    DataSourceTransactionManager dstm;
-    @Autowired
-    TransactionDefinition tDef;
 
     // -- view ----------------------------------------------------------------
     @PostMapping("/getViewSchema")
@@ -231,9 +223,7 @@ public class BaseViewController extends BaseController {
         String sql, tableName, sqlDataSource;
 
         HashMap<String, Object> form = inForm("form");
-        SqlRowSet rsView, rsFormData, rsViewData;
-
-        TransactionStatus tStatus = null;
+        SqlRowSet rsView, rsFormData;
         // ------------------------------------------------
         try {
             // -- 1. pretreatment --
@@ -242,8 +232,7 @@ public class BaseViewController extends BaseController {
             sqlDataSource = rsView.getString("sql_data_source");
 
             // -- 2.1 beforeSave --
-            dstm.setDataSource(dbBus.getDataSource());
-            tStatus = dstm.getTransaction(tDef);
+            dbBus.beginTrans();
             if (!BeforeSave(blAddnew, id)) {
                 return ResultErr();
             }
@@ -258,7 +247,7 @@ public class BaseViewController extends BaseController {
             if (!AfterSave(blAddnew, id)) {
                 return ResultErr();
             }
-            dstm.commit(tStatus);
+            dbBus.commit();
 
             // -- 9. 返回当前行更新后的基础表数据和视图数据 --
             rsFormData = BaseViewService.getFormData(dbBus, tableName, id);
@@ -270,9 +259,15 @@ public class BaseViewController extends BaseController {
             sql = AfterReplace(sql);
             ok("dtbViewData", dbBus.getRowSet(sql, id));
         } catch (Exception e) {
+            TransactionStatus status = dbBus.getTransactionStatus();
+            if (status != null && !status.isCompleted()) {
+                try {
+                    dbBus.rollback();
+                } catch (Exception e1) {
+                    return ResultErr(e1);
+                }
+            }
             return ResultErr(e);
-        } finally {
-            rollback(tStatus);
         }
         return ResultOk();
     }
@@ -285,15 +280,13 @@ public class BaseViewController extends BaseController {
         String tableName;
 
         SqlRowSet rsView, rsFormData;
-        TransactionStatus tStatus = null;
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
             tableName = rsView.getString("table_name");
 
             // -- 2.1 beforeDelete --
-            dstm.setDataSource(dbBus.getDataSource());
-            tStatus = dstm.getTransaction(tDef);
+            dbBus.beginTrans();
             if (!BeforeDelete(id)) {
                 return ResultErr();
             }
@@ -303,16 +296,22 @@ public class BaseViewController extends BaseController {
             if (!AfterDelete(id)) {
                 return ResultErr();
             }
-            dstm.commit(tStatus);
+            dbBus.commit();
 
             if (idNext > 0) {
                 rsFormData = BaseViewService.getFormData(dbBus, tableName, idNext);
                 ok("dtbFormData", rsFormData);
             }
         } catch (Exception e) {
+            TransactionStatus status = dbBus.getTransactionStatus();
+            if (status != null && !status.isCompleted()) {
+                try {
+                    dbBus.rollback();
+                } catch (Exception e1) {
+                    return ResultErr(e1);
+                }
+            }
             return ResultErr(e);
-        } finally {
-            rollback(tStatus);
         }
         return ResultOk();
     }
@@ -325,10 +324,9 @@ public class BaseViewController extends BaseController {
         String viewPk = in("viewPk");
         String flowPk = in("flowPk");
         String buttonPk = in("buttonPk");
-        String databasePk, tableName;
+        String tableName;
 
         SqlRowSet rsView, rsFlowButton, rsFormData;
-        TransactionStatus tStatus = null;
         // ------------------------------------------------
         try {
             rsView = BaseViewService.getView(dbSys, viewPk);
@@ -338,8 +336,7 @@ public class BaseViewController extends BaseController {
             rsFlowButton.next();
 
             // -- 2.1 beforeSave --
-            dstm.setDataSource(dbBus.getDataSource());
-            tStatus = dstm.getTransaction(tDef);
+            dbBus.beginTrans();
             if (!BeforeFlowClick(id, rsFlowButton)) {
                 return ResultErr();
             }
@@ -349,7 +346,7 @@ public class BaseViewController extends BaseController {
             if (!AfterFlowClick(id, rsFlowButton)) {
                 return ResultErr();
             }
-            dstm.commit(tStatus);
+            dbBus.commit();
 
             // -- 9. 返回结果 --
             if (idNext == 0) {
@@ -358,9 +355,15 @@ public class BaseViewController extends BaseController {
             rsFormData = BaseViewService.getFormData(dbBus, tableName, idNext);
             ok("dtbFormData", rsFormData);
         } catch (Exception e) {
+            TransactionStatus status = dbBus.getTransactionStatus();
+            if (status != null && !status.isCompleted()) {
+                try {
+                    dbBus.rollback();
+                } catch (Exception e1) {
+                    return ResultErr(e1);
+                }
+            }
             return ResultErr(e);
-        } finally {
-            rollback(tStatus);
         }
         return ResultOk();
     }
@@ -369,37 +372,27 @@ public class BaseViewController extends BaseController {
         long id = inInt("id");
 
         String buttonName = in("buttonName");
-
-        TransactionStatus tStatus = null;
         // ------------------------------------------------
         try {
-            dstm.setDataSource(dbBus.getDataSource());
-            tStatus = dstm.getTransaction(tDef);
+            dbBus.beginTrans();
 
             if (!ButtonClick(id, null, buttonName)) {
                 return ResultErr();
             }
 
-            dstm.commit(tStatus);
+            dbBus.commit();
         } catch (Exception e) {
-            return ResultErr(e);
-        } finally {
-            rollback(tStatus);
-        }
-        return ResultOk();
-    }
-
-    // -- common --------------------------------------------------------------
-    private void rollback(TransactionStatus tStatus) {
-        try {
-            if (tStatus != null) {
-                if (!tStatus.isCompleted()) {
-                    dstm.rollback(tStatus);
+            TransactionStatus status = dbBus.getTransactionStatus();
+            if (status != null && !status.isCompleted()) {
+                try {
+                    dbBus.rollback();
+                } catch (Exception e1) {
+                    return ResultErr(e1);
                 }
             }
-        } catch (Exception e) {
-            err(e);
+            return ResultErr(e);
         }
+        return ResultOk();
     }
 
     // -- sub class override --------------------------------------------------

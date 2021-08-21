@@ -215,25 +215,6 @@ public class DBFactory extends JdbcTemplate {
         }
     }
 
-    @Deprecated
-    @Override
-    public void execute(final String sql) throws DataAccessException {
-        super.execute(sql);
-    }
-
-    // -- public static method ------------------------------------------------
-    public static void rollbackOld(DataSourceTransactionManager dstm, TransactionStatus tStatus) {
-        try {
-            if (tStatus != null) {
-                if (!tStatus.isCompleted()) {
-                    dstm.rollback(tStatus);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     // -- Check SQL injection -------------------------------------------------
     public static boolean checkSqlInjection(String sqlStatement) {
         // ------------------------------------------------
@@ -246,7 +227,6 @@ public class DBFactory extends JdbcTemplate {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
-        } finally {
         }
         // ------------------------------------------------
         return true;
@@ -265,7 +245,7 @@ public class DBFactory extends JdbcTemplate {
         }
         return dstm;
     }
-    private TransactionStatus getTransactionStatus() {
+    public TransactionStatus getTransactionStatus() {
         TransactionStatus transStatus = tlTs.get();
         return transStatus;
     }
