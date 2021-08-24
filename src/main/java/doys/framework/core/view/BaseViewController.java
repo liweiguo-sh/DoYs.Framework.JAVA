@@ -3,7 +3,7 @@
  * @author David.Li
  * @version 1.0
  * @create_date 2020-05-15
- * @modify_date 2021-08-21
+ * @modify_date 2021-08-24
  * 通用视图控制类, 用于通用视图
  *****************************************************************************/
 package doys.framework.core.view;
@@ -15,7 +15,6 @@ import doys.framework.util.UtilString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -259,15 +258,9 @@ public class BaseViewController extends BaseController {
             sql = AfterReplace(sql);
             ok("dtbViewData", dbBus.getRowSet(sql, id));
         } catch (Exception e) {
-            TransactionStatus status = dbBus.getTransactionStatus();
-            if (status != null && !status.isCompleted()) {
-                try {
-                    dbBus.rollback();
-                } catch (Exception e1) {
-                    return ResultErr(e1);
-                }
-            }
             return ResultErr(e);
+        } finally {
+            dbBus.endTrans();
         }
         return ResultOk();
     }
@@ -303,15 +296,9 @@ public class BaseViewController extends BaseController {
                 ok("dtbFormData", rsFormData);
             }
         } catch (Exception e) {
-            TransactionStatus status = dbBus.getTransactionStatus();
-            if (status != null && !status.isCompleted()) {
-                try {
-                    dbBus.rollback();
-                } catch (Exception e1) {
-                    return ResultErr(e1);
-                }
-            }
             return ResultErr(e);
+        } finally {
+            dbBus.endTrans();
         }
         return ResultOk();
     }
@@ -355,15 +342,9 @@ public class BaseViewController extends BaseController {
             rsFormData = BaseViewService.getFormData(dbBus, tableName, idNext);
             ok("dtbFormData", rsFormData);
         } catch (Exception e) {
-            TransactionStatus status = dbBus.getTransactionStatus();
-            if (status != null && !status.isCompleted()) {
-                try {
-                    dbBus.rollback();
-                } catch (Exception e1) {
-                    return ResultErr(e1);
-                }
-            }
             return ResultErr(e);
+        } finally {
+            dbBus.endTrans();
         }
         return ResultOk();
     }
@@ -382,15 +363,9 @@ public class BaseViewController extends BaseController {
 
             dbBus.commit();
         } catch (Exception e) {
-            TransactionStatus status = dbBus.getTransactionStatus();
-            if (status != null && !status.isCompleted()) {
-                try {
-                    dbBus.rollback();
-                } catch (Exception e1) {
-                    return ResultErr(e1);
-                }
-            }
             return ResultErr(e);
+        } finally {
+            dbBus.endTrans();
         }
         return ResultOk();
     }

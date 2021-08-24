@@ -278,15 +278,39 @@ public class DBFactory extends JdbcTemplate {
         if (dstm == null) {
             throw new CommonException("Please invoke beginTrans() first(1).");
         }
+
         TransactionStatus transStatus = getTransactionStatus();
         if (transStatus == null) {
             throw new CommonException("Please invoke beginTrans() first(2).");
+        }
+        if (transStatus.isCompleted()) {
+            throw new CommonException("The transation has completed.");
         }
 
         // -- 回滚事务 --
         dstm.rollback(transStatus);
         clearTrans();
     }
+    public void endTrans() {
+        DataSourceTransactionManager dstm = tlDstm.get();
+        if (dstm == null) {
+            // -- 如果尚未开启事务，退出 --
+            return;
+        }
+        TransactionStatus transStatus = getTransactionStatus();
+        if (transStatus == null) {
+            // -- 如果尚未开启事务，退出 --
+            return;
+        }
+        if (!transStatus.isCompleted()) {
+            // -- 如果存在未提交的事务，则强制回滚 --
+            dstm.rollback(transStatus);
+        }
+
+        // -- 清理线程锁变量 --
+        clearTrans();
+    }
+
     private void clearTrans() {
         tlDstm.remove();
         tlTs.remove();
