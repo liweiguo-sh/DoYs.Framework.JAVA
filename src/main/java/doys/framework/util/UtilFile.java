@@ -1,9 +1,11 @@
 package doys.framework.util;
 import doys.framework.a2.structure.EntityFile;
 import doys.framework.core.ex.CommonException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class UtilFile {
@@ -26,6 +28,47 @@ public class UtilFile {
             return filename.substring(idx + 1);
         }
         return "";
+    }
+    public static String removePath(String pathname) {
+        int idx;
+        String name = pathname;
+
+        idx = pathname.lastIndexOf("\\");
+        if (idx < 0) {
+            idx = pathname.lastIndexOf("/");
+        }
+
+        if (idx >= 0) {
+            name = pathname.substring(idx + 1);
+        }
+        return name;
+    }
+    public static String getSizeText(long size) {
+        float sizeValue = size;
+        String unit = "";
+
+        if (sizeValue < 1024) {
+            unit = "B";
+        }
+        else {
+            sizeValue = sizeValue / 1024;
+            if (sizeValue < 1024) {
+                unit = "K";
+            }
+            else {
+                sizeValue = sizeValue / 1024;
+                if (sizeValue < 1024) {
+                    unit = "M";
+                }
+                else {
+                    sizeValue = sizeValue / 1024;
+                    if (sizeValue < 1024) {
+                        unit = "G";
+                    }
+                }
+            }
+        }
+        return new DecimalFormat("#0.##").format(sizeValue) + unit;
     }
 
     public static ArrayList<String> readTextFile(String filename, String charset, int maxLine) throws Exception {
@@ -283,7 +326,7 @@ public class UtilFile {
         osw.flush();
     }
 
-    // -- copy\delete file -----------------------------------------------------------
+    // -- copy\delete file ----------------------------------------------------
     public static boolean copyFile(String fileSource, String fildDestination) throws Exception {
         FileInputStream fisSrc;
         FileOutputStream fosDst;
@@ -334,5 +377,29 @@ public class UtilFile {
             return file.delete();
         }
         return false;
+    }
+
+    // -- upload file ---------------------------------------------------------
+    public static String saveUploadFile(MultipartFile multipartFile, String relativePath, String name) throws Exception {
+        String path, pathname;
+
+        File file;
+        // -- 1. path -------------------------------------
+        path = UtilYml.getRunPath(relativePath);
+        file = new File(path);
+        if (!file.exists()) {
+            if (!file.mkdirs()) {
+                throw new CommonException("创建文件目录失败，请检查。");
+            }
+        }
+
+        // -- 2. pathname ---------------------------------
+        pathname = Combine(path, name);
+
+        // -- 3. save -------------------------------------
+        file = new File(pathname);
+        multipartFile.transferTo(file);
+
+        return pathname;
     }
 }

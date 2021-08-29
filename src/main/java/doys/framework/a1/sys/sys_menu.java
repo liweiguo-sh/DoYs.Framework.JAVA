@@ -11,6 +11,8 @@ import doys.framework.upgrade.db.enum1.EntityTableMatch;
 public class sys_menu extends BASE_ENTITY_AUTO {
     @EntityFieldAnnotation(length = "15")
     public String pk;
+    @EntityFieldAnnotation(length = "200", default_value = "")
+    public String url;
 
     @EntityFieldAnnotation(type = EntityFieldType.TINYINT, text = "允许重复打开")
     public int allow_multi = 0;
