@@ -329,15 +329,20 @@ public class BaseController extends BaseTop {
         _err(strErr);
     }
     protected void err(Exception e) {
+        Class<? extends Exception> clz = e.getClass();
         try {
-            logger.error("tenant_id = " + UtilTDS.getTenantId());
+            if (!clz.equals(SessionTimeoutException.class)) {
+                logger.error("SessionTimeoutException");
+            }
+            else {
+                logger.error("tenant_id = " + UtilTDS.getTenantId());
+            }
         } catch (Exception e1) {
             System.err.println("debug here: protected void err(Exception e)");
         }
 
         logger.error(e.getMessage());
 
-        Class<? extends Exception> clz = e.getClass();
         if (clz.equals(CommonException.class)
             || clz.equals(UnexpectedException.class)
             || clz.equals(UnImplementException.class)
