@@ -402,4 +402,26 @@ public class UtilFile {
 
         return pathname;
     }
+    public static String saveUploadFileTemp(MultipartFile multipartFile, String relativePath, String name) throws Exception {
+        String path, pathname;
+
+        File file;
+        // -- 1. path -------------------------------------
+        path = UtilYml.getTempPath(relativePath);
+        file = new File(path);
+        if (!file.exists()) {
+            if (!file.mkdirs()) {
+                throw new CommonException("创建文件目录失败，请检查。");
+            }
+        }
+
+        // -- 2. pathname ---------------------------------
+        pathname = Combine(path, name);
+
+        // -- 3. save -------------------------------------
+        file = new File(pathname);
+        multipartFile.transferTo(file);
+
+        return pathname;
+    }
 }

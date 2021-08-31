@@ -17,7 +17,7 @@ import java.text.DecimalFormat;
 
 public class UtilExcel {
     public static String[][] excelToArray(String fileExcel) throws Exception {
-        int rowCount, columnCount;
+        int rowMax, columnCount;
 
         String extName, cellValue;
         String[][] data;
@@ -43,16 +43,18 @@ public class UtilExcel {
         }
         // -- 2. open sheet -------------------------------
         sheet = workbook.getSheetAt(0);
-        rowCount = sheet.getLastRowNum();
-
+        rowMax = sheet.getLastRowNum();
+        if (rowMax < 0) {
+            return new String[0][0];
+        }
         rowHeader = sheet.getRow(0);
         columnCount = rowHeader.getLastCellNum();
 
-        data = new String[rowCount + 1][columnCount];
+        data = new String[rowMax + 1][columnCount];
 
         // -- 3. fill data --------------------------------
         DecimalFormat df = new DecimalFormat("0");
-        for (int iRow = 0; iRow <= rowCount; iRow++) {
+        for (int iRow = 0; iRow <= rowMax; iRow++) {
             row = sheet.getRow(iRow);
             for (int iCol = 0; iCol < columnCount; iCol++) {
                 cell = row.getCell(iCol);
