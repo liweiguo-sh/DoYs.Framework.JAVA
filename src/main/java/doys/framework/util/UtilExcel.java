@@ -71,7 +71,7 @@ public class UtilExcel {
                     }
                 }
                 else if (cellType == CellType.STRING) {
-                    cellValue = cell.getStringCellValue();
+                    cellValue = cell.getStringCellValue().trim();
                 }
                 else if (cellType == CellType.BLANK) {
                     cellValue = "";

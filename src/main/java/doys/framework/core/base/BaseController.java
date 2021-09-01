@@ -331,7 +331,7 @@ public class BaseController extends BaseTop {
     protected void err(Exception e) {
         Class<? extends Exception> clz = e.getClass();
         try {
-            if (!clz.equals(SessionTimeoutException.class)) {
+            if (clz.equals(SessionTimeoutException.class)) {
                 logger.error("SessionTimeoutException");
             }
             else {
@@ -340,8 +340,6 @@ public class BaseController extends BaseTop {
         } catch (Exception e1) {
             System.err.println("debug here: protected void err(Exception e)");
         }
-
-        logger.error(e.getMessage());
 
         if (clz.equals(CommonException.class)
             || clz.equals(UnexpectedException.class)
@@ -409,7 +407,9 @@ public class BaseController extends BaseTop {
         result.put("error", message);
 
         // ------------------------------------------------
-        logger.error("code = " + error.code + ", innerCode = " + error.innerCode);
+        if (!error.code.equals("") || !error.innerCode.equals("")) {
+            logger.error("code = " + error.code + ", innerCode = " + error.innerCode);
+        }
         logger.error(message);
 
         // ------------------------------------------------

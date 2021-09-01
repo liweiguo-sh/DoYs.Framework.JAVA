@@ -130,6 +130,13 @@ public class UtilTDS {
             throw new SessionTimeoutException();
         }
     }
+    public static String getUserKey() throws Exception {
+        try {
+            return (String) getSession().getAttribute("userPk");
+        } catch (NullPointerException e) {
+            throw new SessionTimeoutException();
+        }
+    }
     public static String getTenantDbName() throws Exception {
         int tenantId = UtilTDS.getTenantId();
 
