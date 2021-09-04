@@ -12,10 +12,10 @@ public class UtilDataTable {
         // --------------------------------------------------------------------
         rowCount = data.length - 1;
         columnCount = data[0].length;
-        sql = "SELECT '" + UtilString.arrayJoin(data[0], "', '") + "'";
+        sql = "SELECT '' " + UtilString.arrayJoin(data[0], ", '' ") + " WHERE 1 = 0";
         dtb = dbBus.getDataTable(sql);
 
-        for (int iRow = 1; iRow < rowCount; iRow++) {
+        for (int iRow = 1; iRow <= rowCount; iRow++) {
             dataRow = dtb.NewRow();
             for (int iCol = 0; iCol < columnCount; iCol++) {
                 dataRow.setDataCell(iCol + 1, data[iRow][iCol]);
