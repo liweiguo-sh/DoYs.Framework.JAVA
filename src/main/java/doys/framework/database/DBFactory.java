@@ -16,6 +16,7 @@ import org.springframework.transaction.TransactionStatus;
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class DBFactory extends JdbcTemplate {
@@ -160,6 +161,16 @@ public class DBFactory extends JdbcTemplate {
             throw e;
         }
         return result;
+    }
+    public int getIntByInsert(String sql, Object... args) throws Exception {
+        exec(sql, args);
+        Map<String, Object> map = super.queryForMap("SELECT @@identity id");
+        return Integer.parseInt(map.get("id").toString());
+    }
+    public long getLongByInsert(String sql, Object... args) throws Exception {
+        exec(sql, args);
+        Map<String, Object> map = super.queryForMap("SELECT @@identity id");
+        return Long.parseLong(map.get("id").toString());
     }
     public int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException {
         int[] result = null;

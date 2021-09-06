@@ -18,6 +18,7 @@ import java.text.DecimalFormat;
 public class UtilExcel {
     public static String[][] excelToArray(String fileExcel) throws Exception {
         int rowMax, columnCount;
+        int idxRow = 0, iRow = 0, iCol = 0;
 
         String extName, cellValue;
         String[][] data;
@@ -53,36 +54,50 @@ public class UtilExcel {
         data = new String[rowMax + 1][columnCount];
 
         // -- 3. fill data --------------------------------
-        DecimalFormat df = new DecimalFormat("0");
-        for (int iRow = 0; iRow <= rowMax; iRow++) {
-            row = sheet.getRow(iRow);
-            for (int iCol = 0; iCol < columnCount; iCol++) {
-                cell = row.getCell(iCol);
-                if (cell == null) {
-                    data[iRow][iCol] = "";
-                    continue;
-                }
-                // ----------------------------------------
-                cellType = cell.getCellType();
-                if (cellType == CellType.NUMERIC) {
-                    cellValue = df.format(cell.getNumericCellValue());
-                    if (cellValue.endsWith(".0")) {
-                        cellValue = cellValue.substring(0, cellValue.length() - 2);
-                    }
-                }
-                else if (cellType == CellType.STRING) {
-                    cellValue = cell.getStringCellValue().trim();
-                }
-                else if (cellType == CellType.BLANK) {
-                    cellValue = "";
-                }
-                else {
-                    cellValue = "???" + cellType + "???";
-                }
-                data[iRow][iCol] = cellValue;
-            }
-        }
+        try {
+            DecimalFormat df = new DecimalFormat("0");
+            for (iRow = 0; iRow <= rowMax; iRow++) {
+                row = sheet.getRow(iRow);
+                if (row == null) continue;
 
+                for (iCol = 0; iCol < columnCount; iCol++) {
+                    cell = row.getCell(iCol);
+                    if (cell == null) {
+                        data[idxRow][iCol] = "";
+                        continue;
+                    }
+                    // ----------------------------------------
+                    cellType = cell.getCellType();
+                    if (cellType == CellType.NUMERIC) {
+                        cellValue = df.format(cell.getNumericCellValue());
+                        if (cellValue.endsWith(".0")) {
+                            cellValue = cellValue.substring(0, cellValue.length() - 2);
+                        }
+                    }
+                    else if (cellType == CellType.STRING) {
+                        cellValue = cell.getStringCellValue().trim();
+                    }
+                    else if (cellType == CellType.BLANK) {
+                        cellValue = "";
+                    }
+                    else {
+                        cellValue = "???" + cellType + "???";
+                    }
+                    data[idxRow][iCol] = cellValue;
+                }
+                idxRow++;
+            }
+
+            // -- 有空行，需要去除 --
+            if (iRow > idxRow) {
+                String[][] data2 = new String[idxRow][columnCount];
+                System.arraycopy(data, 0, data2, 0, idxRow);
+                data = data2;
+            }
+        } catch (Exception e) {
+            System.err.println("iRow = " + iRow + ", iCol = " + iCol);
+            throw e;
+        }
         // -- 9. return -----------------------------------
         fis.close();
         return data;
