@@ -3,7 +3,7 @@
  * @author David.Li
  * @version 1.0
  * @create_date 2020-08-19
- * @create_date 2021-02-17
+ * @modify_date 2021-09-07
  * Excel工具类
  *****************************************************************************/
 package doys.framework.util;
@@ -21,41 +21,39 @@ public class UtilExcel {
         int idxRow = 0, iRow = 0, iCol = 0;
 
         String extName, cellValue;
-        String[][] data;
+        String[][] data, dataTemp;
 
-        FileInputStream fis;
         Workbook workbook;
         Sheet sheet;
         Row row, rowHeader;
         Cell cell;
         CellType cellType;
-        // -- 1. open workbook ----------------------------
-        fis = new FileInputStream(fileExcel);
+        DecimalFormat df = new DecimalFormat("0");
+        // ------------------------------------------------
+        try (FileInputStream fis = new FileInputStream(fileExcel)) {
+            // -- 1. open workbook ----------------------------
+            extName = UtilFile.getExtName(fileExcel);
+            if (extName.equalsIgnoreCase("xls")) {
+                workbook = new HSSFWorkbook(fis);
+            }
+            else if (extName.equalsIgnoreCase("xlsx")) {
+                workbook = new XSSFWorkbook(fis);
+            }
+            else {
+                throw new CommonException("非法的Excle文件后缀名 (" + extName + "), 请检查。");
+            }
 
-        extName = UtilFile.getExtName(fileExcel);
-        if (extName.equalsIgnoreCase("xls")) {
-            workbook = new HSSFWorkbook(fis);
-        }
-        else if (extName.equalsIgnoreCase("xlsx")) {
-            workbook = new XSSFWorkbook(fis);
-        }
-        else {
-            throw new CommonException("非法的Excle文件后缀名 (" + extName + "), 请检查。");
-        }
-        // -- 2. open sheet -------------------------------
-        sheet = workbook.getSheetAt(0);
-        rowMax = sheet.getLastRowNum();
-        if (rowMax < 0) {
-            return new String[0][0];
-        }
-        rowHeader = sheet.getRow(0);
-        columnCount = rowHeader.getLastCellNum();
+            // -- 2. open sheet -------------------------------
+            sheet = workbook.getSheetAt(0);
+            rowMax = sheet.getLastRowNum();
+            if (rowMax < 0) {
+                return new String[0][0];
+            }
+            rowHeader = sheet.getRow(0);
+            columnCount = rowHeader.getLastCellNum();
+            data = new String[rowMax + 1][columnCount];
 
-        data = new String[rowMax + 1][columnCount];
-
-        // -- 3. fill data --------------------------------
-        try {
-            DecimalFormat df = new DecimalFormat("0");
+            // -- 3. fill data --------------------------------
             for (iRow = 0; iRow <= rowMax; iRow++) {
                 row = sheet.getRow(iRow);
                 if (row == null) continue;
@@ -88,18 +86,17 @@ public class UtilExcel {
                 idxRow++;
             }
 
-            // -- 有空行，需要去除 --
+            // -- 4. 有空行，需要去除 -----------------------------
             if (iRow > idxRow) {
-                String[][] data2 = new String[idxRow][columnCount];
-                System.arraycopy(data, 0, data2, 0, idxRow);
-                data = data2;
+                dataTemp = data;
+                data = new String[idxRow][columnCount];
+                System.arraycopy(dataTemp, 0, data, 0, idxRow);
             }
         } catch (Exception e) {
             System.err.println("iRow = " + iRow + ", iCol = " + iCol);
             throw e;
         }
         // -- 9. return -----------------------------------
-        fis.close();
         return data;
     }
 }
