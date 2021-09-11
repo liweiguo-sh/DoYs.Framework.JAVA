@@ -46,6 +46,12 @@ public class ENTITY_RECORD {
             throw new CommonException("记录尚未保存。");
         }
     }
+    public int getIntId() throws Exception {
+        return Integer.parseInt(getId());
+    }
+    public long getLongId() throws Exception {
+        return Long.parseLong(getId());
+    }
 
     // ------------------------------------------------------------------------
     public String Save() throws Exception {

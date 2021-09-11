@@ -130,7 +130,7 @@ public class UtilTDS {
             throw new SessionTimeoutException();
         }
     }
-    public static String getUserKey() throws Exception {
+    public static String getUserPk() throws Exception {
         try {
             return (String) getSession().getAttribute("userPk");
         } catch (NullPointerException e) {
