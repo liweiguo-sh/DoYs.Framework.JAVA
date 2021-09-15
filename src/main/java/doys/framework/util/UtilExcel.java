@@ -3,7 +3,7 @@
  * @author David.Li
  * @version 1.0
  * @create_date 2020-08-19
- * @modify_date 2021-09-07
+ * @modify_date 2021-09-15
  * Excel工具类
  *****************************************************************************/
 package doys.framework.util;
@@ -17,8 +17,9 @@ import java.text.DecimalFormat;
 
 public class UtilExcel {
     public static String[][] excelToArray(String fileExcel) throws Exception {
-        int rowMax, columnCount;
-        int idxRow = 0, iRow = 0, iCol = 0;
+        int rowMax, columnCount;        // -- 最大行号，最大列数 --
+        int idxRow = 0;                 // -- 最大行号减去row == null的行 --
+        int iRow = 0, iCol = 0;
 
         String extName, cellValue;
         String[][] data, dataTemp;
@@ -87,6 +88,18 @@ public class UtilExcel {
             }
 
             // -- 4. 有空行，需要去除 -----------------------------
+            boolean hasValue = false;
+            for (int i = data.length - 1; i >= 0; i--) {
+                for (int j = 0; j < columnCount; j++) {
+                    if (!data[i][j].equals("")) {
+                        hasValue = true;
+                        break;
+                    }
+                }
+                if (hasValue) break;
+                idxRow--;   // -- 当前行没有有效数据 --
+            }
+
             if (iRow > idxRow) {
                 dataTemp = data;
                 data = new String[idxRow][columnCount];
