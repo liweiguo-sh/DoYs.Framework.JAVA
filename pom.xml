@@ -65,13 +65,8 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>    <!-- 只支持到 JDK8 -->
-            <groupId>org.bidib.jbidib.org.qbang.rxtx</groupId>
-            <artifactId>rxtxcomm</artifactId>
-            <version>2.2</version>
-        </dependency>
 
-        <!-- webClient -->
+        <!-- webClient，reactor-netty没用到？ -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
@@ -105,7 +100,7 @@
             <version>3.4.0</version>
         </dependency>
 
-        <!-- httpClient(待废弃) -->
+        <!-- httpClient(待废弃，已被spring-webflux替代）（当前绿客门的哗啦啦接口在用) -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
