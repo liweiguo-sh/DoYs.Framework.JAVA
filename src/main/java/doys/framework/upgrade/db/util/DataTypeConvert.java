@@ -1,5 +1,4 @@
 package doys.framework.upgrade.db.util;
-
 import doys.framework.core.ex.CommonException;
 import doys.framework.upgrade.db.enum1.EntityFieldType;
 public class DataTypeConvert {
@@ -9,7 +8,7 @@ public class DataTypeConvert {
      * @throws Exception
      */
     public static String getColumnType(EntityFieldType filedType) throws Exception {
-        String columnType = "";
+        String columnType;
 
         if (filedType == EntityFieldType.STRING) {
             columnType = "varchar";

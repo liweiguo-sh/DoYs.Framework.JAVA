@@ -8,7 +8,7 @@ import doys.framework.upgrade.db.enum1.EntityTableMatch;
 @EntityTableAnnotation(databasePk = "sys", match = EntityTableMatch.strict)
 @EntityIndexAnnotation(pk = "pk")
 public class sys_instance extends BASE_ENTITY {
-    @EntityFieldAnnotation(length = "30", comment = "主键")
+    @EntityFieldAnnotation(length = "30", not_null = true, comment = "主键")
     public String pk;
     @EntityFieldAnnotation(length = "50", text = "数据库实例名称")
     public String name;

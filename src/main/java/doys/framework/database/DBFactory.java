@@ -242,7 +242,28 @@ public class DBFactory extends JdbcTemplate {
         // ------------------------------------------------
         return true;
     }
-
+    public static String getSimpleType(String dataType) throws Exception {
+        String fieldType;
+        // ------------------------------------------------
+        dataType = dataType.toLowerCase();
+        if (dataType.contains("char") || dataType.contains("text")) {
+            fieldType = "string";
+        }
+        else if (dataType.equals("int") || dataType.equals("bigint")
+            || dataType.equals("float") || dataType.equals("double") || dataType.equals("decimal")) {
+            fieldType = "number";
+        }
+        else if (dataType.equals("datetime") || dataType.equals("date") || dataType.equals("time")) {
+            fieldType = "datetime";
+        }
+        else if (dataType.contains("tinyint") || dataType.contains("text")) {
+            fieldType = "boolean";
+        }
+        else {
+            throw new CommonException("DBFactory.getSimpleType, Unknown dataType " + dataType);
+        }
+        return fieldType;
+    }
 
     // -- Transaction ---------------------------------------------------------
     private ThreadLocal<DataSourceTransactionManager> tlDstm = new ThreadLocal<>();

@@ -50,92 +50,83 @@ public class EntityTable {
         StringBuilder sb = new StringBuilder();
 
         // ------------------------------------------------
-        try {
-            sb.append("CREATE TABLE `" + name + "` (");
-            // -- 1. 字段部分 --
-            for (EntityField field : entityFields) {
-                if (isFirstField) {
-                    isFirstField = false;
-                }
-                else {
-                    sb.append(",");
-                }
-                sb.append("\n\t`" + field.name + "` ");
+        sb.append("CREATE TABLE `" + name + "` (");
+        // -- 1. 字段部分 --
+        for (EntityField field : entityFields) {
+            if (isFirstField) {
+                isFirstField = false;
+            }
+            else {
+                sb.append(",");
+            }
+            sb.append("\n\t`" + field.name + "` ");
 
-                if (field.type == EntityFieldType.INT) {
-                    sb.append(field.type);
-                }
-                else if (field.type == EntityFieldType.TINYINT) {
-                    sb.append("tinyint");
-                }
-                else if (field.type == EntityFieldType.LONG) {
-                    sb.append("bigint");
-                }
-                else if (field.type == EntityFieldType.STRING) {
-                    sb.append("varchar(" + field.length + ")");
-                }
-                else if (field.type == EntityFieldType.FLOAT || field.type == EntityFieldType.DOUBLE) {
-                    sb.append(field.type + "(" + field.length + ")");
-                }
-                else if (field.type == EntityFieldType.DECIMAL) {
-                    sb.append(field.type + "(" + field.length + ")");
+            if (field.type == EntityFieldType.INT) {
+                sb.append(field.type);
+            }
+            else if (field.type == EntityFieldType.TINYINT) {
+                sb.append("tinyint");
+            }
+            else if (field.type == EntityFieldType.LONG) {
+                sb.append("bigint");
+            }
+            else if (field.type == EntityFieldType.STRING) {
+                sb.append("varchar(" + field.length + ")");
+            }
+            else if (field.type == EntityFieldType.FLOAT || field.type == EntityFieldType.DOUBLE) {
+                sb.append(field.type + "(" + field.length + ")");
+            }
+            else if (field.type == EntityFieldType.DECIMAL) {
+                sb.append(field.type + "(" + field.length + ")");
+            }
+            else if (field.type == EntityFieldType.DATETIME || field.type == EntityFieldType.DATE || field.type == EntityFieldType.TIME) {
+                sb.append(field.type);
+            }
+            else if (field.type == EntityFieldType.TEXT) {
+                sb.append("text");
+            }
+            else {
+                throw new CommonException("待补充代码");
+            }
+            if (field.auto) {
+                autoColName = field.name;
+                sb.append(" AUTO_INCREMENT");
+            }
+            if (field.auto || field.not_null) {
+                sb.append(" NOT NULL");
+            }
+            if (field.default_value != null) {
+                if (field.type == EntityFieldType.INT || field.type == EntityFieldType.TINYINT || field.type == EntityFieldType.LONG) {
+                    sb.append(" DEFAULT " + field.default_value);
                 }
                 else if (field.type == EntityFieldType.DATETIME || field.type == EntityFieldType.DATE || field.type == EntityFieldType.TIME) {
-                    sb.append(field.type);
-                }
-                else if (field.type == EntityFieldType.TEXT) {
-                    sb.append("text");
+                    sb.append(" DEFAULT " + field.default_value);
                 }
                 else {
-                    throw new CommonException("待补充代码");
+                    sb.append(" DEFAULT '" + field.default_value + "'");
                 }
-                if (field.auto) {
-                    autoColName = field.name;
-                    sb.append(" AUTO_INCREMENT");
-                }
-                if (field.auto || field.not_null) {
-                    sb.append(" NOT NULL");
-                }
-                if (field.default_value != null && !field.default_value.equals("")) {
-                    if (field.type == EntityFieldType.INT || field.type == EntityFieldType.TINYINT || field.type == EntityFieldType.LONG) {
-                        sb.append(" DEFAULT " + field.default_value);
-                    }
-                    else if (field.type == EntityFieldType.DATETIME || field.type == EntityFieldType.DATE || field.type == EntityFieldType.TIME) {
-                        sb.append(" DEFAULT " + field.default_value);
-                    }
-                    else {
-                        if (field.default_value.equals("''")) {
-                            sb.append(" DEFAULT ''");
-                        }
-                        else {
-                            sb.append(" DEFAULT '" + field.default_value + "'");
-                        }
-                    }
-                }
-                sb.append(" COMMENT '" + (field.text.equals("") ? field.name : field.text) + "|" + field.comment + "'");
             }
-
-            // -- 2. 索引部分 --
-            if (!autoColName.equals("")) {
-                sb.append(",\n\tPRIMARY KEY (" + autoColName + ")");
-            }
-            else if (!pk.equals("")) {
-                sb.append(",\n\tPRIMARY KEY (" + pk + ")");
-            }
-
-            for (int i = 0; i < ux.length; i++) {
-                sb.append(",\r\n\tUNIQUE INDEX ux" + (i + 1) + "_" + name + "(" + ux[i] + ")");
-            }
-            for (int i = 0; i < ix.length; i++) {
-                sb.append(",\r\n\tINDEX ix" + (i + 1) + "_" + name + "(" + ix[i] + ")");
-            }
-
-            // -- 9. end --
-            sb.append("\r\n);");
-            sqlReturn = sb.toString();
-        } catch (Exception e) {
-            throw e;
+            sb.append(" COMMENT '" + (field.text.equals("") ? field.name : field.text) + "|" + field.comment + "'");
         }
+
+        // -- 2. 索引部分 --
+        if (!autoColName.equals("")) {
+            sb.append(",\n\tPRIMARY KEY (" + autoColName + ")");
+        }
+        else if (!pk.equals("")) {
+            sb.append(",\n\tPRIMARY KEY (" + pk + ")");
+        }
+
+        for (int i = 0; i < ux.length; i++) {
+            sb.append(",\r\n\tUNIQUE INDEX ux" + (i + 1) + "_" + name + "(" + ux[i] + ")");
+        }
+        for (int i = 0; i < ix.length; i++) {
+            sb.append(",\r\n\tINDEX ix" + (i + 1) + "_" + name + "(" + ix[i] + ")");
+        }
+
+        // -- 9. end --
+        sb.append("\r\n);");
+        sqlReturn = sb.toString();
         return sqlReturn;
     }
 

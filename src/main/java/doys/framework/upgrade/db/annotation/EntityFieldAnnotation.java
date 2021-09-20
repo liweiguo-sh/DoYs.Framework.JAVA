@@ -1,5 +1,4 @@
 package doys.framework.upgrade.db.annotation;
-
 import doys.framework.upgrade.db.enum1.EntityFieldType;
 
 import java.lang.annotation.*;
@@ -22,7 +21,9 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 @Inherited
 public @interface EntityFieldAnnotation {
-    public static String datetime = "CURRENT_TIMESTAMP";    // -- 数据库时间，格式：yyyy-MM-dd HH:mm:ss --
+    public static String undefined = "__undefined__";       // -- 数据库字段默认值：未定义 --
+    public static String now = "CURRENT_TIMESTAMP";         // -- 数据库字段默认值：now，格式：yyyy-MM-dd HH:mm:ss --
+    public static String nul = "NULL";                      // -- 数据库字段默认值：null --
 
     /**
      * 字段类型
@@ -48,7 +49,7 @@ public @interface EntityFieldAnnotation {
      * 默认值
      * 数据库时间：CURRENT_TIMESTAMP
      */
-    String default_value() default "";
+    String default_value() default undefined;
 
     /**
      * 字段中文名称

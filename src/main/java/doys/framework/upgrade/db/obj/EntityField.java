@@ -1,5 +1,4 @@
 package doys.framework.upgrade.db.obj;
-
 import doys.framework.core.ex.CommonException;
 import doys.framework.upgrade.db.enum1.EntityFieldType;
 import doys.framework.upgrade.db.util.DataTypeConvert;
@@ -131,28 +130,34 @@ public class EntityField {
         if (not_null || auto) {
             sb.append(" NOT NULL");
         }
-        if (!auto && default_value != null && !default_value.equals("")) {
-            if (type == EntityFieldType.STRING) {
-                if (default_value.equals("''")) {
-                    sb.append(" DEFAULT ''");
+        if (!auto) {
+            if (default_value != null) {
+                if (type == EntityFieldType.STRING) {
+                    if (default_value.equals("")) {
+                        sb.append(" DEFAULT ''");
+                    }
+                    else {
+                        sb.append(" DEFAULT '" + default_value + "'");
+                    }
+                }
+                else if (type == EntityFieldType.INT || type == EntityFieldType.LONG || type == EntityFieldType.TINYINT
+                    || type == EntityFieldType.FLOAT || type == EntityFieldType.DOUBLE || type == EntityFieldType.DECIMAL) {
+                    if (!default_value.equals("")) {
+                        sb.append(" DEFAULT " + default_value);
+                    }
+                }
+                else if (type == EntityFieldType.DATETIME || type == EntityFieldType.DATE || type == EntityFieldType.TIME) {
+                    if (!default_value.equals("")) {
+                        sb.append(" DEFAULT " + default_value);
+                    }
+                }
+                else if (type == EntityFieldType.TEXT) {
+                    // BLOB, TEXT, GEOMETRY or JSON column  can't have a default value
+                    // do nothing
                 }
                 else {
-                    sb.append(" DEFAULT '" + default_value + "'");
+                    throw new CommonException("debug here: getAddColumnSql 2");
                 }
-            }
-            else if (type == EntityFieldType.INT || type == EntityFieldType.LONG || type == EntityFieldType.TINYINT
-                || type == EntityFieldType.FLOAT || type == EntityFieldType.DOUBLE || type == EntityFieldType.DECIMAL) {
-                sb.append(" DEFAULT " + default_value);
-            }
-            else if (type == EntityFieldType.DATETIME || type == EntityFieldType.DATE || type == EntityFieldType.TIME) {
-                sb.append(" DEFAULT " + default_value);
-            }
-            else if (type == EntityFieldType.TEXT) {
-                // BLOB, TEXT, GEOMETRY or JSON column  can't have a default value
-                // do nothing
-            }
-            else {
-                throw new CommonException("debug here: getAddColumnSql 2");
             }
         }
 

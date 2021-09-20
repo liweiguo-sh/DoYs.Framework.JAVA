@@ -8,11 +8,12 @@ import doys.framework.upgrade.db.enum1.EntityTableMatch;
 @EntityTableAnnotation(databasePk = "sys", match = EntityTableMatch.strict)
 @EntityIndexAnnotation(pk = "id", ux = { "name", "short_name" })
 public class sys_tenant extends BASE_ENTITY {
-    @EntityFieldAnnotation(length = "30", text = "数据库实例标识")
+    @EntityFieldAnnotation(length = "30", not_null = true, text = "数据库实例标识")
     public String instance_pk;
     @EntityFieldAnnotation(length = "10", text = "租户类型", comment = "F：正式租户；D：演示；T：试用；U：其它")
     public String type;
 
+    @EntityFieldAnnotation(not_null = true)
     public int id;
 
     @EntityFieldAnnotation(length = "50", text = "商户名称")

@@ -15,6 +15,7 @@ import doys.framework.upgrade.db.obj.EntityField;
 import doys.framework.upgrade.db.obj.EntityTable;
 import doys.framework.upgrade.db.util.ClassReflect;
 import doys.framework.upgrade.db.util.MySqlHelper;
+import doys.framework.util.UtilString;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import java.lang.reflect.Field;
@@ -139,6 +140,10 @@ public class UpgradeDatabaseService extends BaseService {
         entityField.name = field.getName();
         entityField.type = entityField.parseType(field.getType().getName());
 
+        if (entityField.name.equals("xxx")) {
+            System.out.println(entityField.name);
+        }
+
         // -- 1. 实体类字段属性(默认值) --
         field.setAccessible(true);
         Object defaultValue = field.get(entity);
@@ -175,6 +180,31 @@ public class UpgradeDatabaseService extends BaseService {
             }
             else if (entityField.type == EntityFieldType.DECIMAL) {
                 entityField.length = "10,2";
+            }
+        }
+
+        // -- 4. 修正默认值 --
+        if (entityField.auto) {
+            // -- do nothing --
+        }
+        else {
+            if (entityField.default_value.equals(EntityFieldAnnotation.undefined)) {
+                if (entityField.type == EntityFieldType.STRING) {
+                    entityField.default_value = "";
+                }
+                else if (entityField.type == EntityFieldType.TINYINT || entityField.type == EntityFieldType.INT || entityField.type == EntityFieldType.LONG
+                    || entityField.type == EntityFieldType.FLOAT || entityField.type == EntityFieldType.DOUBLE || entityField.type == EntityFieldType.DECIMAL) {
+                    entityField.default_value = "0";
+                }
+                else {
+                    entityField.default_value = null;
+                }
+            }
+            else if (entityField.default_value.equals(EntityFieldAnnotation.nul)) {
+                entityField.default_value = null;
+            }
+            else if (entityField.default_value.equals("''")) {
+                entityField.default_value = "";
             }
         }
 
@@ -323,13 +353,6 @@ public class UpgradeDatabaseService extends BaseService {
             }
         }
 
-        if (columnDefault == null) {
-            //columnDefault = "";
-        }
-        else if (columnDefault.equals("")) {
-            columnDefault = "''";
-        }
-
         // -- 1. 判断是否有不同，有则需要升级 --
         for (int i = 0; i < 1; i++) {
             if (!entityColumnType.equalsIgnoreCase(columnType)) {
@@ -351,9 +374,7 @@ public class UpgradeDatabaseService extends BaseService {
             if (columnNotNull != entityField.not_null) {
                 break;          // -- 1.4 是否为空 --
             }
-            if ((columnDefault != null && !columnDefault.equals(entityField.default_value))
-                || (columnDefault == null && (entityField.default_value != null && !entityField.default_value.equals("")))) {
-                logger.info(entityField.name);
+            if (!UtilString.equals(columnDefault, entityField.default_value)) {
                 break;          // -- 1.5 默认值不同 --
             }
 

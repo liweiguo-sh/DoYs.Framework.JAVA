@@ -9,7 +9,7 @@ import doys.framework.upgrade.db.enum1.EntityTableMatch;
 @EntityTableAnnotation(databasePk = "prefix", match = EntityTableMatch.strict)
 @EntityIndexAnnotation(pk = "id", ux = { "pk" })
 public class sys_group extends BASE_ENTITY_CRUD {
-    @EntityFieldAnnotation(length = "20")
+    @EntityFieldAnnotation(length = "20", not_null = true)
     public String pk;
 
     @EntityFieldAnnotation(length = "20")
