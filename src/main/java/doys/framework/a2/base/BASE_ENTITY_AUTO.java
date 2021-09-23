@@ -1,7 +1,7 @@
 package doys.framework.a2.base;
 import doys.framework.database.DBFactory;
 import doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
-import doys.framework.upgrade.db.enum1.EntityFieldType;
+import doys.framework.upgrade.db.enumeration.EntityFieldType;
 
 public class BASE_ENTITY_AUTO extends BASE_ENTITY {
     @EntityFieldAnnotation(type = EntityFieldType.INT, auto = true, not_null = true, comment = "主键")

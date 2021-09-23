@@ -1,4 +1,4 @@
-package doys.framework.upgrade.db.enum1;
+package doys.framework.upgrade.db.enumeration;
 
 public enum EntityFieldType {
     UNKNOWN,

@@ -1,7 +1,7 @@
 package doys.framework.upgrade.db.obj;
 import doys.framework.core.ex.CommonException;
-import doys.framework.upgrade.db.enum1.EntityFieldType;
-import doys.framework.upgrade.db.enum1.EntityTableMatch;
+import doys.framework.upgrade.db.enumeration.EntityFieldType;
+import doys.framework.upgrade.db.enumeration.EntityTableMatch;
 
 import java.util.ArrayList;
 
@@ -24,7 +24,7 @@ public class EntityTable {
     public int columnCount;
     public ArrayList<EntityField> entityFields = new ArrayList<>();
 
-    public void addColumnDefinition(EntityField entityField) {
+    public void addFieldDefinition(EntityField entityField) {
         this.entityFields.add(entityField);
     }
 
@@ -97,10 +97,17 @@ public class EntityTable {
             }
             if (field.default_value != null) {
                 if (field.type == EntityFieldType.INT || field.type == EntityFieldType.TINYINT || field.type == EntityFieldType.LONG) {
-                    sb.append(" DEFAULT " + field.default_value);
+                    if (field.default_value.equals("")) {
+                        sb.append(" DEFAULT 0");
+                    }
+                    else {
+                        sb.append(" DEFAULT " + field.default_value);
+                    }
                 }
                 else if (field.type == EntityFieldType.DATETIME || field.type == EntityFieldType.DATE || field.type == EntityFieldType.TIME) {
-                    sb.append(" DEFAULT " + field.default_value);
+                    if (!field.default_value.equals("")) {
+                        sb.append(" DEFAULT " + field.default_value);
+                    }
                 }
                 else {
                     sb.append(" DEFAULT '" + field.default_value + "'");

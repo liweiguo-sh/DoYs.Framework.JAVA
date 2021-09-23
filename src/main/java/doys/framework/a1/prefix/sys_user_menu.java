@@ -11,7 +11,7 @@ import doys.framework.a2.base.BASE_ENTITY;
 import doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
 import doys.framework.upgrade.db.annotation.EntityIndexAnnotation;
 import doys.framework.upgrade.db.annotation.EntityTableAnnotation;
-import doys.framework.upgrade.db.enum1.EntityTableMatch;
+import doys.framework.upgrade.db.enumeration.EntityTableMatch;
 
 @EntityTableAnnotation(databasePk = "prefix", match = EntityTableMatch.strict)
 @EntityIndexAnnotation(pk = "user_pk, menu_pk", ix = { "user_pk", "menu_pk" })

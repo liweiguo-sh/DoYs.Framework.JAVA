@@ -3,7 +3,7 @@ import doys.framework.a2.base.BASE_ENTITY_AUTO;
 import doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
 import doys.framework.upgrade.db.annotation.EntityIndexAnnotation;
 import doys.framework.upgrade.db.annotation.EntityTableAnnotation;
-import doys.framework.upgrade.db.enum1.EntityFieldType;
+import doys.framework.upgrade.db.enumeration.EntityFieldType;
 
 @EntityTableAnnotation(databasePk = "sys")
 @EntityIndexAnnotation(pk = "id", ux = { "pk" })

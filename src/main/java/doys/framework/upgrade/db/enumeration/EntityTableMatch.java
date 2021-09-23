@@ -1,4 +1,4 @@
-package doys.framework.upgrade.db.enum1;
+package doys.framework.upgrade.db.enumeration;
 public enum EntityTableMatch {
     /**
      * 精确匹配，多余字段自动删除

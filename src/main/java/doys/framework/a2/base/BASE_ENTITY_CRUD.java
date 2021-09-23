@@ -7,7 +7,7 @@
  *****************************************************************************/
 package doys.framework.a2.base;
 import doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
-import doys.framework.upgrade.db.enum1.EntityFieldType;
+import doys.framework.upgrade.db.enumeration.EntityFieldType;
 
 import java.util.Date;
 

@@ -1,6 +1,6 @@
 package doys.framework.upgrade.db.util;
 import doys.framework.core.ex.CommonException;
-import doys.framework.upgrade.db.enum1.EntityFieldType;
+import doys.framework.upgrade.db.enumeration.EntityFieldType;
 public class DataTypeConvert {
     /**
      * @param filedType 实体数据类型, 例如：String、int、java.lang.Integer、long等

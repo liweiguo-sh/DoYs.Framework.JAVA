@@ -1,4 +1,4 @@
-package doys.framework.upgrade.service;
+package doys.framework.upgrade;
 import doys.framework.common.io.ScanFile;
 import doys.framework.core.base.BaseService;
 import doys.framework.core.ex.CommonException;
@@ -8,9 +8,9 @@ import doys.framework.database.ds.UtilTDS2;
 import doys.framework.upgrade.db.annotation.EntityFieldAnnotation;
 import doys.framework.upgrade.db.annotation.EntityIndexAnnotation;
 import doys.framework.upgrade.db.annotation.EntityTableAnnotation;
-import doys.framework.upgrade.db.enum1.EntityFieldType;
-import doys.framework.upgrade.db.enum1.EntityIndexType;
-import doys.framework.upgrade.db.enum1.EntityTableMatch;
+import doys.framework.upgrade.db.enumeration.EntityFieldType;
+import doys.framework.upgrade.db.enumeration.EntityIndexType;
+import doys.framework.upgrade.db.enumeration.EntityTableMatch;
 import doys.framework.upgrade.db.obj.EntityField;
 import doys.framework.upgrade.db.obj.EntityTable;
 import doys.framework.upgrade.db.util.ClassReflect;
@@ -126,7 +126,7 @@ public class UpgradeDatabaseService extends BaseService {
             EntityField entityField = parseField(entity, arrField.get(i));
             if (entityField != null) {
                 table.columnCount++;
-                table.addColumnDefinition(entityField);
+                table.addFieldDefinition(entityField);
                 if (entityField.auto) {
                     table.pk = entityField.name;
                 }
@@ -212,7 +212,8 @@ public class UpgradeDatabaseService extends BaseService {
         return entityField;
     }
 
-    private static void upgradeTable(DBFactory dbBus, String databaseName, EntityTable entityTable) throws Exception {
+    // ------------------------------------------------------------------------
+    public static void upgradeTable(DBFactory dbBus, String databaseName, EntityTable entityTable) throws Exception {
         int result;
 
         String sql;

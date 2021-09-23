@@ -2,7 +2,7 @@ package doys.framework.upgrade.db.util;
 import doys.framework.core.ex.CommonException;
 import doys.framework.core.ex.UnImplementException;
 import doys.framework.database.DBFactory;
-import doys.framework.upgrade.db.enum1.EntityIndexType;
+import doys.framework.upgrade.db.enumeration.EntityIndexType;
 import doys.framework.upgrade.db.obj.EntityField;
 import doys.framework.util.UtilYml;
 import org.springframework.jdbc.core.JdbcTemplate;

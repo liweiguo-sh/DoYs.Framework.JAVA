@@ -1,6 +1,6 @@
 package doys.framework.upgrade.db.obj;
 import doys.framework.core.ex.CommonException;
-import doys.framework.upgrade.db.enum1.EntityFieldType;
+import doys.framework.upgrade.db.enumeration.EntityFieldType;
 import doys.framework.upgrade.db.util.DataTypeConvert;
 
 public class EntityField {

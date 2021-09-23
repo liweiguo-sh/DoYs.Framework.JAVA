@@ -1,5 +1,5 @@
 package doys.framework.upgrade.db.annotation;
-import doys.framework.upgrade.db.enum1.EntityFieldType;
+import doys.framework.upgrade.db.enumeration.EntityFieldType;
 
 import java.lang.annotation.*;
 
