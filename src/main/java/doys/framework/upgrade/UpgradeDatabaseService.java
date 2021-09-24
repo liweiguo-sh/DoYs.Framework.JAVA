@@ -89,7 +89,7 @@ public class UpgradeDatabaseService extends BaseService {
         }
         logger.info("upgrade database success, total entity table: " + entityTables.size());
     }
-    private static EntityTable parseTable(Object entity) throws Exception {
+    public static EntityTable parseTable(Object entity) throws Exception {
         EntityTable table = new EntityTable();
         EntityTableAnnotation tableProperty = entity.getClass().getAnnotation(EntityTableAnnotation.class);
         // -- 1. 判断是否实体类 --
