@@ -155,7 +155,7 @@ public class UtilRowSet {
     }
 
     // -- convertTo -----------------------------------------------------------
-    public static ArrayList toArrayList(SqlRowSet rsData) throws Exception {
+    public static ArrayList<HashMap<String, Object>> toArrayList(SqlRowSet rsData) throws Exception {
         int columnCount;
 
         String columnName, dataType, columnType;
@@ -193,5 +193,97 @@ public class UtilRowSet {
         }
         // ------------------------------------------------
         return list;
+    }
+    public static HashMap<String, Object> toHashMap(SqlRowSet rsData) throws Exception {
+        int columnCount;
+
+        String columnName, dataType, columnType;
+
+        SqlRowSetMetaData rsmd = rsData.getMetaData();
+        HashMap<String, Object> map = new HashMap<>();
+        // ------------------------------------------------
+        if (!rsData.next()) return null;
+        columnCount = rsmd.getColumnCount();
+
+        for (int i = 1; i <= columnCount; i++) {
+            columnName = rsmd.getColumnLabel(i);
+            dataType = rsmd.getColumnTypeName(i);
+            columnType = UtilRowSet.getFieldType(dataType);
+            if (columnType.equals("number")) {
+                if (dataType.equals("INT")) {
+                    map.put(columnName, rsData.getInt(i));
+                }
+                else if (dataType.equals("TINYINT")) {
+                    map.put(columnName, rsData.getInt(i) == 1);
+                }
+                else if (dataType.equals("BIGINT")) {
+                    map.put(columnName, rsData.getLong(i) == 1);
+                }
+                else if (dataType.equals("FLOAT")) {
+                    map.put(columnName, rsData.getFloat(i));
+                }
+                else if (dataType.equals("DOUBLE") || dataType.equals("DECIMAL")) {
+                    map.put(columnName, rsData.getDouble(i));
+                }
+                else {
+                    throw new UnexpectedException();
+                }
+            }
+            else {
+                map.put(columnName, rsData.getString(i));
+            }
+        }
+        // ------------------------------------------------
+        return map;
+    }
+    public static HashMap<String, Object> toHashMap(SqlRowSet rsData, String keyField, String valueField) throws Exception {
+        int columnCount;
+
+        String columnName, dataType = "", columnType = "";
+        String keyValue;
+
+        SqlRowSetMetaData rsmd = rsData.getMetaData();
+        HashMap<String, Object> map = new HashMap<>();
+        // ------------------------------------------------
+        columnCount = rsmd.getColumnCount();
+        for (int i = 1; i <= columnCount; i++) {
+            columnName = rsmd.getColumnLabel(i);
+            if (columnName.equalsIgnoreCase(valueField)) {
+                dataType = rsmd.getColumnTypeName(i);
+                columnType = UtilRowSet.getFieldType(dataType);
+                break;
+            }
+        }
+
+        // ------------------------------------------------
+        rsData.beforeFirst();
+        while (rsData.next()) {
+            keyValue = rsData.getString(keyField);
+            if (columnType.equals("number")) {
+                if (dataType.equals("INT")) {
+                    map.put(keyValue, rsData.getInt(valueField));
+                }
+                else if (dataType.equals("TINYINT")) {
+                    map.put(keyValue, rsData.getInt(valueField) == 1);
+                }
+                else if (dataType.equals("BIGINT")) {
+                    map.put(keyValue, rsData.getLong(valueField));
+                }
+                else if (dataType.equals("FLOAT")) {
+                    map.put(keyValue, rsData.getFloat(valueField));
+                }
+                else if (dataType.equals("DOUBLE") || dataType.equals("DECIMAL")) {
+                    map.put(keyValue, rsData.getDouble(valueField));
+                }
+                else {
+                    throw new UnexpectedException();
+                }
+            }
+            else {
+                map.put(keyValue, rsData.getString(valueField));
+            }
+        }
+        // ------------------------------------------------
+        return map;
     }
 }
