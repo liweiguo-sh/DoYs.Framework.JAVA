@@ -1,12 +1,10 @@
 package doys.framework.util;
-
 import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
 import doys.framework.database.ds.TenantDataSource;
 import doys.framework.database.ds.UtilTDS;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-import java.util.ArrayList;
 public class UtilString {
     /**
      * 驼峰转下划线
@@ -68,46 +66,6 @@ public class UtilString {
             string2 = trimSpace(string2);
 
             return string1.equalsIgnoreCase(string2);
-        }
-    }
-    public static String arrayJoin(String[] arrString, String symbol) throws Exception {
-        int len = arrString.length;
-
-        StringBuilder builder;
-        // ------------------------------------------------
-        if (len == 0) {
-            return "";
-        }
-        else if (len == 1) {
-            return arrString[0];
-        }
-        else {
-            builder = new StringBuilder(len + 1);
-            builder.append(arrString[0]);
-            for (int i = 1; i < len; i++) {
-                builder.append(symbol + arrString[i]);
-            }
-            return builder.toString();
-        }
-    }
-    public static String arrayJoin(ArrayList<String> list, String symbol) throws Exception {
-        int len = list.size();
-
-        StringBuilder builder;
-        // ------------------------------------------------
-        if (len == 0) {
-            return "";
-        }
-        else if (len == 1) {
-            return list.get(0);
-        }
-        else {
-            builder = new StringBuilder(len + 1);
-            builder.append(list.get(0));
-            for (int i = 1; i < len; i++) {
-                builder.append(symbol + list.get(i));
-            }
-            return builder.toString();
         }
     }
 

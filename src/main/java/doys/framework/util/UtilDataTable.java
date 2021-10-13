@@ -12,7 +12,7 @@ public class UtilDataTable {
         // --------------------------------------------------------------------
         rowCount = data.length - 1;
         columnCount = data[0].length;
-        sql = "SELECT '' " + UtilString.arrayJoin(data[0], ", '' ") + " WHERE 1 = 0";
+        sql = "SELECT '' " + UtilArray.arrayJoin(data[0], ", '' ") + " WHERE 1 = 0";
         dtb = dbBus.getDataTable(sql);
 
         for (int iRow = 1; iRow <= rowCount; iRow++) {
