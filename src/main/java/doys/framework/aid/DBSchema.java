@@ -1,20 +1,23 @@
 /*************************************************
  * Copyright (C), 2012-2017, xpas-next.com
+ * Copyright (C), 2020-2021, doys-next.com
  * @author Volant Lee.
  * @version 3.0
  * @create date 2012-07-20
- * @modify date 2017-09-12
+ * @modify date 2021-10-15
  * 解析数据库字段信息到表 ST_TALBE/ST_FIELD/ST_INDEX中, 只追加, 不删除
  */
 package doys.framework.aid;
+import doys.framework.core.base.BaseService;
 import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
 import doys.framework.database.ds.UtilTDS;
 import doys.framework.database.dtb.DataTable;
+import doys.framework.util.UtilNumber;
 import doys.framework.util.UtilRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-public class DBSchema {
+public class DBSchema extends BaseService {
     private DBFactory dbSys;
     // ------------------------------------------------------------------------
     public DBSchema(DBFactory _dbSys) {
@@ -28,7 +31,7 @@ public class DBSchema {
         // ------------------------------------------------
         tableName = tableName.toLowerCase();
         sql = "SELECT * FROM sys_database WHERE pk = ?";
-        rs = dbSys.getRowSet(sql, new Object[] { databasePk });
+        rs = dbSys.getRowSet(sql, databasePk);
         if (rs.next()) {
             databaseType = rs.getString("db_type");
             databaseName = rs.getString("name");
@@ -71,68 +74,69 @@ public class DBSchema {
         sql += "AND NOT table_name LIKE 'x_label_%' ";
         sql += "ORDER BY table_name";
 
-        try {
-            SqlRowSet rs = dbSys.getRowSet(sql);
-            sql = "SELECT * FROM sys_table WHERE database_pk = '" + databaseType + "' ";
-            if (!tableName.equals("")) {
-                sql += "AND name IN ('" + tableName.replaceAll(",", "','") + "') ";
-            }
-            sql += "ORDER BY pk";
-            dtb = dbSys.getDataTable(sql);
-            dtb.Sort("pk");
-            // -- 1. 添加新表 ---------------------------------
-            while (rs.next()) {
-                oFind[0] = rs.getString("pk");
-                nFind = dtb.Find(oFind);
-                if (nFind < 0) {
-                    drNew = dtb.NewRow();
-                    drNew.setDataCell("database_pk", databaseType);
-                    drNew.setDataCell("pk", rs.getString("pk"));
-                    drNew.setDataCell("name", rs.getString("name"));
-                    drNew.setDataCell("type", rs.getString("type"));
-                    drNew.setDataCell("text", rs.getString("name"));
-                    drNew.setRowTag("1");
-                    dtb.AddRow(drNew);
-                }
-                else {
-                    dtb.setRowTag(nFind, "1");
-                }
-            }
-            // -- 2. 删除不存在的表(禁用，当前租户库没有，其它租户库可能有) ---------
-            for (int i = dtb.getRowCount() - 1; i >= 0; i--) {
-                if (dtb.getRowTag(i).equals("")) {
-                    // -- dtb.RemoveAt(i); --
-                }
-            }
-            nResult = dtb.Update(dbSys, "sys_table", "pk");
-            if (nResult < 0) {
-                throw new CommonException("refreshDBStruct_MySQL_Table 遇到错误，请检查。");
-            }
-            // -- 3. 刷新数据表字段 ------------------------------
-            if (refreshDBStruct_MySQL_Fields(databaseType, databaseName, tableName) == false) {
-                return false;
-            }
-            // -- 4. 刷新数据表索引 ------------------------------
-            /*
-            if (refreshDBStruct_MySQL_Indexes(databasePk, databaseName, tableName) == false) {
-                return false;
-            }
-            */
-        } catch (Exception e) {
-            throw e;
-        } finally {
+        SqlRowSet rs = dbSys.getRowSet(sql);
+        sql = "SELECT * FROM sys_table WHERE database_pk = '" + databaseType + "' ";
+        if (!tableName.equals("")) {
+            sql += "AND name IN ('" + tableName.replaceAll(",", "','") + "') ";
         }
+        sql += "ORDER BY pk";
+        dtb = dbSys.getDataTable(sql);
+        dtb.Sort("pk");
+        // -- 1. 添加新表 ---------------------------------
+        while (rs.next()) {
+            if (isDynamicTable(rs.getString("name"))) {
+                // -- 动态表，不处理 --
+                // -- dbSys.exec("DELETE FROM sys_table WHERE pk = ?", rs.getString("pk")); --
+                continue;
+            }
+
+            oFind[0] = rs.getString("pk");
+            nFind = dtb.Find(oFind);
+            if (nFind < 0) {
+                drNew = dtb.NewRow();
+                drNew.setDataCell("database_pk", databaseType);
+                drNew.setDataCell("pk", rs.getString("pk"));
+                drNew.setDataCell("name", rs.getString("name"));
+                drNew.setDataCell("type", rs.getString("type"));
+                drNew.setDataCell("text", rs.getString("name"));
+                drNew.setRowTag("1");
+                dtb.AddRow(drNew);
+            }
+            else {
+                dtb.setRowTag(nFind, "1");
+            }
+        }
+        // -- 2. 删除不存在的表(禁用，当前租户库没有，其它租户库可能有) ---------
+        for (int i = dtb.getRowCount() - 1; i >= 0; i--) {
+            if (dtb.getRowTag(i).equals("")) {
+                // -- dtb.RemoveAt(i); --
+            }
+        }
+        nResult = dtb.Update(dbSys, "sys_table", "pk");
+        if (nResult < 0) {
+            throw new CommonException("refreshDBStruct_MySQL_Table 遇到错误，请检查。");
+        }
+        // -- 3. 刷新数据表字段 ------------------------------
+        if (refreshDBStruct_MySQL_Fields(databaseType, databaseName, tableName) == false) {
+            return false;
+        }
+        // -- 4. 刷新数据表索引 ------------------------------
+        /**
+         if (refreshDBStruct_MySQL_Indexes(databasePk, databaseName, tableName) == false) {
+         return false;
+         }
+         */
         return true;
     }
     private boolean refreshDBStruct_MySQL_Fields(String databasePk, String databaseName, String tableName) throws Exception {
         int nFind = 0, nResult = 0;
 
-        String sql = "";
-        String dataType = "", fieldType = "", fieldDefault = "", fieldNote = "";
+        String sql;
+        String dataType, fieldType, fieldDefault, fieldNote;
         String[] oFind = new String[1];
 
-        DataTable dtb = null;
-        DataTable.DataRow drRow = null;
+        DataTable dtb;
+        DataTable.DataRow drRow;
         // ------------------------------------------------
         sql = "SELECT * FROM sys_field WHERE SUBSTR(table_pk, 1, " + (databasePk.length() + 1) + ") = '" + databasePk + ".' ";
         if (!tableName.equals("")) {
@@ -143,7 +147,7 @@ public class DBSchema {
         dtb.Sort("pk");
 
         // -- 动态视图SQL -------------------------------------
-        sql = "SELECT CONCAT('" + databasePk + "', '.', UPPER(table_name)) table_pk, ";
+        sql = "SELECT CONCAT('" + databasePk + "', '.', UPPER(table_name)) table_pk, table_name, ";
         sql += "CONCAT('" + databasePk + "', '.', UPPER(table_name), '.', column_name) pk, column_name name, data_type, ";
         sql += "character_maximum_length len, CASE is_nullable WHEN 'YES' THEN 1 ELSE 0 END flag_nullable, ";
         sql += "CASE extra WHEN 'auto_increment' THEN 1 ELSE 0 END flag_identity, CASE column_key WHEN 'PRI' THEN 1 ELSE 0 END flag_pkey, ";
@@ -152,79 +156,75 @@ public class DBSchema {
         if (!tableName.equals("")) {
             sql += "AND table_name IN ('" + tableName.replaceAll(",", "','") + "') ";
         }
-        sql += "ORDER BY table_name, column_name, flag_pkey";
+        sql = "SELECT isc.* FROM (" + sql + ") isc INNER JOIN sys_table ON isc.table_pk = sys_table.pk ";
+        sql += "ORDER BY table_name, name, flag_pkey";
         // ------------------------------------------------
-        try {
-            SqlRowSet rs = dbSys.getRowSet(sql);
-            while (rs.next()) {
-                oFind[0] = rs.getString("pk");
-                nFind = dtb.Find(oFind);
-                if (nFind < 0) {
-                    drRow = dtb.NewRow();
-                    drRow.setDataCell("table_pk", rs.getString("table_pk"));
-                    drRow.setDataCell("pk", rs.getString("pk"));
-                    drRow.setDataCell("name", rs.getString("name"));
-                    drRow.setRowTag("1");
-                    dtb.AddRow(drRow);
-                }
-                else {
-                    drRow = dtb.Row(nFind);
-                    dtb.setRowTag(nFind, "1");
-                }
-                // -- 1、固定属性信息 --------
-                dataType = rs.getString("data_type").toLowerCase();
-                fieldType = UtilRowSet.getFieldType(dataType);
-
-                drRow.setDataCell("datatype", dataType);
-                drRow.setDataCell("type", fieldType);
+        SqlRowSet rs = dbSys.getRowSet(sql);
+        while (rs.next()) {
+            oFind[0] = rs.getString("pk");
+            nFind = dtb.Find(oFind);
+            if (nFind < 0) {
+                drRow = dtb.NewRow();
+                drRow.setDataCell("table_pk", rs.getString("table_pk"));
                 drRow.setDataCell("pk", rs.getString("pk"));
-                drRow.setDataCell("flag_pkey", rs.getString("flag_pkey"));
-                drRow.setDataCell("flag_identity", rs.getString("flag_identity"));
-                drRow.setDataCell("text", rs.getString("name"));
-                drRow.setDataCell("len", rs.getString("len"));
-                drRow.setDataCell("flag_nullable", rs.getString("flag_nullable"));
-                // -- 2、field_default --
-                fieldDefault = rs.getString("default_value");
-                drRow.setDataCell("default_value", fieldDefault);
-                // -- 3、field_remark --
-                fieldNote = rs.getString("note");
-                drRow.setDataCell("note", fieldNote);
-                if (fieldNote != null && !fieldNote.equals("")) {
-                    String[] arrRemark = fieldNote.split("\\|");
-                    drRow.setDataCell("text", arrRemark[0]);
-                    drRow.setDataCell("remark", arrRemark[arrRemark.length - 1]);
-                }
-                // -- 5、others ---------
-                if (fieldType.equalsIgnoreCase("datetime") || fieldType.equalsIgnoreCase("number")) {
-                    drRow.setDataCell("width", 90);
-                }
-                else {
-                    drRow.setDataCell("width", UtilRowSet.getColumnWidth(fieldType, drRow.DataCell("text"), Integer.parseInt(drRow.DataCell("len"))));
-                }
+                drRow.setDataCell("name", rs.getString("name"));
+                drRow.setRowTag("1");
+                dtb.AddRow(drRow);
+            }
+            else {
+                drRow = dtb.Row(nFind);
+                dtb.setRowTag(nFind, "1");
+            }
+            // -- 1、固定属性信息 --------
+            dataType = rs.getString("data_type").toLowerCase();
+            fieldType = UtilRowSet.getFieldType(dataType);
 
-                if (fieldType.equalsIgnoreCase("number")) {
-                    drRow.setDataCell("align", "right");
-                }
-                else if (fieldType.equalsIgnoreCase("datetime")) {
-                    drRow.setDataCell("align", "center");
-                }
-                else {
-                    drRow.setDataCell("align", "left");
-                }
+            drRow.setDataCell("datatype", dataType);
+            drRow.setDataCell("type", fieldType);
+            drRow.setDataCell("pk", rs.getString("pk"));
+            drRow.setDataCell("flag_pkey", rs.getString("flag_pkey"));
+            drRow.setDataCell("flag_identity", rs.getString("flag_identity"));
+            drRow.setDataCell("text", rs.getString("name"));
+            drRow.setDataCell("len", rs.getString("len"));
+            drRow.setDataCell("flag_nullable", rs.getString("flag_nullable"));
+            // -- 2、field_default --
+            fieldDefault = rs.getString("default_value");
+            drRow.setDataCell("default_value", fieldDefault);
+            // -- 3、field_remark --
+            fieldNote = rs.getString("note");
+            drRow.setDataCell("note", fieldNote);
+            if (fieldNote != null && !fieldNote.equals("")) {
+                String[] arrRemark = fieldNote.split("\\|");
+                drRow.setDataCell("text", arrRemark[0]);
+                drRow.setDataCell("remark", arrRemark[arrRemark.length - 1]);
             }
-            // -- 3、删除不存在的字段(禁用) --------------------------
-            for (int i = dtb.getRowCount() - 1; i >= 0; i--) {
-                if (dtb.getRowTag(i).equals("")) {
-                    dtb.RemoveAt(i);
-                }
+            // -- 5、others ---------
+            if (fieldType.equalsIgnoreCase("datetime") || fieldType.equalsIgnoreCase("number")) {
+                drRow.setDataCell("width", 90);
             }
-            nResult = dtb.Update(dbSys, "sys_field", "pk");
-            if (nResult < 0) {
-                throw new CommonException("刷新数据库字段过程中遇到意外错误.");
+            else {
+                drRow.setDataCell("width", UtilRowSet.getColumnWidth(fieldType, drRow.DataCell("text"), Integer.parseInt(drRow.DataCell("len"))));
             }
-        } catch (Exception e) {
-            throw e;
-        } finally {
+
+            if (fieldType.equalsIgnoreCase("number")) {
+                drRow.setDataCell("align", "right");
+            }
+            else if (fieldType.equalsIgnoreCase("datetime")) {
+                drRow.setDataCell("align", "center");
+            }
+            else {
+                drRow.setDataCell("align", "left");
+            }
+        }
+        // -- 3、删除不存在的字段(禁用) --------------------------
+        for (int i = dtb.getRowCount() - 1; i >= 0; i--) {
+            if (dtb.getRowTag(i).equals("")) {
+                dtb.RemoveAt(i);
+            }
+        }
+        nResult = dtb.Update(dbSys, "sys_field", "pk");
+        if (nResult < 0) {
+            throw new CommonException("刷新数据库字段过程中遇到意外错误.");
         }
         return true;
     }
@@ -248,5 +248,18 @@ public class DBSchema {
         dbSys.exec(sql);
         // ------------------------------------------------
         return true;
+    }
+
+    // ------------------------------------------------------------------------
+    private boolean isDynamicTable(String tableName) {
+        if (tableName.startsWith("x_")) {
+            int idx1 = tableName.indexOf("_");
+            int idx2 = tableName.lastIndexOf("_");
+            if (idx2 > idx1) {
+                String suffix = tableName.substring(idx2 + 1);
+                return UtilNumber.isInt(suffix);
+            }
+        }
+        return false;
     }
 }
