@@ -202,9 +202,9 @@ public class UtilRowSet {
         SqlRowSetMetaData rsmd = rsData.getMetaData();
         HashMap<String, Object> map = new HashMap<>();
         // ------------------------------------------------
-        if (!rsData.next()) return null;
-        columnCount = rsmd.getColumnCount();
+        if (!rsData.next()) return map;
 
+        columnCount = rsmd.getColumnCount();
         for (int i = 1; i <= columnCount; i++) {
             columnName = rsmd.getColumnLabel(i);
             dataType = rsmd.getColumnTypeName(i);
@@ -232,6 +232,10 @@ public class UtilRowSet {
             else {
                 map.put(columnName, rsData.getString(i));
             }
+        }
+
+        if (rsData.next()) {
+            throw new CommonException("UtilRowSet.toHashMap仅适用于单条记录的情况，请检查。");
         }
         // ------------------------------------------------
         return map;
