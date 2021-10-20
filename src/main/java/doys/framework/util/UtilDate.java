@@ -49,6 +49,7 @@ public class UtilDate {
         return getDateTimeDiff(startTime, LocalDateTime.now());
     }
     public static long getDateTimeDiff(LocalDateTime startTime, LocalDateTime endTime) {
+        // -- 返回 endTime - startTime 的时间差，单位：毫秒 --
         return java.time.Duration.between(startTime, endTime).toMillis();
     }
 }
