@@ -3,7 +3,7 @@
  * @author David.Li
  * @version 1.0
  * @create_date 2020-08-19
- * @modify_date 2021-09-15
+ * @modify_date 2021-11-02
  * Excel工具类
  *****************************************************************************/
 package doys.framework.util;
@@ -29,7 +29,7 @@ public class UtilExcel {
         Row row, rowHeader;
         Cell cell;
         CellType cellType;
-        DecimalFormat df = new DecimalFormat("0");
+        DecimalFormat df = new DecimalFormat("0.####");
         // ------------------------------------------------
         try (FileInputStream fis = new FileInputStream(fileExcel)) {
             // -- 1. open workbook ----------------------------
@@ -78,6 +78,9 @@ public class UtilExcel {
                     }
                     else if (cellType == CellType.BLANK) {
                         cellValue = "";
+                    }
+                    else if (cellType == CellType.FORMULA) {
+                        cellValue = String.valueOf(cell.getNumericCellValue());
                     }
                     else {
                         cellValue = "???" + cellType + "???";
