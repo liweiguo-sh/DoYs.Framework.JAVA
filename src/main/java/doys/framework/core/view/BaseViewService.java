@@ -3,7 +3,7 @@
  * @author David.Li
  * @version 1.0
  * @create_date 2020-05-15
- * @modify_date 2021-05-24
+ * @modify_date 2021-11-04
  * 通用视图服务基类, 用于通用视图
  *****************************************************************************/
 package doys.framework.core.view;
@@ -237,7 +237,7 @@ public class BaseViewService extends BaseService {
                 }
                 else if (columnType.equalsIgnoreCase("datetime")) {
                     columnValue = (String) form.get(columnName);
-                    if (columnValue.equals("")) {
+                    if (columnValue == null || columnValue.equals("")) {
                         columnValue = null;
                     }
                 }
