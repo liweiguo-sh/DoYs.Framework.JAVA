@@ -225,4 +225,13 @@ public class UtilString {
         }
         return numStr;
     }
+
+    public static int toInt(String stringValue) {
+        if (stringValue == null) return 0;
+
+        stringValue = stringValue.trim();
+        if (stringValue.equals("")) return 0;
+
+        return Integer.parseInt(stringValue);
+    }
 }

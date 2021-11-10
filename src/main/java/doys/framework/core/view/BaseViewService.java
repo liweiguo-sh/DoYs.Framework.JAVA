@@ -3,7 +3,7 @@
  * @author David.Li
  * @version 1.0
  * @create_date 2020-05-15
- * @modify_date 2021-11-04
+ * @modify_date 2021-11-10
  * 通用视图服务基类, 用于通用视图
  *****************************************************************************/
 package doys.framework.core.view;
@@ -110,7 +110,7 @@ public class BaseViewService extends BaseService {
     public static long insert(DBFactory dbBus, String tableName, HashMap form, HttpSession session) throws Exception {
         int nIdx = 0;
 
-        String sql = "SELECT * FROM " + tableName + " LIMIT 0";
+        String sql;
         String columnType, columnName, columnValue, quotes;
         StringBuilder buildField = new StringBuilder();
         StringBuilder buildValue = new StringBuilder();
@@ -129,10 +129,10 @@ public class BaseViewService extends BaseService {
                 // -- 预处理 ---------------------------------
                 if (columnName.equalsIgnoreCase("creator")) {
                     if (!form.containsKey(columnName)) {
-                        form.put(columnName, (String) session.getAttribute("userPk"));
+                        form.put(columnName, session.getAttribute("userPk"));
                     }
                     else {
-                        form.replace(columnName, (String) session.getAttribute("userPk"));
+                        form.replace(columnName, session.getAttribute("userPk"));
                     }
                 }
                 else if (columnName.equalsIgnoreCase("cdate")) {
@@ -146,6 +146,15 @@ public class BaseViewService extends BaseService {
                         if (form.get(columnName).toString().equals("")) {
                             form.replace(columnName, "0");
                         }
+                    }
+                }
+                else if (columnName.equalsIgnoreCase("id_ver")) {
+                    // -- 新增记录时，数据记录版本号为0 --
+                    if (!form.containsKey(columnName)) {
+                        form.put(columnName, 0);
+                    }
+                    else {
+                        form.replace(columnName, 0);
                     }
                 }
                 else {
@@ -197,9 +206,10 @@ public class BaseViewService extends BaseService {
         }
     }
     public static boolean update(DBFactory dbSys, DBFactory dbBus, String tableName, HashMap form, HttpSession session) throws Exception {
-        int result = 0, nIdx = 0;
+        int result, nIdx = 0;
+        long id = Long.parseLong(form.get("id").toString());
 
-        String sql = "SELECT * FROM " + tableName + " LIMIT 0";
+        String sql;
         String columnType, columnName, columnValue, quotes;
         StringBuilder builder = new StringBuilder();
         SqlRowSetMetaData rsmd;
@@ -224,6 +234,14 @@ public class BaseViewService extends BaseService {
             }
             else if (columnName.equalsIgnoreCase("mdate")) {
                 builder.append((nIdx++ == 0 ? "" : ", ") + columnName + " = now()");
+            }
+            else if (columnName.equalsIgnoreCase("id_ver")) {
+                int valueDB = dbBus.getInt("SELECT id_ver FROM " + tableName + " WHERE id = ?", 0, id);
+                int valueForm = UtilString.toInt(form.get(columnName).toString());
+                if (valueDB != valueForm) {
+                    throw new CommonException("当前记录已被修改，请关闭界面重新打开。");
+                }
+                builder.append((nIdx++ == 0 ? "" : ", ") + columnName + " = " + (valueDB + 1));
             }
             else {
                 quotes = "'";
@@ -255,7 +273,7 @@ public class BaseViewService extends BaseService {
             }
         }
 
-        builder.append(" WHERE id = " + form.get("id"));
+        builder.append(" WHERE id = " + id);
         sql = builder.toString();
 
         result = dbBus.exec(sql);
