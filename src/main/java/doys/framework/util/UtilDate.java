@@ -43,6 +43,9 @@ public class UtilDate {
     public static LocalDateTime getDateTime(String strDateTime) {
         return LocalDateTime.parse(strDateTime, DateTimeFormatter.ofPattern(Const.datetimeFormat));
     }
+    public static LocalDate getDate(String strDate) {
+        return LocalDate.parse(strDate, DateTimeFormatter.ofPattern(Const.dateFormat));
+    }
 
     // -- get diff between date/time/datetime ---------------------------------
     public static long getDateTimeDiff(LocalDateTime startTime) {
