@@ -19,6 +19,9 @@ public class ENTITY_RECORD {
     public ENTITY_RECORD(DBFactory dbBus, String tableName, String id) throws Exception {
         _ENTITY_RECORD(dbBus, tableName, id);
     }
+    public ENTITY_RECORD(DBFactory dbBus, String tableName, long id) throws Exception {
+        _ENTITY_RECORD(dbBus, tableName, String.valueOf(id));
+    }
     private void _ENTITY_RECORD(DBFactory dbBus, String tableName, String id) throws Exception {
         this.dbBus = dbBus;
         this.tableName = tableName;
@@ -46,10 +49,10 @@ public class ENTITY_RECORD {
             throw new CommonException("记录尚未保存。");
         }
     }
-    public int getIntId() throws Exception {
+    public int getIdInt() throws Exception {
         return Integer.parseInt(getId());
     }
-    public long getLongId() throws Exception {
+    public long getIdLong() throws Exception {
         return Long.parseLong(getId());
     }
 
