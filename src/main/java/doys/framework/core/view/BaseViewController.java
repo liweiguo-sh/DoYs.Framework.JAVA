@@ -159,6 +159,16 @@ public class BaseViewController extends BaseController {
         }
         return ResultOk();
     }
+    @PostMapping("/exportData")
+    private RestResult exportData() {
+        // ------------------------------------------------
+        try {
+            logger.info("exportData");
+        } catch (Exception e) {
+            return ResultErr(e);
+        }
+        return ResultOk();
+    }
 
     // -- view form -----------------------------------------------------------
     @PostMapping("/getFormSchema")
