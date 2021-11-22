@@ -7,6 +7,7 @@
  * 通用视图服务基类, 用于通用视图
  *****************************************************************************/
 package doys.framework.core.view;
+import doys.framework.core.Token;
 import doys.framework.core.base.BaseService;
 import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
@@ -15,7 +16,6 @@ import doys.framework.util.UtilString;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
-import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 
 public class BaseViewService extends BaseService {
@@ -107,7 +107,7 @@ public class BaseViewService extends BaseService {
         return dbBus.getRowSet(sql, id);
     }
 
-    public static long insert(DBFactory dbBus, String tableName, HashMap form, HttpSession session) throws Exception {
+    public static long insert(DBFactory dbBus, String tableName, HashMap form, Token token) throws Exception {
         int nIdx = 0;
 
         String sql;
@@ -129,10 +129,10 @@ public class BaseViewService extends BaseService {
                 // -- 预处理 ---------------------------------
                 if (columnName.equalsIgnoreCase("creator")) {
                     if (!form.containsKey(columnName)) {
-                        form.put(columnName, session.getAttribute("userPk"));
+                        form.put(columnName, token.getString("userPk"));
                     }
                     else {
-                        form.replace(columnName, session.getAttribute("userPk"));
+                        form.replace(columnName, token.getString("userPk"));
                     }
                 }
                 else if (columnName.equalsIgnoreCase("cdate")) {
@@ -205,7 +205,7 @@ public class BaseViewService extends BaseService {
             throw e;
         }
     }
-    public static boolean update(DBFactory dbSys, DBFactory dbBus, String tableName, HashMap form, HttpSession session) throws Exception {
+    public static boolean update(DBFactory dbSys, DBFactory dbBus, String tableName, HashMap form, Token token) throws Exception {
         int result, nIdx = 0;
         long id = Long.parseLong(form.get("id").toString());
 
@@ -230,7 +230,7 @@ public class BaseViewService extends BaseService {
             if (columnName.equalsIgnoreCase("id")) {
             }
             else if (columnName.equalsIgnoreCase("modifier")) {
-                builder.append((nIdx++ == 0 ? "" : ", ") + columnName + " = '" + session.getAttribute("userPk") + "'");
+                builder.append((nIdx++ == 0 ? "" : ", ") + columnName + " = '" + token.getString("userPk") + "'");
             }
             else if (columnName.equalsIgnoreCase("mdate")) {
                 builder.append((nIdx++ == 0 ? "" : ", ") + columnName + " = now()");

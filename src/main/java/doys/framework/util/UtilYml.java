@@ -3,7 +3,7 @@
  * @author David.Li
  * @version 1.0
  * @create_date 2020-07-07
- * @modify_date 2021-05-25
+ * @modify_date 2021-11-21
  * Yml文件读取工具类
  *****************************************************************************/
 package doys.framework.util;
@@ -21,7 +21,11 @@ public class UtilYml {
     private Environment _environment;
     private static Environment environment;
 
-    @Value("${upgrade-database.delete-field.keep-days:31}")                 // -- 默认值写法, 避免配置文件未配置该项出错 --
+    @Value("${global.token-session-timeout:1}")                          // -- 默认值写法, 避免配置文件未配置该项出错 --
+    private int _tokenSessionTimeout;
+    private static int tokenSessionTimeout;
+
+    @Value("${upgrade-database.delete-field.keep-days:31}")
     private String _deleteFieldKeepDays;
     private static String deleteFieldKeepDays;
 
@@ -43,6 +47,7 @@ public class UtilYml {
     @PostConstruct
     private void initYmlProperty() {
         environment = _environment;
+        tokenSessionTimeout = _tokenSessionTimeout;
 
         deleteFieldKeepDays = _deleteFieldKeepDays;
 
@@ -62,6 +67,9 @@ public class UtilYml {
         String port = UtilYml.getValue("server.port");
         String path = UtilYml.getValue("server.servlet.context-path");
         return "http://" + ip + ":" + port + path;
+    }
+    public static int getTimeout() {
+        return tokenSessionTimeout;
     }
 
     public static int getInt(String key) throws Exception {

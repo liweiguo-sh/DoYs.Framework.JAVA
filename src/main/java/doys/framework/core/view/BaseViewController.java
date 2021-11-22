@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -172,9 +171,9 @@ public class BaseViewController extends BaseController {
 
     // -- view form -----------------------------------------------------------
     @PostMapping("/getFormSchema")
-    private RestResult getFormSchema(@RequestBody Map<String, String> req) {
-        String viewPk = req.get("viewPk");
-        String flowPks = req.get("flowPks");
+    private RestResult getFormSchema() {
+        String viewPk = in("viewPk");
+        String flowPks = in("flowPks");
 
         SqlRowSet rsView, rsViewField, rsFlowButton, rsViewButton;
         // ------------------------------------------------
@@ -247,10 +246,10 @@ public class BaseViewController extends BaseController {
             }
             // -- 3.2. save --
             if (blAddnew) {
-                id = BaseViewService.insert(dbBus, tableName, form, this.session());
+                id = BaseViewService.insert(dbBus, tableName, form, this.getToken());
             }
             else {
-                BaseViewService.update(dbSys, dbBus, tableName, form, this.session());
+                BaseViewService.update(dbSys, dbBus, tableName, form, this.getToken());
             }
             // -- 2.3 afterSave --
             if (!AfterSave(blAddnew, id)) {
@@ -338,7 +337,7 @@ public class BaseViewController extends BaseController {
                 return ResultErr();
             }
             // -- 2.2 doFlow --
-            BaseViewService.doFlow(dbBus, tableName, id, rsFlowButton, ssValue("userPk"));
+            BaseViewService.doFlow(dbBus, tableName, id, rsFlowButton, tokenString("userPk"));
             // -- 2.3 afterDoFlow --
             if (!AfterFlowClick(id, rsFlowButton)) {
                 return ResultErr();
@@ -410,8 +409,8 @@ public class BaseViewController extends BaseController {
     protected String BeforeReplace(String sql) {
         return sql;
     }
-    private String ReplaceSql(String sql) {
-        sql = sql.replaceAll("%userPk%", ssValue("userPk"));
+    private String ReplaceSql(String sql) throws Exception {
+        sql = sql.replaceAll("%userPk%", getToken().getString("userPk"));
         return sql;
     }
     protected String AfterReplace(String sql) {

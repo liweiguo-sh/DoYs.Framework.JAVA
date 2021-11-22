@@ -10,9 +10,10 @@ import doys.framework.core.base.BaseControllerStd;
 import doys.framework.core.entity.RestResult;
 import doys.framework.system.service.MenuService;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/sys_menu")
@@ -22,7 +23,7 @@ public class Menu extends BaseControllerStd {
         SqlRowSet rsSystem;
         // ------------------------------------------------
         try {
-            rsSystem = MenuService.getSystem(dbSys, dbTenant, ssValue("sqlUserGroupPks"));
+            rsSystem = MenuService.getSystem(dbSys, dbTenant, tokenString("sqlUserGroupPks"));
 
             ok("dtbSystem", rsSystem);
         } catch (Exception e) {
@@ -32,15 +33,13 @@ public class Menu extends BaseControllerStd {
     }
 
     @PostMapping("/getMenuByUser")
-    private RestResult getMenuByUser(@RequestBody Map<String, String> req) {
-        String userPk;
-        String systemKey = req.get("systemKey");
+    private RestResult getMenuByUser() {
+        String systemKey = in("systemKey");
 
         SqlRowSet rsMenu;
         // ------------------------------------------------
         try {
-            userPk = (String) this.session().getAttribute("userPk");
-            rsMenu = MenuService.getMenuByUser(dbSys, systemKey, ssValue("sqlUserGroupPks"));
+            rsMenu = MenuService.getMenuByUser(dbSys, systemKey, tokenString("sqlUserGroupPks"));
 
             ok("dtbMenu", rsMenu);
         } catch (Exception e) {

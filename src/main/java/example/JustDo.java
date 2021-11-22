@@ -4,7 +4,6 @@ import doys.framework.core.entity.RestResult;
 import doys.framework.system.service.ViewService;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,16 +11,15 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/once")
 public class JustDo extends BaseControllerStd {
     @RequestMapping("/a")
-    public RestResult JustDoIt(@RequestBody Map<String, String> req) {
+    public RestResult JustDoIt() {
         int nMax = 1;
         try {
-            nMax = Integer.parseInt(req.get("nMaxCount"));
+            nMax = inInt("nMaxCount");
             for (int i = 1; i <= nMax; i++) {
                 logger.info("第 " + i + " 次执行开始...");
 
@@ -36,11 +34,11 @@ public class JustDo extends BaseControllerStd {
         return ResultOk();
     }
     @RequestMapping("/b")
-    public RestResult b(@RequestBody Map<String, String> req) {
+    public RestResult b() {
 
         int nMax = 1;
         try {
-            nMax = Integer.parseInt(req.get("nMaxCount"));
+            nMax = inInt("nMaxCount");
             dbSys.exec("DELETE FROM customer");
 
             int[] result;
@@ -65,7 +63,7 @@ public class JustDo extends BaseControllerStd {
                 dbSys.exec("DELETE FROM customer");
 
                 ArrayList<Customer> customers = new ArrayList<Customer>();
-                nMax = Integer.parseInt(req.get("nMaxCount"));
+                nMax = inInt("nMaxCount");
                 for (int j = 1; j <= 30000; j++) {
                     Customer c = new Customer();
                     c.setCustId(i * 10000 + j);

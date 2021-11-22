@@ -3,9 +3,18 @@ import doys.framework.a0.Const;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 public class UtilDate {
+    public static long getMilliSecond() {
+        return getMilliSecond(LocalDateTime.now());
+    }
+    public static long getMilliSecond(LocalDateTime ldt) {
+        // -- 取毫秒数 --
+        return ldt.toInstant(ZoneOffset.of("+8")).toEpochMilli();
+    }
+
     // -- get string from date/time/datetime ----------------------------------
     public static String getDateStr() {
         return getDateStr(null, null);
@@ -41,7 +50,12 @@ public class UtilDate {
 
     // -- get date/time/datetime from string ----------------------------------
     public static LocalDateTime getDateTime(String strDateTime) {
-        return LocalDateTime.parse(strDateTime, DateTimeFormatter.ofPattern(Const.datetimeFormat));
+        String format = Const.datetimeFormat;
+        if (strDateTime.length() > format.length()) {
+            strDateTime = strDateTime.substring(0, format.length());
+        }
+
+        return LocalDateTime.parse(strDateTime, DateTimeFormatter.ofPattern(format));
     }
     public static LocalDate getDate(String strDate) {
         return LocalDate.parse(strDate, DateTimeFormatter.ofPattern(Const.dateFormat));

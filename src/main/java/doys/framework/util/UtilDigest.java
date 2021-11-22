@@ -1,4 +1,5 @@
 package doys.framework.util;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 public class UtilDigest {
@@ -8,10 +9,10 @@ public class UtilDigest {
         try {
             StringBuilder sb = new StringBuilder();
             MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] array = md.digest((strString).getBytes("UTF-8"));
+            byte[] array = md.digest((strString).getBytes(StandardCharsets.UTF_8));
 
-            for (int i = 0; i < array.length; ++i) {
-                sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1, 3));
+            for (byte b : array) {
+                sb.append(Integer.toHexString((b & 0xFF) | 0x100).substring(1, 3));
             }
             return sb.toString();
         } catch (Exception e) {

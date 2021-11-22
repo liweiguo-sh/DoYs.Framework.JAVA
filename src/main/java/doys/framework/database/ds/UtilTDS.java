@@ -3,7 +3,7 @@
  * @author David.Li
  * @version 1.0
  * @create_date 2020-07-07
- * @create_date 2021-02-23
+ * @create_date 2021-11-22
  * TDS(Tenant Data Source)商户动态数据源工具类
  *****************************************************************************/
 package doys.framework.database.ds;
@@ -154,6 +154,9 @@ public class UtilTDS {
     }
 
     // -- DBFactory -----------------------------------------------------------
+    public static DBFactory getDbSys() {
+        return dbSys;
+    }
     public static DBFactory getDBFactory(int tenantId) throws Exception {
         return new DBFactory(getDatasource(tenantId));
     }

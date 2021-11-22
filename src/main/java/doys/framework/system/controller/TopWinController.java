@@ -23,8 +23,8 @@ public class TopWinController extends BaseControllerStd {
             tenantId = UtilTDS.getTenantId();
 
             ok("tenantId", tenantId);
-            ok("userPk", ssValue("userPk"));
-            ok("userName", ssValue("userName"));
+            ok("userPk", tokenString("userPk"));
+            ok("userName", tokenString("userName"));
         } catch (Exception e) {
             return ResultErr(e);
         }

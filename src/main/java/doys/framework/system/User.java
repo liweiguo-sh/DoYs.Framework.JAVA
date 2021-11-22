@@ -4,9 +4,14 @@
  * Create Date: 2020-04-10
  * Modify Date: 2021-02-23
  * Description: 用户登录
+ *
+ * Modify Date: 2021-11-22
+ * 改为token模式
  *****************************************************************************/
 package doys.framework.system;
 import doys.framework.common.image.ImageVerifyCode;
+import doys.framework.core.Token;
+import doys.framework.core.TokenService;
 import doys.framework.core.base.BaseControllerStd;
 import doys.framework.core.entity.RestResult;
 import doys.framework.util.UtilDate;
@@ -49,21 +54,18 @@ public class User extends BaseControllerStd {
         // ------------------------------------------------
         try {
             // -- 0. read tenant infomation --
-            tenantId = parseTenantId(in("tenantId"));
+            tenantId = parseTenantId(head("tenantId"));
             rsTenant = UserService.getTenant(dbSys, tenantId);
-            if (rsTenant.next()) {
-                session().setAttribute("tenantId", tenantId);
-                session().setAttribute("tenantName", rsTenant.getString("name"));
-                session().setAttribute("tenantShortName", rsTenant.getString("short_name"));
-                session().setAttribute("tenantExpDate", rsTenant.getString("exp_date"));
-            }
-            else {
+            if (!rsTenant.next()) {
                 return ResultErr("企业代码不正确，请检查。");
             }
 
             // -- 1.1 验证验证码 --
             if (blVerifyCode) {
-                verifyCodeSession = ssValue("verifyCode");
+                HttpSession ss = request().getSession();
+                if (ss.getAttribute("verifyCode") != null) {
+                    verifyCodeSession = (String) ss.getAttribute("verifyCode");
+                }
                 if (verifyCodeSession.equals("")) {
                     return ResultErr("会话已超时，请刷新登录页面。");
                 }
@@ -81,10 +83,10 @@ public class User extends BaseControllerStd {
             // -- 2. 返回用户信息 --
             rsUser = UserService.getUser(dbTenant, userPk);
             if (rsUser.next()) {
-                setSession(rsUser);
-                if (!ssBoolean("isDeveloper") && rsUser.getInt("flag_menu_overdue") == 1) {
+                setToken(rsTenant, rsUser);
+                if (!tokenBoolean("isDeveloper") && rsUser.getInt("flag_menu_overdue") == 1) {
                     // -- 如果不是开发人员并且访问菜单的配置已过期，重新计算用户可访问菜单 --
-                    UserService.recalUserMenu(dbTenant, userPk, ssValue("sqlUserGroupPks"));
+                    UserService.recalUserMenu(dbTenant, userPk, tokenString("sqlUserGroupPks"));
                 }
             }
             else {
@@ -142,26 +144,39 @@ public class User extends BaseControllerStd {
         tenantId = Integer.parseInt(tenantIdString);
         return tenantId;
     }
-    private void setSession(SqlRowSet rsUser) throws Exception {
+    private void setToken(SqlRowSet rsTenant, SqlRowSet rsUser) throws Exception {
+        int tenantId;
+
         String sql;
         String userPk, userName;
         String strGroupPks = "";
         String sqlGroupPks = "", sqlUserGroupPks = "";
 
-        HttpSession ss = session();
+        Token tss;
         SqlRowSet rsGroupUser;
-        // ------------------------------------------------
+        // -- 1. create tokenSession -------------------------
+        rsTenant.first();
+        tenantId = rsTenant.getInt("id");
+
         rsUser.first();
         userPk = rsUser.getString("pk");
         userName = rsUser.getString("name");
 
+        // -- 2. ------------------------------------------
+        tss = TokenService.createToken(tenantId, userPk);
+        tss.setValue("tenantId", tenantId);
+        tss.setValue("tenantName", rsTenant.getString("name"));
+        tss.setValue("tenantShortName", rsTenant.getString("short_name"));
+        tss.setValue("tenantExpDate", rsTenant.getString("exp_date"));
+        tss.setValue("userPk", userPk);
+        tss.setValue("userName", userName);
+        super.entityRequest().header.setValue("token", tss.tokenId);
+
+        ok("token", tss.tokenId);
         ok("userPk", userPk);
         ok("userName", userName);
 
-        ss.setAttribute("userPk", userPk);
-        ss.setAttribute("userName", userName);
-
-        // ------------------------------------------------
+        // -- 3. ------------------------------------------
         sql = "SELECT group_pk FROM sys_group_user WHERE user_pk = ?";
         rsGroupUser = dbTenant.getRowSet(sql, userPk);
         while (rsGroupUser.next()) {
@@ -176,9 +191,10 @@ public class User extends BaseControllerStd {
         else {
             sqlUserGroupPks = "'" + userPk + "'";
         }
+
+        tss.setValue("sqlGroupPks", sqlGroupPks);
+        tss.setValue("sqlUserGroupPks", sqlUserGroupPks);
+        tss.setValue("isDeveloper", (sqlUserGroupPks.contains("'developer'") || sqlUserGroupPks.contains("'developers'")));
         ok("groupPks", strGroupPks);
-        ss.setAttribute("sqlGroupPks", sqlGroupPks);
-        ss.setAttribute("sqlUserGroupPks", sqlUserGroupPks);
-        ss.setAttribute("isDeveloper", (sqlUserGroupPks.contains("'developer'") || sqlUserGroupPks.contains("'developers'")));
     }
 }

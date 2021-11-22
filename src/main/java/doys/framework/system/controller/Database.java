@@ -10,19 +10,14 @@ import doys.framework.aid.DBSchema;
 import doys.framework.core.base.BaseControllerSys;
 import doys.framework.core.entity.RestResult;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/system/database")
 public class Database extends BaseControllerSys {
     @PostMapping("/refresh")
-    public RestResult refreshDBStruct(@RequestBody Map<String, String> req) {
-        String para1 = req.get("para1");
-        // ------------------------------------------------
+    public RestResult refreshDBStruct() {
         try {
             DBSchema schema = new DBSchema(dbSys);
             schema.refreshDBStruct("prefix", "");

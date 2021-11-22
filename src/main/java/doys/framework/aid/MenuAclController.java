@@ -12,14 +12,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class MenuAclController extends BaseControllerStd {
     @RequestMapping("/getGroupAndUserAndMenu")
     private RestResult getGroupAndUserAndMenu() {
-        boolean isDeveloper = ssBoolean("isDeveloper");
+        boolean isDeveloper;
         String sql, sqlSystem, sqlMenu;
-        String busDB;
-        String userPk = ssValue("userPk");
+        String busDB, userPk;
 
         SqlRowSet rsGroup, rsUser, rsMenu;
         // ------------------------------------------------
         try {
+            isDeveloper = getToken().getBoolean("isDeveloper");
+            userPk = getToken().getString("userPk");
+
             sql = "SELECT id, pk, name FROM sys_group WHERE flag_built_in = 0 ORDER BY flag_built_in DESC, pk";
             rsGroup = dbTenant.getRowSet(sql);
             ok("dtbGroup", rsGroup);
