@@ -55,4 +55,22 @@ public class UtilArray {
         // ------------------------------------------------
         return false;
     }
+
+    public static String[][] arrayListToArray(ArrayList<ArrayList<Object>> list) {
+        int rowCount = list.size();
+        if (rowCount == 0) {
+            return new String[0][0];
+        }
+        int colCount = list.get(0).size();
+        String[][] arr = new String[rowCount][colCount];
+
+        ArrayList<Object> listRow;
+        for (int iRow = 0; iRow < rowCount; iRow++) {
+            listRow = list.get(iRow);
+            for (int iCol = 0; iCol < colCount; iCol++) {
+                arr[iRow][iCol] = listRow.get(iCol).toString();
+            }
+        }
+        return arr;
+    }
 }
