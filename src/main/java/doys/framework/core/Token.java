@@ -13,6 +13,7 @@ import doys.framework.util.UtilDate;
 import doys.framework.util.UtilYml;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 
 public class Token {
@@ -27,17 +28,20 @@ public class Token {
 
     private HashMap<String, Object> mapValue = new HashMap<>();
     // -- check timeout & renew ---------------------------
+    public LocalDateTime getExpTime() {
+        return dtRenew.plus(UtilYml.getTimeout(), ChronoUnit.MINUTES);
+    }
     public boolean checkTimeout() throws Exception {
-        if (UtilDate.getDateTimeDiff(dtRenew) / 1000 / 60 > UtilYml.getTimeout()) {
+        if (UtilDate.getDateTimeDiff(dtRenew) / 1000 / 60 > (UtilYml.getTimeout() + 60)) {
             return true;   // -- timeout --
         }
 
         // -- renew ---------------------------------------
         if (UtilDate.getDateTimeDiff(dtRenew) / 1000 / 60 > RENEW_MINITUS) {
-            String sql = "UPDATE sys_token SET renew_time = ? WHERE token = ?";
+            String sql = "UPDATE sys_token SET renew_time = NOW() WHERE token_id = ?";
             DBFactory dbSys = UtilTDS.getDbSys();
 
-            dbSys.exec(sql, UtilDate.getDateTimeStr());
+            dbSys.exec(sql, tokenId);
             dtRenew = LocalDateTime.now();
         }
         return false;

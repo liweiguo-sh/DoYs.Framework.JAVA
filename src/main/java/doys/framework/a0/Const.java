@@ -18,4 +18,20 @@ public class Const {
     public static int MAX_MENU_LEVEL = 4;       // -- 系统最大支持 3 级菜单(注：第一级菜单是子系统) --
     public static int MAX_PAGE_ROWS = 100;      // -- 视图每页数据行数 --
     // ------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------
+    public static String ERR_TENANT_ID = "S01";
+    public static String ERROR_TENANT_ID = "参数[tenantId]为空或不存在";
+
+    public static String ERR_NO_TOKEN = "S05";
+    public static String ERROR_NO_TOKEN = "参数[token]为空或不存在";
+    public static String ERR_TIMEOUT = "S06";
+    public static String ERROR_TIMEOUT = "token已过期";
+
+    public static String ERR_USER_NAME = "S11";
+    public static String ERROR_USER_NAME = "参数[username]为空或不存在";
+    public static String ERR_APP_SECRET = "S12";
+    public static String ERROR_APP_SECRET = "参数[app_secret]为空或不正确";
+
+
 }

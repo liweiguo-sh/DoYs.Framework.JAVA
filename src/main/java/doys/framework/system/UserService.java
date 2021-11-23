@@ -6,7 +6,27 @@ import doys.framework.database.DBFactory;
 import doys.framework.util.UtilDigest;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class UserService extends BaseService {
+    public static int parseTenantId(String tenantIdString) {
+        int tenantId = -1;
+        try {
+            if (tenantIdString != null && !tenantIdString.equals("")) {
+                Pattern pattern = Pattern.compile("\\d+");
+                Matcher matcher = pattern.matcher(tenantIdString);
+
+                while (matcher.find()) {
+                    tenantIdString = matcher.group();
+                }
+                tenantId = Integer.parseInt(tenantIdString);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return tenantId;
+    }
     public static SqlRowSet getTenant(DBFactory dbBus, int tenantId) throws Exception {
         String sql = "SELECT * FROM sys_tenant WHERE id = ?";
         return dbBus.getRowSet(sql, tenantId);

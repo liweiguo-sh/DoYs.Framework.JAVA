@@ -3,6 +3,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import doys.framework.core.Token;
 import doys.framework.core.TokenService;
 import doys.framework.core.base.BaseTop;
+import doys.framework.system.UserService;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -11,8 +12,6 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class TokenInterceptor extends BaseTop implements HandlerInterceptor {
     @Override
@@ -61,19 +60,23 @@ public class TokenInterceptor extends BaseTop implements HandlerInterceptor {
     private void responseNoToken(HttpServletResponse response) throws Exception {
         HashMap<String, Object> map = new HashMap<>();
         map.put("ok", false);
-        map.put("error", "no token");
+        map.put("code", Const.ERR_NO_TOKEN);
+        map.put("error", Const.ERROR_NO_TOKEN);
 
         ObjectMapper mapper = new ObjectMapper();
         String responseString = mapper.writeValueAsString(map);
+        response.setHeader("Content-Type", "application/json;charset=utf-8");
         response.getWriter().write(responseString);
     }
     private void responseTimeout(HttpServletResponse response) throws Exception {
         HashMap<String, Object> map = new HashMap<>();
         map.put("ok", false);
-        map.put("error", "token timeout");
+        map.put("code", Const.ERR_TIMEOUT);
+        map.put("error", Const.ERROR_TIMEOUT);
 
         ObjectMapper mapper = new ObjectMapper();
         String responseString = mapper.writeValueAsString(map);
+        response.setHeader("Content-Type", "application/json;charset=utf-8");
         response.getWriter().write(responseString);
     }
 
@@ -90,20 +93,10 @@ public class TokenInterceptor extends BaseTop implements HandlerInterceptor {
 
     // ------------------------------------------------------------------------
     private int getTenantId(HttpServletRequest request) {
-        int tenantId = 0;
-        String tenantIdString = request.getHeader("tenantId");
-
-        if (tenantIdString != null && !tenantIdString.equals("")) {
-            Pattern pattern = Pattern.compile("\\d+");
-            Matcher matcher = pattern.matcher(tenantIdString);
-
-            while (matcher.find()) {
-                tenantIdString = matcher.group();
-            }
-            tenantId = Integer.parseInt(tenantIdString);
+        int tenantId = UserService.parseTenantId(request.getHeader("tenantId"));
+        if (tenantId > 0) {
+            request.getSession().setAttribute("tenantId", tenantId);
         }
-
-        request.getSession().setAttribute("tenantId", tenantId);
         return tenantId;
     }
     private String getTokenId(HttpServletRequest request) {

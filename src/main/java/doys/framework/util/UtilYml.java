@@ -21,7 +21,7 @@ public class UtilYml {
     private Environment _environment;
     private static Environment environment;
 
-    @Value("${global.token-session-timeout:1}")                          // -- 默认值写法, 避免配置文件未配置该项出错 --
+    @Value("${global.token-session-timeout:1440}")                          // -- 默认值写法, 避免配置文件未配置该项出错 --
     private int _tokenSessionTimeout;
     private static int tokenSessionTimeout;
 

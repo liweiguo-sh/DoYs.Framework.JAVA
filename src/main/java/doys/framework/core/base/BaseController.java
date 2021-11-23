@@ -89,10 +89,10 @@ public class BaseController extends BaseTop {
     protected int headInt(String headName, int defaultValue) throws Exception {
         return entityRequest().header.getInt(headName, defaultValue);
     }
-    protected String head(String headName) throws Exception {
+    protected String head(String headName) {
         return entityRequest().header.getString(headName, "");
     }
-    protected String head(String headName, String defaultValue) throws Exception {
+    protected String head(String headName, String defaultValue) {
         return entityRequest().header.getString(headName, defaultValue);
     }
 
@@ -139,7 +139,7 @@ public class BaseController extends BaseTop {
     protected String in(String parameterName) {
         return entityRequest().body.getString(parameterName, "");
     }
-    protected String in(String parameterName, String defaultValue) throws Exception {
+    protected String in(String parameterName, String defaultValue) {
         return entityRequest().body.getString(parameterName, defaultValue);
     }
     protected Object inObject(String parameterName) throws Exception {
@@ -252,6 +252,11 @@ public class BaseController extends BaseTop {
     }
     protected RestResult ResultErr(Exception e) {
         err(e);
+        return _ResultErr();
+    }
+    protected RestResult ResultErr(String strCode, String strErr) {
+        code(strCode);
+        err(strErr);
         return _ResultErr();
     }
     protected RestResult ResultErr(String strErr) {

@@ -2,18 +2,21 @@
  * Copyright 2020-2021, doys-next.com
  * Author: David.Li
  * Create Date: 2020-04-10
- * Modify Date: 2021-02-23
+ * Modify Date: 2021-11-23
  * Description: 用户登录
  *
  * Modify Date: 2021-11-22
  * 改为token模式
  *****************************************************************************/
 package doys.framework.system;
+import doys.framework.a0.Const;
 import doys.framework.common.image.ImageVerifyCode;
 import doys.framework.core.Token;
 import doys.framework.core.TokenService;
 import doys.framework.core.base.BaseControllerStd;
 import doys.framework.core.entity.RestResult;
+import doys.framework.database.DBFactory;
+import doys.framework.database.ds.UtilTDS;
 import doys.framework.util.UtilDate;
 import doys.framework.util.UtilYml;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,8 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/user")
@@ -40,8 +41,56 @@ public class User extends BaseControllerStd {
     private String superPassword;
 
     // ------------------------------------------------------------------------
+    @PostMapping("/getToken")
+    private RestResult loginByApi() {
+        int tenantId = UserService.parseTenantId(in("tenantId", "0"));
+
+        String sql;
+        String userPk = in("username");
+        String password = in("appSecret");
+
+        SqlRowSet rsTenant, rsUser;
+        DBFactory dbBus;
+        Token token;
+        // ------------------------------------------------
+        try {
+            // -- 1. 验证商户 --
+            sql = "SELECT id FROM sys_tenant WHERE id = ?";
+            rsTenant = dbSys.getRowSet(sql, tenantId);
+            if (!rsTenant.next()) {
+                return ResultErr(Const.ERR_TENANT_ID, Const.ERROR_TENANT_ID);
+            }
+
+            // -- 2. 验证用户 --
+            dbBus = UtilTDS.getDBFactory(tenantId);
+            sql = "SELECT password FROM sys_user WHERE pk = ?";
+            rsUser = dbBus.getRowSet(sql, userPk);
+            if (rsUser.next()) {
+                if (!rsUser.getString("password").equalsIgnoreCase(password)) {
+                    return ResultErr(Const.ERR_APP_SECRET, Const.ERROR_APP_SECRET);
+                }
+            }
+            else {
+                return ResultErr(Const.ERR_USER_NAME, Const.ERROR_USER_NAME);
+            }
+
+            // -- 3. 创建token --
+            token = TokenService.createToken(tenantId, userPk);
+            token.setValue("tenantId", tenantId);
+            token.setValue("userPk", userPk);
+            ok("token", token.tokenId);
+            ok("expTime", UtilDate.getDateTimeStr(token.getExpTime()));
+
+            // -- 9. 登录日志 --
+            logger.info("用户 " + tenantId + "\\" + userPk + " 获取token[" + token.tokenId + "]成功 (" + UtilDate.getDateTimeString() + ")");
+        } catch (Exception e) {
+            return ResultErr(e);
+        }
+        return ResultOk();
+    }
+    // ------------------------------------------------------------------------
     @PostMapping("/login")
-    private RestResult login() {
+    private RestResult loginByWeb() {
         int tenantId;
 
         String userPk = in("userPk");
@@ -54,7 +103,7 @@ public class User extends BaseControllerStd {
         // ------------------------------------------------
         try {
             // -- 0. read tenant infomation --
-            tenantId = parseTenantId(head("tenantId"));
+            tenantId = UserService.parseTenantId(head("tenantId"));
             rsTenant = UserService.getTenant(dbSys, tenantId);
             if (!rsTenant.next()) {
                 return ResultErr("企业代码不正确，请检查。");
@@ -100,7 +149,6 @@ public class User extends BaseControllerStd {
         }
         return ResultOk();
     }
-
     @GetMapping("/getVerifyCode")
     private RestResult getVerifyCode(HttpSession ss) {
         int w = 150, h = 40;
@@ -133,17 +181,6 @@ public class User extends BaseControllerStd {
     }
 
     // ------------------------------------------------------------------------
-    private int parseTenantId(String tenantIdString) {
-        int tenantId;
-        Pattern pattern = Pattern.compile("\\d+");
-        Matcher matcher = pattern.matcher(tenantIdString);
-
-        while (matcher.find()) {
-            tenantIdString = matcher.group();
-        }
-        tenantId = Integer.parseInt(tenantIdString);
-        return tenantId;
-    }
     private void setToken(SqlRowSet rsTenant, SqlRowSet rsUser) throws Exception {
         int tenantId;
 
