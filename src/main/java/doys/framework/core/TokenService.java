@@ -62,28 +62,28 @@ public class TokenService extends BaseService {
     public static Token getToken(String tokenId) throws Exception {
         String sql;
 
-        Token tss = null;
+        Token token = null;
         SqlRowSet rsSession;
         DBFactory dbSys;
         // ------------------------------------------------
         if (mapToken.containsKey(tokenId)) {
-            tss = mapToken.get(tokenId);
+            token = mapToken.get(tokenId);
         }
         else {
             dbSys = UtilTDS.getDbSys();
             sql = "SELECT * FROM sys_token WHERE token_id = ?";
             rsSession = dbSys.getRowSet(sql, tokenId);
             if (rsSession.next()) {
-                tss = new Token();
-                tss.tokenId = tokenId;
-                tss.tenantId = rsSession.getInt("tenant_id");
-                tss.userPk = rsSession.getString("user_pk");
-                tss.dtLogin = UtilDate.getDateTime(rsSession.getString("login_time"));
-                tss.dtRenew = UtilDate.getDateTime(rsSession.getString("renew_time"));
-                mapToken.put(tokenId, tss);
+                token = new Token();
+                token.tokenId = tokenId;
+                token.tenantId = rsSession.getInt("tenant_id");
+                token.userPk = rsSession.getString("user_pk");
+                token.dtLogin = UtilDate.getDateTime(rsSession.getString("login_time"));
+                token.dtRenew = UtilDate.getDateTime(rsSession.getString("renew_time"));
+                mapToken.put(tokenId, token);
             }
         }
-        return tss;
+        return token;
     }
     public static void deleteTokenSession(String token) throws Exception {
         String sql;

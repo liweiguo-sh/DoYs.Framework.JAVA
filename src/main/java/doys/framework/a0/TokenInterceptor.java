@@ -16,7 +16,7 @@ import java.util.HashMap;
 public class TokenInterceptor extends BaseTop implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        int tenantId;
+        int tenantId = 0;
         String clz, tokenId;
 
         HandlerMethod handlerMethod;
@@ -24,7 +24,16 @@ public class TokenInterceptor extends BaseTop implements HandlerInterceptor {
         // ------------------------------------------------
         try {
             tokenId = getTokenId(request);
-            tenantId = getTenantId(request);
+            if (!tokenId.equals("")) {
+                Token token = TokenService.getToken(tokenId);
+                if (token != null) {
+                    tenantId = token.tenantId;
+                    request.getSession().setAttribute("tenantId", tenantId);
+                }
+            }
+            if (tenantId <= 0) {
+                tenantId = getTenantId(request);
+            }
 
             if (handler instanceof HandlerMethod) {
                 handlerMethod = (HandlerMethod) handler;
