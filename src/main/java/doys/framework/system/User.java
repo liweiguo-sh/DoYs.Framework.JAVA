@@ -2,7 +2,7 @@
  * Copyright 2020-2021, doys-next.com
  * Author: David.Li
  * Create Date: 2020-04-10
- * Modify Date: 2021-11-23
+ * Modify Date: 2021-11-25
  * Description: 用户登录
  *
  * Modify Date: 2021-11-22
@@ -189,7 +189,7 @@ public class User extends BaseControllerStd {
         String strGroupPks = "";
         String sqlGroupPks = "", sqlUserGroupPks = "";
 
-        Token tss;
+        Token token;
         SqlRowSet rsGroupUser;
         // -- 1. create tokenSession -------------------------
         rsTenant.first();
@@ -200,16 +200,16 @@ public class User extends BaseControllerStd {
         userName = rsUser.getString("name");
 
         // -- 2. ------------------------------------------
-        tss = TokenService.createToken(tenantId, userPk);
-        tss.setValue("tenantId", tenantId);
-        tss.setValue("tenantName", rsTenant.getString("name"));
-        tss.setValue("tenantShortName", rsTenant.getString("short_name"));
-        tss.setValue("tenantExpDate", rsTenant.getString("exp_date"));
-        tss.setValue("userPk", userPk);
-        tss.setValue("userName", userName);
-        super.entityRequest().header.setValue("token", tss.tokenId);
+        token = TokenService.createToken(tenantId, userPk);
+        token.setValue("tenantId", tenantId);
+        token.setValue("tenantName", rsTenant.getString("name"));
+        token.setValue("tenantShortName", rsTenant.getString("short_name"));
+        token.setValue("tenantExpDate", rsTenant.getString("exp_date"));
+        token.setValue("userPk", userPk);
+        token.setValue("userName", userName);
+        super.entityRequest().header.setValue("token", token.tokenId);
 
-        ok("token", tss.tokenId);
+        ok("token", token.tokenId);
         ok("userPk", userPk);
         ok("userName", userName);
 
@@ -229,9 +229,10 @@ public class User extends BaseControllerStd {
             sqlUserGroupPks = "'" + userPk + "'";
         }
 
-        tss.setValue("sqlGroupPks", sqlGroupPks);
-        tss.setValue("sqlUserGroupPks", sqlUserGroupPks);
-        tss.setValue("isDeveloper", (sqlUserGroupPks.contains("'developer'") || sqlUserGroupPks.contains("'developers'")));
+        token.setValue("sqlGroupPks", sqlGroupPks);
+        token.setValue("sqlUserGroupPks", sqlUserGroupPks);
+        token.setValue("isDeveloper", (sqlUserGroupPks.contains("'developer'") || sqlUserGroupPks.contains("'developers'")));
+        token.save();
         ok("groupPks", strGroupPks);
     }
 }

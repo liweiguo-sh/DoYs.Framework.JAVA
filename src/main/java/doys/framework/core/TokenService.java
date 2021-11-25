@@ -13,6 +13,7 @@ import doys.framework.database.DBFactory;
 import doys.framework.database.ds.UtilTDS;
 import doys.framework.util.UtilDate;
 import doys.framework.util.UtilDigest;
+import doys.framework.util.UtilYml;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import java.time.LocalDateTime;
@@ -33,13 +34,13 @@ public class TokenService extends BaseService {
         tokenId = UtilDigest.MD5(seed);
 
         // ------------------------------------------------
-        Token tss = new Token();
-        tss.tenantId = tenantId;
-        tss.userPk = userPk;
-        tss.tokenId = tokenId;
-        tss.dtLogin = dtNow;
-        tss.dtRenew = dtNow;
-        mapToken.put(tokenId, tss);
+        Token token = new Token();
+        token.tenantId = tenantId;
+        token.userPk = userPk;
+        token.tokenId = tokenId;
+        token.dtLogin = dtNow;
+        token.dtRenew = dtNow;
+        mapToken.put(token.tokenId, token);
 
         // ------------------------------------------------
         DBFactory dbSys = UtilTDS.getDbSys();
@@ -56,10 +57,10 @@ public class TokenService extends BaseService {
             logger.error("需要先升级数据库。");
         }
         // ------------------------------------------------
-        return tss;
+        return token;
     }
 
-    public static Token getToken(String tokenId) throws Exception {
+    public static synchronized Token getToken(String tokenId) throws Exception {
         String sql;
 
         Token token = null;
@@ -71,6 +72,7 @@ public class TokenService extends BaseService {
         }
         else {
             dbSys = UtilTDS.getDbSys();
+
             sql = "SELECT * FROM sys_token WHERE token_id = ?";
             rsSession = dbSys.getRowSet(sql, tokenId);
             if (rsSession.next()) {
@@ -81,9 +83,49 @@ public class TokenService extends BaseService {
                 token.dtLogin = UtilDate.getDateTime(rsSession.getString("login_time"));
                 token.dtRenew = UtilDate.getDateTime(rsSession.getString("renew_time"));
                 mapToken.put(tokenId, token);
+
+                sql = "SELECT token_key, token_value FROM sys_token_value WHERE token_id = ?";
+                rsSession = dbSys.getRowSet(sql, tokenId);
+                while (rsSession.next()) {
+                    token.setValue(rsSession.getString("token_key"), rsSession.getString("token_value"));
+                }
+                token.clearSave();
             }
         }
         return token;
+    }
+
+    public static void removeTimeoutToken() {
+        int result = 0;
+        int timeout = UtilYml.getTimeout();
+
+        String sql;
+
+        DBFactory dbSys;
+        // ------------------------------------------------
+        try {
+            for (Token token : mapToken.values()) {
+                if (token.timeout()) {
+                    result++;
+                    mapToken.remove(token.tokenId);
+                }
+            }
+
+            if (result > 0) {
+                dbSys = UtilTDS.getDbSys();
+                sql = "DELETE FROM sys_token WHERE TIMESTAMPDIFF(MINUTE, renew_time, NOW()) >= ?";
+                result = dbSys.exec(sql, timeout);
+                if (result > 0) {
+                    sql = "DELETE FROM sys_token_value WHERE token_id NOT IN (SELECT token_id FROM sys_token)";
+                    dbSys.exec(sql);
+
+                    logger.info("delete " + result + " records from sys_token");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e.toString());
+        }
     }
     public static void deleteTokenSession(String token) throws Exception {
         String sql;

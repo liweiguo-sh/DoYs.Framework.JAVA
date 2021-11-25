@@ -16,43 +16,40 @@ import java.util.HashMap;
 public class TokenInterceptor extends BaseTop implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        int tenantId = 0;
+        int tenantId;
         String clz, tokenId;
 
         HandlerMethod handlerMethod;
         ResourceHttpRequestHandler handlerResource;
         // ------------------------------------------------
         try {
-            tokenId = getTokenId(request);
-            if (!tokenId.equals("")) {
-                Token token = TokenService.getToken(tokenId);
-                if (token != null) {
-                    tenantId = token.tenantId;
-                    request.getSession().setAttribute("tenantId", tenantId);
-                }
-            }
-            if (tenantId <= 0) {
-                tenantId = getTenantId(request);
-            }
-
             if (handler instanceof HandlerMethod) {
                 handlerMethod = (HandlerMethod) handler;
                 clz = handlerMethod.getBeanType().getName();
 
                 if (clz.equals("doys.framework.system.User")) {
-                    logger.info("tenantId = " + tenantId + ", 登录请求");
+                    tenantId = getTenantId(request);
+                    if (tenantId > 0) {
+                        request.getSession().setAttribute("tenantId", tenantId);
+                        logger.info("tenantId = " + tenantId + ", 登录请求");
+                    }
+                    else {
+                        logger.info("非法登录请求，没有参数tenantId");
+                    }
                 }
                 else {
+                    tokenId = getTokenId(request);
                     if (tokenId.equals("")) {
                         responseNoToken(response);
                         return false;
                     }
 
                     Token token = TokenService.getToken(tokenId);
-                    if (token == null || token.checkTimeout()) {
+                    if (token == null || token.timeout()) {
                         responseTimeout(response);
                         return false;
                     }
+                    request.getSession().setAttribute("tenantId", token.tenantId);
                 }
             }
             else if (handler instanceof ResourceHttpRequestHandler) {
@@ -62,6 +59,7 @@ public class TokenInterceptor extends BaseTop implements HandlerInterceptor {
                 logger.info("debug here");
             }
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
         return true;
@@ -102,11 +100,7 @@ public class TokenInterceptor extends BaseTop implements HandlerInterceptor {
 
     // ------------------------------------------------------------------------
     private int getTenantId(HttpServletRequest request) {
-        int tenantId = UserService.parseTenantId(request.getHeader("tenantId"));
-        if (tenantId > 0) {
-            request.getSession().setAttribute("tenantId", tenantId);
-        }
-        return tenantId;
+        return UserService.parseTenantId(request.getHeader("tenantId"));
     }
     private String getTokenId(HttpServletRequest request) {
         String tokenId = request.getHeader("token");

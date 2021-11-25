@@ -3,10 +3,11 @@
  * @author David.Li
  * @version 1.0
  * @create_date 2021-11-21
- * @modify_date 2021-11-21
+ * @modify_date 2021-11-25
  * 基于Token的会话类
  *****************************************************************************/
 package doys.framework.core;
+import doys.framework.core.base.BaseTop;
 import doys.framework.database.DBFactory;
 import doys.framework.database.ds.UtilTDS;
 import doys.framework.util.UtilDate;
@@ -15,9 +16,11 @@ import doys.framework.util.UtilYml;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.HashSet;
 
-public class Token {
+public class Token extends BaseTop {
     private static int RENEW_MINITUS = 10;                  // -- 需要重新记录renew_time的时间间隔(单位：分钟) --
+    private static int MAX_TOKEN_VALUE_LEN = 500;           // -- 保存到数据库中的键值最大长度 --
 
     public int tenantId;
     public String userPk;
@@ -27,22 +30,23 @@ public class Token {
     public LocalDateTime dtRenew;
 
     private HashMap<String, Object> mapValue = new HashMap<>();
+    private HashSet<String> setUnsaved = new HashSet<>();        // -- 尚未保存的键值集合 --
     // -- check timeout & renew ---------------------------
     public LocalDateTime getExpTime() {
         return dtRenew.plus(UtilYml.getTimeout(), ChronoUnit.MINUTES);
     }
-    public boolean checkTimeout() throws Exception {
+    public boolean timeout() throws Exception {
         if (UtilDate.getDateTimeDiff(dtRenew) / 1000 / 60 > (UtilYml.getTimeout() + 60)) {
             return true;   // -- timeout --
         }
 
         // -- renew ---------------------------------------
         if (UtilDate.getDateTimeDiff(dtRenew) / 1000 / 60 > RENEW_MINITUS) {
+            dtRenew = LocalDateTime.now();
+
             String sql = "UPDATE sys_token SET renew_time = NOW() WHERE token_id = ?";
             DBFactory dbSys = UtilTDS.getDbSys();
-
             dbSys.exec(sql, tokenId);
-            dtRenew = LocalDateTime.now();
         }
         return false;
     }
@@ -58,25 +62,62 @@ public class Token {
         else {
             mapValue.put(key, value);
         }
+        // ------------------------------------------------
+        if (!key.matches("^[a-zA-z].*")) {
+            // -- 非英文字母开头的键值不保存到数据库中 --
+            return;
+        }
+        if (value != null && value.toString().length() > MAX_TOKEN_VALUE_LEN) {
+            // -- 值超长，不保存 --
+            if (setUnsaved.contains(key)) {
+                setUnsaved.remove(key);
+            }
+            return;
+        }
+        if (setUnsaved.contains(key)) {
+            return;
+        }
+        setUnsaved.add(key);
 
         // ------------------------------------------------
-        if (!save) return;
+        if (save) {
+            save();
+        }
 
+
+    }
+    public void save() {
         int result;
-        String sql;
+        String sql, value;
 
-        DBFactory dbBus = UtilTDS.getDBFactory(tenantId);
+        DBFactory dbBus;
+        // ------------------------------------------------
+        try {
+            if (setUnsaved.size() > 0) {
+                dbBus = UtilTDS.getDbSys();
 
-        sql = "SELECT COUNT(1) FROM sys_token_key WHERE token = ? AND tss_key = ?";
-        result = dbBus.getInt(sql, 0, tokenId, key);
-        if (result == 0) {
-            sql = "INSERT INTO sys_token (token, tss_key, tss_value) VALUES (?, ?, ?)";
-            dbBus.exec(sql, tokenId, key, value);
+                for (String key : setUnsaved) {
+                    value = mapValue.get(key).toString();
+                    sql = "SELECT COUNT(1) FROM sys_token_value WHERE token_id = ? AND token_key = ?";
+                    result = dbBus.getInt(sql, 0, tokenId, key);
+                    if (result == 0) {
+                        sql = "INSERT INTO sys_token_value (token_id, token_key, token_value) VALUES (?, ?, ?)";
+                        dbBus.exec(sql, tokenId, key, value);
+                    }
+                    else {
+                        sql = "UPDATE sys_token_value SET token_value = ? WHERE token_id = ? AND token_key = ?";
+                        dbBus.exec(sql, value, value, tokenId, key);
+                    }
+                }
+                setUnsaved.clear();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("数据库尚未升级.");
         }
-        else {
-            sql = "UPDATE sys_token SET tss_value = ? WHERE token = ? AND tss_key = ?";
-            dbBus.exec(sql, value, tokenId, key);
-        }
+    }
+    public void clearSave() {
+        setUnsaved.clear();
     }
 
     // -- get value ---------------------------------------
