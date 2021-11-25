@@ -20,7 +20,7 @@ public class TokenSchedule extends BaseTenantScheduleService {
     protected DBFactory dbSys;
 
     // ------------------------------------------------------------------------ --
-    @Scheduled(initialDelay = 60 * 1000, fixedDelay = 10 * 60 * 1000)
+    @Scheduled(initialDelay = 15 * 1000, fixedDelay = 10 * 60 * 1000)
     private void nightScheduled() {
         logger.info("Schedule begin, TokenService.removeTimeoutToken");
         TokenService.removeTimeoutToken();

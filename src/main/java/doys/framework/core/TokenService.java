@@ -101,13 +101,16 @@ public class TokenService extends BaseService {
 
         String sql;
 
+        Token token;
         DBFactory dbSys;
         // ------------------------------------------------
         try {
-            for (Token token : mapToken.values()) {
+            Object[] keys = mapToken.keySet().toArray();
+            for (Object key : keys) {
+                token = mapToken.get(key);
                 if (token.timeout()) {
                     result++;
-                    mapToken.remove(token.tokenId);
+                    mapToken.remove(key);
                 }
             }
 
