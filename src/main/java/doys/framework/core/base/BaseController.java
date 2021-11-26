@@ -126,6 +126,9 @@ public class BaseController extends BaseTop {
         return entityRequest().body.getArrayList(parameterName);
     }
 
+    protected boolean inBool(String parameterName) {
+        return entityRequest().body.getBool(parameterName, false);
+    }
     protected boolean inBool(String parameterName, boolean defaultValue) {
         return entityRequest().body.getBool(parameterName, defaultValue);
     }
