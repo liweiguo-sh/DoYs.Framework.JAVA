@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class Token extends BaseTop {
-    private static int RENEW_MINITUS = 10;                  // -- 需要重新记录renew_time的时间间隔(单位：分钟) --
+    private static int RENEW_DELAY = 60;                    // -- 需要重新记录renew_time的时间间隔(单位：分钟) --
     private static int MAX_TOKEN_VALUE_LEN = 500;           // -- 保存到数据库中的键值最大长度 --
 
     public int tenantId;
@@ -35,20 +35,25 @@ public class Token extends BaseTop {
     public LocalDateTime getExpTime() {
         return dtRenew.plus(UtilYml.getTimeout(), ChronoUnit.MINUTES);
     }
-    public boolean timeout() throws Exception {
-        if (UtilDate.getDateTimeDiff(dtRenew) / 1000 / 60 > (UtilYml.getTimeout() + 60)) {
-            return true;   // -- timeout --
-        }
 
-        // -- renew ---------------------------------------
-        if (UtilDate.getDateTimeDiff(dtRenew) / 1000 / 60 > RENEW_MINITUS) {
+    public boolean timeout() {
+        long duration = UtilDate.getDateTimeDiff(dtRenew);
+        long minutes = duration / 1000 / 60;
+        long timeout = UtilYml.getTimeout() + RENEW_DELAY;
+
+        return minutes > timeout;   // -- 超时返回true --
+    }
+    public void renew() throws Exception {
+        long duration = UtilDate.getDateTimeDiff(dtRenew);
+        long minutes = duration / 1000 / 60;
+
+        if (minutes > RENEW_DELAY) {
             dtRenew = LocalDateTime.now();
 
             String sql = "UPDATE sys_token SET renew_time = NOW() WHERE token_id = ?";
             DBFactory dbSys = UtilTDS.getDbSys();
             dbSys.exec(sql, tokenId);
         }
-        return false;
     }
 
     // -- set value ---------------------------------------

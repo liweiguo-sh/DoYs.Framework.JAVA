@@ -49,6 +49,9 @@ public class TokenInterceptor extends BaseTop implements HandlerInterceptor {
                         responseTimeout(response);
                         return false;
                     }
+                    else {
+                        token.renew();  // -- 续租(新请求触发，token存在且未超时) --
+                    }
                     request.getSession().setAttribute("tenantId", token.tenantId);
                 }
             }

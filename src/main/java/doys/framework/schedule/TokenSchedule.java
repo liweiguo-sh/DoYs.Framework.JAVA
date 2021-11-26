@@ -3,7 +3,7 @@
  * @author David.Li
  * @version 1.0
  * @create_date 2021-11-22
- * @modify_date 2021-11-25
+ * @modify_date 2021-11-26
  * Token监控类
  *****************************************************************************/
 package doys.framework.schedule;
@@ -20,7 +20,7 @@ public class TokenSchedule extends BaseTenantScheduleService {
     protected DBFactory dbSys;
 
     // ------------------------------------------------------------------------ --
-    @Scheduled(initialDelay = 15 * 1000, fixedDelay = 10 * 60 * 1000)
+    @Scheduled(initialDelay = 10 * 60 * 1000, fixedDelay = 60 * 60 * 1000)
     private void nightScheduled() {
         logger.info("Schedule begin, TokenService.removeTimeoutToken");
         TokenService.removeTimeoutToken();
