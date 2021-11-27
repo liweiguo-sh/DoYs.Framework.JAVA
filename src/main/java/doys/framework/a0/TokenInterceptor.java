@@ -14,49 +14,46 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 
 public class TokenInterceptor extends BaseTop implements HandlerInterceptor {
+    private static String[] FREE_TOKEN_CLZ = {
+        "doys.aprint.a0.ModulePing"
+    };
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        int tenantId;
-        String clz, tokenId;
-
-        HandlerMethod handlerMethod;
+        String tokenErrType;
         ResourceHttpRequestHandler handlerResource;
         // ------------------------------------------------
         try {
             if (handler instanceof HandlerMethod) {
-                handlerMethod = (HandlerMethod) handler;
-                clz = handlerMethod.getBeanType().getName();
-
-                if (clz.equals("doys.framework.system.User")) {
-                    tenantId = getTenantId(request);
-                    if (tenantId > 0) {
-                        request.getSession().setAttribute("tenantId", tenantId);
-                        logger.info("tenantId = " + tenantId + ", 登录请求");
+                String tokenId = getTokenId(request);
+                if (!tokenId.equals("")) {
+                    Token token = TokenService.getToken(tokenId);
+                    if (token != null && !token.timeout()) {
+                        token.renew();                  // -- 1. 有效token：续租(新请求触发，token存在且未超时) --
+                        request.getSession().setAttribute("tenantId", token.tenantId);
+                        return true;
                     }
                     else {
-                        logger.info("非法登录请求，没有参数tenantId");
+                        tokenErrType = "Timeout";       // -- 2. token超时 --
                     }
                 }
                 else {
-                    tokenId = getTokenId(request);
-                    if (tokenId.equals("")) {
-                        responseNoToken(response);
-                        return false;
-                    }
+                    tokenErrType = "NoToken";           // -- 3. 没有token或token不存在 --
+                }
 
-                    Token token = TokenService.getToken(tokenId);
-                    if (token == null || token.timeout()) {
+                // -- 没有有效token ---------------------------
+                if (!doNoTokenRequest(request, (HandlerMethod) handler)) {
+                    if (tokenErrType.equals("Timeout")) {
                         responseTimeout(response);
-                        return false;
                     }
                     else {
-                        token.renew();  // -- 续租(新请求触发，token存在且未超时) --
+                        responseNoToken(response);
                     }
-                    request.getSession().setAttribute("tenantId", token.tenantId);
+                    return false;
                 }
             }
             else if (handler instanceof ResourceHttpRequestHandler) {
                 handlerResource = (ResourceHttpRequestHandler) handler;
+                // logger.info("debug here, handlerResource");
             }
             else {
                 logger.info("debug here");
@@ -66,6 +63,30 @@ public class TokenInterceptor extends BaseTop implements HandlerInterceptor {
             return false;
         }
         return true;
+    }
+    private boolean doNoTokenRequest(HttpServletRequest request, HandlerMethod handlerMethod) {
+        String clz = handlerMethod.getBeanType().getName();
+
+        if (clz.equals("doys.framework.system.User")) {
+            int tenantId = getTenantId(request);
+            if (tenantId > 0) {
+                request.getSession().setAttribute("tenantId", tenantId);
+                logger.info("tenantId = " + tenantId + ", 登录请求");
+            }
+            else {
+                logger.info("非法登录请求，没有参数tenantId");
+            }
+            return true;
+        }
+        else {
+            // -- 免token的类 --
+            for (int i = FREE_TOKEN_CLZ.length - 1; i >= 0; i--) {
+                if (FREE_TOKEN_CLZ[i].equals(clz)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     private void responseNoToken(HttpServletResponse response) throws Exception {
         HashMap<String, Object> map = new HashMap<>();
