@@ -31,13 +31,13 @@ public class UtilArray {
             return "";
         }
         else if (len == 1) {
-            return list.get(0);
+            return String.valueOf(list.get(0));
         }
         else {
             builder = new StringBuilder(len + 1);
-            builder.append(list.get(0));
+            builder.append(String.valueOf(list.get(0)));        // -- 当前台传过来的数组是整型数组时，不转换会出错 --
             for (int i = 1; i < len; i++) {
-                builder.append(symbol + list.get(i));
+                builder.append(symbol + String.valueOf(list.get(i)));
             }
             return builder.toString();
         }
