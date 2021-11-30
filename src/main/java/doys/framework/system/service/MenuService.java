@@ -47,7 +47,7 @@ public class MenuService extends BaseService {
 
         sql = "SELECT v.controller, m.* FROM sys_menu m LEFT JOIN sys_view v ON m.type_pk = v.pk "
             + "WHERE LEFT(m.pk, 3) = ? AND (m.pk IN (" + sqlMenu6 + ") OR m.pk IN (" + sqlMenu9 + ")  OR m.pk IN (" + sqlMenu12 + ") ) AND flag_disabled = 0 "
-            + "ORDER BY m.sequence";
+            + "ORDER BY m.sequences";
         rowSet = dbSys.getRowSet(sql, systemKey);
         return rowSet;
     }
