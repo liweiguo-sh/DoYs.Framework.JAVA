@@ -9,6 +9,8 @@
 package doys.framework.database.ds;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import doys.framework.core.Token;
+import doys.framework.core.TokenService;
 import doys.framework.core.ex.CommonException;
 import doys.framework.core.ex.SessionTimeoutException;
 import doys.framework.database.DBFactory;
@@ -20,6 +22,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import java.util.concurrent.ConcurrentHashMap;
@@ -114,6 +117,15 @@ public class UtilTDS {
     }
 
     // -- Tenant --------------------------------------------------------------
+    public static HttpServletRequest getRequest() throws Exception {
+        HttpServletRequest request;
+        try {
+            request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+            return request;
+        } catch (NullPointerException e) {
+            throw new SessionTimeoutException();
+        }
+    }
     public static HttpSession getSession() throws Exception {
         HttpSession ss;
         try {
@@ -123,6 +135,7 @@ public class UtilTDS {
             throw new SessionTimeoutException();
         }
     }
+
     public static int getTenantId() throws Exception {
         try {
             return (int) getSession().getAttribute("tenantId");
@@ -132,7 +145,10 @@ public class UtilTDS {
     }
     public static String getUserPk() throws Exception {
         try {
-            return (String) getSession().getAttribute("userPk");
+            String tokenId = getRequest().getHeader("token");
+            Token token = TokenService.getToken(tokenId);
+
+            return token.userPk;
         } catch (NullPointerException e) {
             throw new SessionTimeoutException();
         }
