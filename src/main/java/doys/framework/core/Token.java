@@ -143,7 +143,7 @@ public class Token extends BaseTop {
 
     }
     public boolean getBoolean(String key) {
-        return (boolean) mapValue.getOrDefault(key, false);
+        return Boolean.valueOf(mapValue.getOrDefault(key, false).toString());
     }
     public boolean getBoolean(String key, String defaultValue) {
         return (boolean) mapValue.getOrDefault(key, defaultValue);
