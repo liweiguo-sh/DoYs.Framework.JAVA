@@ -38,10 +38,10 @@ public class Token extends BaseTop {
 
     public boolean timeout() {
         long duration = UtilDate.getDateTimeDiff(dtRenew);
-        long minutes = duration / 1000 / 60;
-        long timeout = UtilYml.getTimeout() + RENEW_DELAY;
+        long durationMinutes = duration / 1000 / 60;
+        long timeoutMinutes = UtilYml.getTimeout() + RENEW_DELAY;
 
-        return minutes > timeout;   // -- 超时返回true --
+        return durationMinutes > timeoutMinutes;   // -- 超时返回true --
     }
     public void renew() throws Exception {
         long duration = UtilDate.getDateTimeDiff(dtRenew);
