@@ -15,7 +15,8 @@ import java.util.HashMap;
 
 public class TokenInterceptor extends BaseTop implements HandlerInterceptor {
     private static String[] FREE_TOKEN_CLZ = {
-        "doys.aprint.a0.ModulePing"
+        "doys.aprint.a0.ModulePing",
+        "doys.aprint.trace.DataQuery"
     };
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
