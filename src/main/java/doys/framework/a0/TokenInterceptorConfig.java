@@ -1,9 +1,9 @@
 package doys.framework.a0;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
+// -- 停用类(注释@Configuration) --
+//@Configuration
 public class TokenInterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

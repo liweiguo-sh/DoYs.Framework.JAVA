@@ -20,6 +20,9 @@ public class Const {
     // ------------------------------------------------------------------------
 
     // ------------------------------------------------------------------------
+    public static String ERR_UNKNOWN = "S00";
+    public static String ERROR_UNKNOWN = "未知的错误";
+
     public static String ERR_TENANT_ID = "S01";
     public static String ERROR_TENANT_ID = "参数[tenantId]为空或不存在";
 
