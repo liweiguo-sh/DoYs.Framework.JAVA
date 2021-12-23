@@ -7,6 +7,14 @@
  * 建议只对Int及String两种数据类型排序，Find同上.
  * 用法参考.net的DataTable, 已提供的方法基本相同, 用完后一定要调用.close()方法回收内存.
  */
+/******************************************************************************
+ * Copyright (C), 2021, doys-next.com
+ * @author David.Li
+ * @version 1.0
+ * @create_date 2021-12-23
+ * @modify_date 2021-12-23
+ * 增加判断字段是否存在
+ *****************************************************************************/
 package doys.framework.database.dtb;
 import doys.framework.a0.Const;
 import doys.framework.core.ex.CommonException;
@@ -437,6 +445,16 @@ public class DataTable {
     private String _getColumnType(int iCol) {
         return _arrCols[iCol][0];
     }
+
+    public boolean containsColumn(String columnName) {
+        for (int i = rsmd.getColumnCount(); i > 0; i--) {
+            if (rsmd.getColumnLabel(i).equalsIgnoreCase(columnName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // --DataRow insert, update , delete and commit save-----------------------
     public DataRow NewRow() {
         if (_nColCount <= 0) {
