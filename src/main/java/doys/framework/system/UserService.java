@@ -31,6 +31,11 @@ public class UserService extends BaseService {
         String sql = "SELECT * FROM sys_tenant WHERE id = ?";
         return dbBus.getRowSet(sql, tenantId);
     }
+    public static SqlRowSet getUser(DBFactory dbBus, String userPk) throws Exception {
+        String sql = "SELECT pk, name, flag_menu_overdue FROM sys_user WHERE pk = ?";
+        SqlRowSet rowSet = dbBus.getRowSet(sql, userPk);
+        return rowSet;
+    }
 
     public static boolean verifyUser(DBFactory dbBus, String userPk, String passwordClient, String loginTime, String supperPassword) throws Exception {
         String sql;
@@ -64,10 +69,24 @@ public class UserService extends BaseService {
         }
         return true;
     }
-    public static SqlRowSet getUser(DBFactory dbBus, String userPk) throws Exception {
-        String sql = "SELECT pk, name, flag_menu_overdue FROM sys_user WHERE pk = ?";
-        SqlRowSet rowSet = dbBus.getRowSet(sql, userPk);
-        return rowSet;
+    public static boolean verfyPassword(DBFactory dbBus, String userPk, String password) throws Exception {
+        String sql;
+        String passwordDB_MD5, passwordClientMD5;
+
+        // ------------------------------------------------
+        sql = "SELECT password FROM sys_user WHERE pk = ?";
+        passwordDB_MD5 = dbBus.getValue(sql, "", userPk);
+
+        passwordClientMD5 = UtilDigest.passwordMD5(userPk.toLowerCase(), password);
+
+        return passwordDB_MD5.equals(passwordClientMD5) || passwordDB_MD5.equals(password);
+    }
+    public static void savePassword(DBFactory dbBus, String userPk, String password) throws Exception {
+        String sql, passwordMD5;
+
+        passwordMD5 = UtilDigest.passwordMD5(userPk.toLowerCase(), password);
+        sql = "UPDATE sys_user SET password = ? WHERE pk = ?";
+        dbBus.exec(sql, passwordMD5, userPk);
     }
 
     public static void setMenuOverdue(DBFactory dbBus) throws Exception {
