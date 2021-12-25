@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class TokenService extends BaseService {
+    private static boolean FIRST_EXEC = true;       // -- 首次执行 --
     private static String RANDOM_FOR_TOKEN = "zSaSN^zphT";
 
     private static HashMap<String, Token> mapToken = new HashMap<>();
@@ -114,7 +115,9 @@ public class TokenService extends BaseService {
                 }
             }
 
-            if (result > 0) {
+            if (result > 0 || FIRST_EXEC) {
+                FIRST_EXEC = false;
+
                 dbSys = UtilTDS.getDbSys();
                 sql = "DELETE FROM sys_token WHERE TIMESTAMPDIFF(MINUTE, renew_time, NOW()) >= ?";
                 result = dbSys.exec(sql, timeout);
