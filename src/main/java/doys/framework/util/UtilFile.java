@@ -1,6 +1,7 @@
 package doys.framework.util;
 import doys.framework.a2.structure.EntityFile;
 import doys.framework.core.ex.CommonException;
+import doys.framework.core.ex.UnexpectedException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -332,7 +333,10 @@ public class UtilFile {
         FileOutputStream fosDst;
         FileChannel srcChannel, dstChannel;
         // ------------------------------------------------
-        if (!(new File(fileSource).exists())) return false;
+        if (!(new File(fileSource).exists())) {
+            throw new UnexpectedException("The source file does not exist.");
+        }
+        ;
 
         checkPath(new File(fildDestination).getParent(), true);
 
