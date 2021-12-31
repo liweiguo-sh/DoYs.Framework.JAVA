@@ -336,7 +336,6 @@ public class UtilFile {
         if (!(new File(fileSource).exists())) {
             throw new UnexpectedException("The source file does not exist.");
         }
-        ;
 
         checkPath(new File(fildDestination).getParent(), true);
 
