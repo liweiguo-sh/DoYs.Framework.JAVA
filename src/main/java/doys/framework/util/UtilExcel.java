@@ -1,13 +1,15 @@
 /******************************************************************************
- * Copyright (C), 2020-2021, doys-next.com
+ * Copyright (C), 2020-2022, doys-next.com
  * @author David.Li
  * @version 1.0
  * @create_date 2020-08-19
- * @modify_date 2021-11-02
+ * @modify_date 2022-01-12
  * Excel工具类
  *****************************************************************************/
 package doys.framework.util;
 import doys.framework.core.ex.CommonException;
+import doys.framework.database.DBFactory;
+import doys.framework.database.dtb.DataTable;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -17,12 +19,12 @@ import java.text.DecimalFormat;
 
 public class UtilExcel {
     public static String[][] excelToArray(String fileExcel) throws Exception {
-        int rowMax, columnCount;        // -- 最大行号，最大列数 --
-        int idxRow = 0;                 // -- 最大行号减去row == null的行 --
+        int rowMax, columnCount;        // -- 最大行号，真实数据行数，最大列数 --
+        int idxRow = -1;                // -- 最大行号减去row == null的行下标 --
         int iRow = 0, iCol = 0;
 
         String extName, cellValue;
-        String[][] data, dataTemp;
+        String[][] data;
 
         Workbook workbook;
         Sheet sheet;
@@ -59,6 +61,7 @@ public class UtilExcel {
                 row = sheet.getRow(iRow);
                 if (row == null) continue;
 
+                idxRow++;
                 for (iCol = 0; iCol < columnCount; iCol++) {
                     cell = row.getCell(iCol);
                     if (cell == null) {
@@ -87,26 +90,28 @@ public class UtilExcel {
                     }
                     data[idxRow][iCol] = cellValue;
                 }
-                idxRow++;
             }
 
-            // -- 4. 有空行，需要去除 -----------------------------
+            // -- 4. 末尾有空行，需要去除 ---------------------------
             boolean hasValue = false;
             for (int i = data.length - 1; i >= 0; i--) {
                 for (int j = 0; j < columnCount; j++) {
-                    if (!data[i][j].equals("")) {
+                    if (data[i][j] != null && !data[i][j].equals("")) {
                         hasValue = true;
                         break;
                     }
                 }
-                if (hasValue) break;
-                idxRow--;   // -- 当前行没有有效数据 --
+                if (hasValue) {
+                    idxRow = i;      // -- 从后往前数，当前行开始有有效数据。+1即为有效数据的实际行数 --
+                    break;
+                }
             }
 
-            if (iRow > idxRow) {
-                dataTemp = data;
-                data = new String[idxRow][columnCount];
-                System.arraycopy(dataTemp, 0, data, 0, idxRow);
+            if (iRow > idxRow + 1) {
+                int dataCount = idxRow + 1;
+                String[][] dataTemp = data;
+                data = new String[dataCount][columnCount];
+                System.arraycopy(dataTemp, 0, data, 0, dataCount);
             }
         } catch (Exception e) {
             System.err.println("iRow = " + iRow + ", iCol = " + iCol);
@@ -114,5 +119,11 @@ public class UtilExcel {
         }
         // -- 9. return -----------------------------------
         return data;
+    }
+
+    public static DataTable excelToDataTable(String fileExcel, DBFactory dbBus) throws Exception {
+        String[][] data = excelToArray(fileExcel);
+
+        return UtilDataTable.getDataTableByExcelArray(dbBus, data);
     }
 }
