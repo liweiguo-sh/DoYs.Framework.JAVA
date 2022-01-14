@@ -7,6 +7,7 @@
  * Excel工具类
  *****************************************************************************/
 package doys.framework.util;
+import doys.framework.a0.Const;
 import doys.framework.core.ex.CommonException;
 import doys.framework.database.DBFactory;
 import doys.framework.database.dtb.DataTable;
@@ -16,9 +17,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 
 public class UtilExcel {
     public static String[][] excelToArray(String fileExcel) throws Exception {
+        return excelToArray(fileExcel, 0);
+    }
+    public static String[][] excelToArray(String fileExcel, int sheetIndex) throws Exception {
         int rowMax, columnCount;        // -- 最大行号，真实数据行数，最大列数 --
         int idxRow = -1;                // -- 最大行号减去row == null的行下标 --
         int iRow = 0, iCol = 0;
@@ -32,6 +37,7 @@ public class UtilExcel {
         Cell cell;
         CellType cellType;
         DecimalFormat df = new DecimalFormat("0.####");
+        SimpleDateFormat sdf = new SimpleDateFormat(Const.dateFormat);
         // ------------------------------------------------
         try (FileInputStream fis = new FileInputStream(fileExcel)) {
             // -- 1. open workbook ----------------------------
@@ -47,7 +53,7 @@ public class UtilExcel {
             }
 
             // -- 2. open sheet -------------------------------
-            sheet = workbook.getSheetAt(0);
+            sheet = workbook.getSheetAt(sheetIndex);
             rowMax = sheet.getLastRowNum();
             if (rowMax < 0) {
                 return new String[0][0];
@@ -71,9 +77,15 @@ public class UtilExcel {
                     // ----------------------------------------
                     cellType = cell.getCellType();
                     if (cellType == CellType.NUMERIC) {
-                        cellValue = df.format(cell.getNumericCellValue());
-                        if (cellValue.endsWith(".0")) {
-                            cellValue = cellValue.substring(0, cellValue.length() - 2);
+                        if (DateUtil.isCellDateFormatted(cell)) {
+                            // -- 日期类型 --
+                            cellValue = sdf.format(cell.getDateCellValue());
+                        }
+                        else {
+                            cellValue = df.format(cell.getNumericCellValue());
+                            if (cellValue.endsWith(".0")) {
+                                cellValue = cellValue.substring(0, cellValue.length() - 2);
+                            }
                         }
                     }
                     else if (cellType == CellType.STRING) {
