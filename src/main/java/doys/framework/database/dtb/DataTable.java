@@ -23,6 +23,7 @@ import doys.framework.util.UtilRowSet;
 import doys.framework.util.UtilString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
@@ -257,11 +258,11 @@ public class DataTable {
     public String DataCell(int iRow, int iCol, boolean fixNullSpace) {
         return _DataCell(iRow, iCol, fixNullSpace);
     }
-    public String DataCell(int iRow, String ColumnName) {
+    public String DataCell(int iRow, String ColumnName) throws Exception {
         int iCol = getColIndex(ColumnName);
         return _DataCell(iRow, iCol, false);
     }
-    public String DataCell(int iRow, String ColumnName, boolean fixNullSpace) {
+    public String DataCell(int iRow, String ColumnName, boolean fixNullSpace) throws Exception {
         int iCol = getColIndex(ColumnName);
         return _DataCell(iRow, iCol, fixNullSpace);
     }
@@ -281,7 +282,7 @@ public class DataTable {
             }
         }
     }
-    public void setDataCell(int iRow, String ColumnName, Object objValue) {
+    public void setDataCell(int iRow, String ColumnName, Object objValue) throws Exception {
         int iCol = getColIndex(ColumnName);
         setDataCell(iRow, iCol, objValue);
     }
@@ -330,12 +331,12 @@ public class DataTable {
         }
         return _nColCount;
     }
-    public int getColIndex(String ColumnName) {
-        int nColIndex = -1;
+    public int getColIndex(String ColumnName) throws Exception {
+        int nColIndex;
         try {
             nColIndex = rs.findColumn(ColumnName);
-        } catch (Exception e) {
-            throw e;
+        } catch (InvalidResultSetAccessException e) {
+            throw new CommonException("列名：" + ColumnName + " 无效。");
         }
         return nColIndex;
     }
@@ -433,7 +434,7 @@ public class DataTable {
     /**
      * 返回Column数据类型(简化版)
      */
-    public String getColumnType(String ColumnName) {
+    public String getColumnType(String ColumnName) throws Exception {
         return _getColumnType(getColIndex(ColumnName));
     }
     /**
@@ -717,7 +718,7 @@ public class DataTable {
                 DataTable.this.setDataCell(_DataRowIndex, iCol, objValue);
             }
         }
-        public void setDataCell(String ColumnName, Object objValue) {
+        public void setDataCell(String ColumnName, Object objValue) throws Exception {
             int iCol = getColIndex(ColumnName);
             setDataCell(iCol, objValue);
         }
@@ -735,11 +736,11 @@ public class DataTable {
         public String DataCell(int iCol) {
             return _arrRow[iCol];
         }
-        public String DataCell(String ColumnName) {
+        public String DataCell(String ColumnName) throws Exception {
             int iCol = getColIndex(ColumnName);
             return _DataCell(iCol, false);
         }
-        public String DataCell(String ColumnName, boolean fixNullSpace) {
+        public String DataCell(String ColumnName, boolean fixNullSpace) throws Exception {
             int iCol = getColIndex(ColumnName);
             return _DataCell(iCol, fixNullSpace);
         }
